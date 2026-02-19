@@ -1,0 +1,161 @@
+{
+  "app": {
+    "name": "가몬",
+    "tagline": "가문을 선택하라. 영지를 걸어라."
+  },
+  "home": {
+    "chooseHouse": "가문을 선택하라",
+    "placeholder": "가문을 선택하여 여정을 시작하세요."
+  },
+  "nav": {
+    "home": "홈",
+    "swap": "스왑",
+    "staking": "스테이킹",
+    "leaderboard": "리더보드",
+    "activity": "활동",
+    "admin": "관리"
+  },
+  "wallet": {
+    "connect": "지갑 연결",
+    "disconnect": "연결 해제",
+    "wrongNetwork": "Base로 전환"
+  },
+  "auth": {
+    "signInWithFarcaster": "Farcaster로 로그인",
+    "orConnectWallet": "또는 지갑으로 연결",
+    "scanQrCode": "휴대폰으로 QR 코드를 스캔하세요",
+    "signInDescription": "Farcaster 계정을 연결하여 시작하세요",
+    "openDirectly": "직접 열기",
+    "connectWithFarcaster": "Farcaster로 연결",
+    "creatingConnection": "연결 중...",
+    "cancel": "취소"
+  },
+  "house": {
+    "honoo": "炎 호노오",
+    "mizu": "水 미즈",
+    "mori": "森 모리",
+    "tsuchi": "土 츠치",
+    "kaze": "風 카제",
+    "description": {
+      "honoo": "야망적이고 경쟁적이며 위험을 두려워하지 않는다. 정복이 전부다.",
+      "mizu": "사교적이고 유연하며 커뮤니티 건설자. 적응을 통한 전략.",
+      "mori": "인내심 있고 불굴의 정신. 모든 계절을 초월하는 성장.",
+      "tsuchi": "꾸준하고 신뢰할 수 있는 기반. 표면 아래 숨겨진 부.",
+      "kaze": "대담하고 예측 불가능하며 신속. 무엇보다 자유를."
+    },
+    "join": "{{houseName}} 가입",
+    "members": "{{count}}명의 멤버",
+    "cap": "/ 1,000",
+    "price": "민트 가격",
+    "switchHouse": "가문 변경",
+    "myHouse": "내 가문"
+  },
+  "staking": {
+    "title": "스테이킹 풀",
+    "poolStats": "풀 통계",
+    "totalStaked": "총 스테이킹",
+    "seasonEnd": "시즌 종료",
+    "poolSize": "풀 크기",
+    "yourPosition": "내 포지션",
+    "stakeAmount": "스테이킹 금액",
+    "streamingRate": "수익률",
+    "claimable": "청구 가능",
+    "stake": "스테이크",
+    "unstake": "언스테이크",
+    "claim": "보상 청구",
+    "pendingClaim": "{{amount}} $DOJO 청구",
+    "comingSoon": "스테이킹 풀 곧 출시."
+  },
+  "leaderboard": {
+    "title": "리더보드",
+    "currentSeason": "시즌 {{seasonId}}",
+    "previousWinner": "이전 시즌 우승자",
+    "rank": "순위",
+    "house": "가문",
+    "members": "멤버",
+    "score": "점수",
+    "breakdown": "점수 내역",
+    "dojoStreaks": "DOJO 스트릭 (40%)",
+    "staking": "스테이킹 (30%)",
+    "onChat": "OnChat 활동 (30%)",
+    "comingSoon": "리더보드 곧 출시."
+  },
+  "activity": {
+    "title": "내 활동",
+    "currentHouse": "현재 가문",
+    "dojoStreak": "DOJO 스트릭",
+    "stakeSize": "스테이킹 규모",
+    "onChatMessages": "이번 시즌 메시지",
+    "contribution": "점수 기여도",
+    "comingSoon": "활동 대시보드 곧 출시."
+  },
+  "season": {
+    "week": "{{week}}주차",
+    "active": "진행 중",
+    "cooldown": "쿨다운",
+    "ended": "종료"
+  },
+  "admin": {
+    "title": "관리자 패널",
+    "operatorOnly": "이 페이지는 운영자에게만 제한됩니다.",
+    "snapshot": "시즌 스냅샷",
+    "airdrop": "에어드롭 실행"
+  },
+  "swap": {
+    "title": "스왑",
+    "buyDojo": "$DOJO 구매",
+    "sellDojo": "$DOJO 판매",
+    "buySeki": "$SEKI 구매",
+    "sellSeki": "$SEKI 판매",
+    "price": "현재 가격",
+    "priceDojo": "현재 $DOJO 가격",
+    "priceSeki": "현재 $SEKI 가격",
+    "amount": "수량",
+    "cost": "비용",
+    "receive": "수령액",
+    "fee": "수수료",
+    "totalCost": "총 비용",
+    "gasDisclaimer": "모든 거래에 Base 네트워크 가스 수수료가 별도로 부과됩니다.",
+    "swapWarningTitle": "경고",
+    "sellWarningTitle": "상당한 가치 손실",
+    "sellWarning": "토큰당 환불액이 현재 구매 가격보다 낮습니다. 이 매도로 큰 손실이 발생할 수 있습니다.",
+    "noSupply": "아직 발행된 토큰이 없습니다. 매도할 수 없습니다.",
+    "maxSupply": "최대 공급량에 도달했습니다. 매수할 수 없습니다.",
+    "exceedsSupply": "이 수량은 토큰의 최대 공급량을 초과합니다.",
+    "exceedsBalance": "지갑 잔액({{balance}})을 초과합니다."
+  },
+  "toast": {
+    "swapBuySuccess": "구매 완료!",
+    "swapSellSuccess": "판매 완료!",
+    "swapFailed": "스왑 실패"
+  },
+  "errors": {
+    "walletNotConnected": "지갑을 연결해주세요",
+    "connectWalletToTransact": "트랜잭션 서명을 위해 지갑을 연결해주세요",
+    "transactionFailed": "트랜잭션 실패",
+    "networkError": "네트워크 오류. 다시 시도해주세요.",
+    "userRejected": "트랜잭션이 거부되었습니다",
+    "insufficientFunds": "가스비가 부족합니다",
+    "contractRevert": "컨트랙트 오류: {{reason}}",
+    "unknown": "오류가 발생했습니다: {{message}}",
+    "boundaryTitle": "오류가 발생했습니다",
+    "boundaryMessage": "예기치 않은 오류가 발생했습니다. 페이지를 새로고침해주세요.",
+    "boundaryRefresh": "새로고침",
+    "houseNotSelected": "먼저 가문을 선택해주세요.",
+    "stakeAmountZero": "스테이킹 금액은 0보다 커야 합니다.",
+    "insufficientBalance": "{{token}} 잔액이 부족합니다.",
+    "txFailed": "트랜잭션에 실패했습니다. 다시 시도해주세요."
+  },
+  "a11y": {
+    "changeLanguage": "언어 변경",
+    "toggleTheme": "테마 전환",
+    "qrCode": "Warpcast 로그인용 QR 코드"
+  },
+  "hunt": {
+    "backSeki": "Hunt.town에서 $SEKI 후원하기"
+  },
+  "footer": {
+    "builtOn": "Base에서 구축",
+    "poweredBy": "Sekigahara 제공"
+  }
+}

@@ -1,0 +1,164 @@
+{
+  "app": {
+    "name": "KAMON",
+    "tagline": "Choose Your House. Stake Your Claim."
+  },
+  "home": {
+    "chooseHouse": "Choose Your House",
+    "placeholder": "Select a House to begin your journey."
+  },
+  "nav": {
+    "home": "Home",
+    "swap": "Swap",
+    "staking": "Staking",
+    "leaderboard": "Leaderboard",
+    "activity": "Activity",
+    "admin": "Admin"
+  },
+  "wallet": {
+    "connect": "Connect Wallet",
+    "disconnect": "Disconnect",
+    "wrongNetwork": "Switch to Base"
+  },
+  "auth": {
+    "signInWithFarcaster": "Sign In With Farcaster",
+    "orConnectWallet": "Or connect a wallet",
+    "scanQrCode": "Scan the QR code with your phone",
+    "signInDescription": "Connect your Farcaster account to get started",
+    "openDirectly": "open directly",
+    "connectWithFarcaster": "Connect with Farcaster",
+    "creatingConnection": "Creating connection...",
+    "cancel": "Cancel"
+  },
+  "house": {
+    "honoo": "炎 Honoo",
+    "mizu": "水 Mizu",
+    "mori": "森 Mori",
+    "tsuchi": "土 Tsuchi",
+    "kaze": "風 Kaze",
+    "description": {
+      "honoo": "Ambitious, competitive, risk-takers. Conquest is everything.",
+      "mizu": "Social, flexible, community builders. Strategy through adaptation.",
+      "mori": "Patient, resilient, rooted. Growth that outlasts all seasons.",
+      "tsuchi": "Steady, reliable, foundational. Wealth beneath the surface.",
+      "kaze": "Bold, unpredictable, swift. Freedom above all else."
+    },
+    "join": "Join {{houseName}}",
+    "members": "{{count}} members",
+    "cap": "/ 1,000",
+    "price": "Mint Price",
+    "switchHouse": "Switch House",
+    "myHouse": "My House"
+  },
+  "staking": {
+    "title": "Staking Pool",
+    "poolStats": "Pool Stats",
+    "totalStaked": "Total Staked",
+    "seasonEnd": "Season Ends",
+    "poolSize": "Pool Size",
+    "yourPosition": "Your Position",
+    "stakeAmount": "Amount Staked",
+    "streamingRate": "Earning Rate",
+    "claimable": "Claimable",
+    "stake": "Stake",
+    "unstake": "Unstake",
+    "claim": "Claim Rewards",
+    "pendingClaim": "Claim {{amount}} $DOJO",
+    "comingSoon": "Staking pool coming soon."
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "currentSeason": "Season {{seasonId}}",
+    "previousWinner": "Previous Season Winner",
+    "rank": "Rank",
+    "house": "House",
+    "members": "Members",
+    "score": "Score",
+    "breakdown": "Score Breakdown",
+    "dojoStreaks": "DOJO Streaks (40%)",
+    "staking": "Staking (30%)",
+    "onChat": "OnChat Activity (30%)",
+    "comingSoon": "Leaderboard coming soon."
+  },
+  "activity": {
+    "title": "My Activity",
+    "currentHouse": "Current House",
+    "dojoStreak": "DOJO Streak",
+    "stakeSize": "Stake Size",
+    "onChatMessages": "Messages This Season",
+    "contribution": "Contribution to Score",
+    "comingSoon": "Activity dashboard coming soon."
+  },
+  "season": {
+    "week": "Week {{week}}",
+    "active": "Active",
+    "cooldown": "Cooldown",
+    "ended": "Ended"
+  },
+  "admin": {
+    "title": "Admin Panel",
+    "operatorOnly": "This page is restricted to operators.",
+    "snapshot": "Season Snapshot",
+    "airdrop": "Trigger Airdrop"
+  },
+  "swap": {
+    "title": "Swap",
+    "buyToken": "Buy $TOKEN",
+    "sellToken": "Sell $TOKEN",
+    "priceToken": "Current $TOKEN Price",
+    "buyDojo": "Buy $DOJO",
+    "sellDojo": "Sell $DOJO",
+    "buySeki": "Buy $SEKI",
+    "sellSeki": "Sell $SEKI",
+    "price": "Current Price",
+    "priceDojo": "Current $DOJO Price",
+    "priceSeki": "Current $SEKI Price",
+    "amount": "Amount",
+    "cost": "Cost",
+    "receive": "You receive",
+    "fee": "Fee",
+    "totalCost": "Total Cost",
+    "gasDisclaimer": "Additional Base network gas fees apply to all transactions.",
+    "swapWarningTitle": "Warning",
+    "sellWarningTitle": "Significant Value Loss",
+    "sellWarning": "The per-token refund is lower than the current buy price. You may lose significant value on this sell.",
+    "noSupply": "No tokens have been minted yet. Selling is not available.",
+    "maxSupply": "Maximum supply reached. Buying is not available.",
+    "exceedsSupply": "This amount would exceed the maximum token supply.",
+    "exceedsBalance": "Amount exceeds your wallet balance of {{balance}}."
+  },
+  "toast": {
+    "swapBuySuccess": "Purchase complete!",
+    "swapSellSuccess": "Sale complete!",
+    "swapFailed": "Swap failed"
+  },
+  "errors": {
+    "walletNotConnected": "Please connect your wallet",
+    "connectWalletToTransact": "Connect a wallet to sign transactions",
+    "transactionFailed": "Transaction failed",
+    "networkError": "Network error. Please try again.",
+    "userRejected": "Transaction was rejected",
+    "insufficientFunds": "Insufficient funds for gas",
+    "contractRevert": "Contract error: {{reason}}",
+    "unknown": "Something went wrong: {{message}}",
+    "boundaryTitle": "Something went wrong",
+    "boundaryMessage": "An unexpected error occurred. Please try refreshing the page.",
+    "boundaryRefresh": "Refresh",
+    "houseNotSelected": "Please select a House first.",
+    "stakeAmountZero": "Stake amount must be greater than 0.",
+    "insufficientBalance": "Insufficient {{token}} balance.",
+    "txFailed": "Transaction failed. Try again."
+  },
+  "a11y": {
+    "changeLanguage": "Change language",
+    "toggleTheme": "Toggle theme",
+    "qrCode": "QR code for Warpcast sign in"
+  },
+  "hunt": {
+    "backSeki": "Back $SEKI on Hunt.town"
+  },
+  "footer": {
+    "builtOn": "Built on Base",
+    "poweredBy": "Powered by Sekigahara"
+  }
+}

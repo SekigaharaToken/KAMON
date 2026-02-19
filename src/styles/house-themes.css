@@ -1,0 +1,103 @@
+/**
+ * House-specific color overrides.
+ * Applied via CSS class on <html> element (e.g., house-honoo).
+ * Overrides --primary, --secondary, --accent from index.css.
+ */
+
+/* 炎 Honoo (Fire) — Aggressive & Bloody */
+.house-honoo {
+  --primary: #c92a22;
+  --primary-foreground: #fefcf8;
+  --secondary: #55011f;
+  --secondary-foreground: #fefcf8;
+  --accent: #dccf8e;
+  --accent-foreground: #000000;
+}
+
+.dark .house-honoo,
+.house-honoo:is(.dark *) {
+  --primary: #d0555d;
+  --primary-foreground: #fefcf8;
+  --secondary: #55011f;
+  --secondary-foreground: #fefcf8;
+}
+
+/* 水 Mizu (Water) — Cool Tactical */
+.house-mizu {
+  --primary: #94bcad;
+  --primary-foreground: #000000;
+  --secondary: #6f5652;
+  --secondary-foreground: #fefcf8;
+  --accent: #dccf8e;
+  --accent-foreground: #000000;
+}
+
+.dark .house-mizu,
+.house-mizu:is(.dark *) {
+  --primary: #94bcad;
+  --primary-foreground: #000000;
+  --secondary: #3a3835;
+  --secondary-foreground: #fefcf8;
+  --accent: #9b9024;
+  --accent-foreground: #fefcf8;
+}
+
+/* 森 Mori (Forest) — Earthy & Grounded */
+.house-mori {
+  --primary: #9b9024;
+  --primary-foreground: #fefcf8;
+  --secondary: #6f5652;
+  --secondary-foreground: #fefcf8;
+  --accent: #94bcad;
+  --accent-foreground: #000000;
+}
+
+.dark .house-mori,
+.house-mori:is(.dark *) {
+  --primary: #9b9024;
+  --primary-foreground: #fefcf8;
+  --secondary: #55011f;
+  --secondary-foreground: #fefcf8;
+  --accent: #dccf8e;
+  --accent-foreground: #1a1a1a;
+}
+
+/* 土 Tsuchi (Earth) — Steady & Enduring */
+.house-tsuchi {
+  --primary: #6f5652;
+  --primary-foreground: #fefcf8;
+  --secondary: #9b9024;
+  --secondary-foreground: #fefcf8;
+  --accent: #dccf8e;
+  --accent-foreground: #000000;
+}
+
+.dark .house-tsuchi,
+.house-tsuchi:is(.dark *) {
+  --primary: #6f5652;
+  --primary-foreground: #fefcf8;
+  --secondary: #55011f;
+  --secondary-foreground: #fefcf8;
+  --accent: #dccf8e;
+  --accent-foreground: #1a1a1a;
+}
+
+/* 風 Kaze (Wind) — Unpredictable & Swift */
+.house-kaze {
+  --primary: #94bcad;
+  --primary-foreground: #000000;
+  --secondary: #d0555d;
+  --secondary-foreground: #fefcf8;
+  --accent: #dccf8e;
+  --accent-foreground: #000000;
+}
+
+.dark .house-kaze,
+.house-kaze:is(.dark *) {
+  --primary: #94bcad;
+  --primary-foreground: #000000;
+  --secondary: #55011f;
+  --secondary-foreground: #fefcf8;
+  --accent: #9b9024;
+  --accent-foreground: #fefcf8;
+}
