@@ -35,3 +35,9 @@ export const MAX_DOJO_STREAK = 30;
 
 /** Staking badge eligibility threshold (4 continuous weeks) */
 export const STAKING_BADGE_WEEKS = 4;
+
+/** OnChat channel slug for Sekigahara scoring */
+export const ONCHAT_CHANNEL_SLUG = "sekigahara";
+
+/** OnChat message count cache TTL in milliseconds (1 hour) */
+export const ONCHAT_CACHE_TTL = 60 * 60 * 1000;

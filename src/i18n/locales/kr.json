@@ -13,6 +13,7 @@
     "staking": "스테이킹",
     "leaderboard": "리더보드",
     "activity": "활동",
+    "chat": "채팅",
     "admin": "관리"
   },
   "wallet": {
@@ -153,6 +154,12 @@
   },
   "hunt": {
     "backSeki": "Hunt.town에서 $SEKI 후원하기"
+  },
+  "chat": {
+    "title": "채팅",
+    "description": "세키가하라 채널의 온체인 채팅. 메시지는 Base에 저장됩니다.",
+    "loading": "OnChat 로딩 중...",
+    "navLabel": "채팅"
   },
   "footer": {
     "builtOn": "Base에서 구축",

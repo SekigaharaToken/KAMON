@@ -13,6 +13,7 @@
     "staking": "Staking",
     "leaderboard": "Leaderboard",
     "activity": "Activity",
+    "chat": "Chat",
     "admin": "Admin"
   },
   "wallet": {
@@ -156,6 +157,12 @@
   },
   "hunt": {
     "backSeki": "Back $SEKI on Hunt.town"
+  },
+  "chat": {
+    "title": "Chat",
+    "description": "On-chain chat in the Sekigahara channel. Messages are stored on Base.",
+    "loading": "Loading OnChat...",
+    "navLabel": "Chat"
   },
   "footer": {
     "builtOn": "Built on Base",

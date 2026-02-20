@@ -14,6 +14,7 @@ const StakingPage = lazy(() => import("@/pages/StakingPage.jsx"));
 const LeaderboardPage = lazy(() => import("@/pages/LeaderboardPage.jsx"));
 const ActivityPage = lazy(() => import("@/pages/ActivityPage.jsx"));
 const AdminPage = lazy(() => import("@/pages/AdminPage.jsx"));
+const ChatPage = lazy(() => import("@/pages/ChatPage.jsx"));
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
               <Route path="/leaderboard" element={<LeaderboardPage />} />
               <Route path="/activity" element={<ActivityPage />} />
               <Route path="/admin" element={<AdminPage />} />
+              <Route path="/chat" element={<ChatPage />} />
             </Routes>
           </Suspense>
         </PageWrapper>

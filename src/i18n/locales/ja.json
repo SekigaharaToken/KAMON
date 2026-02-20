@@ -13,6 +13,7 @@
     "staking": "ステーキング",
     "leaderboard": "リーダーボード",
     "activity": "アクティビティ",
+    "chat": "チャット",
     "admin": "管理"
   },
   "wallet": {
@@ -153,6 +154,12 @@
   },
   "hunt": {
     "backSeki": "Hunt.townで$SEKIを支援"
+  },
+  "chat": {
+    "title": "チャット",
+    "description": "関ヶ原チャンネルのオンチェーンチャット。メッセージはBaseに保存されます。",
+    "loading": "OnChat読み込み中...",
+    "navLabel": "チャット"
   },
   "footer": {
     "builtOn": "Base上に構築",

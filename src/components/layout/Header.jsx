@@ -117,6 +117,7 @@ export const Header = () => {
               { to: "/staking", label: "nav.staking" },
               { to: "/leaderboard", label: "nav.leaderboard" },
               { to: "/activity", label: "nav.activity" },
+              { to: "/chat", label: "nav.chat" },
             ].map(({ to, label }) => (
               <Link
                 key={to}
