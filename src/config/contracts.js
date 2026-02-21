@@ -130,5 +130,5 @@ export const HOUSE_ADDRESSES = {
 export const STAKING_POOL_ADDRESS =
   getEnv("VITE_STAKING_POOL_ADDRESS", "").toLowerCase();
 
-// OnChat contract (Base mainnet)
-export const ONCHAT_ADDRESS = "0x898D291C2160A9CB110398e9dF3693b7f2c4af2D";
+// OnChat contract (env-aware; falls back to Base mainnet)
+export const ONCHAT_ADDRESS = getEnv("VITE_ONCHAT_ADDRESS", "0x898D291C2160A9CB110398e9dF3693b7f2c4af2D");

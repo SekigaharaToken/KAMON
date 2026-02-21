@@ -5,6 +5,7 @@ import "forge-std/Script.sol";
 import "../src/MockERC20.sol";
 import "../src/MockBond.sol";
 import "../src/MockDojoResolver.sol";
+import "../src/MockOnChat.sol";
 
 /**
  * Deploy all mock contracts for local Anvil development.
@@ -15,9 +16,11 @@ import "../src/MockDojoResolver.sol";
  *   - MockBond — bonding curve factory
  *   - 5 House NFTs (via MockBond.createMultiToken)
  *   - MockDojoResolver — DOJO streak oracle
+ *   - MockOnChat — messaging for OnChat scoring
  *
  * Mints 100,000 $SEKI to the deployer (Anvil account 0).
  * Sets initial streaks for Anvil accounts 0-4.
+ * Seeds OnChat with a "sekigahara" channel and test messages.
  *
  * Usage:
  *   forge script script/Deploy.s.sol --rpc-url http://localhost:8545 --broadcast
@@ -80,7 +83,41 @@ contract DeployLocal is Script {
         resolver.setStreak(anvilAccounts[1], 30, 30, block.timestamp - 1800);
         resolver.setStreak(anvilAccounts[2], 3,  10, block.timestamp - 86400); // at risk (>23h)
 
+        // --- OnChat ---
+        MockOnChat onChat = new MockOnChat();
+
+        // Create "sekigahara" channel (deployer auto-joins)
+        onChat.createChannel("sekigahara");
+
+        // Compute slug hash for joining/messaging
+        bytes32 sekiSlug = onChat.computeSlugHash("sekigahara");
+
+        // Send some messages from deployer (account 0)
+        onChat.sendMessage(sekiSlug, "Welcome to Sekigahara!");
+        onChat.sendMessage(sekiSlug, "The battle begins.");
+        onChat.sendMessage(sekiSlug, "Choose your House wisely.");
+
         vm.stopBroadcast();
+
+        // --- Seed OnChat from accounts 1-3 ---
+        // Anvil well-known private keys for accounts 1-3
+        uint256[3] memory seedKeys = [
+            uint256(0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d),
+            uint256(0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a),
+            uint256(0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6)
+        ];
+
+        for (uint256 i = 0; i < 3; i++) {
+            vm.startBroadcast(seedKeys[i]);
+            onChat.joinChannel(sekiSlug);
+
+            // Each account sends (i+1)*2 messages for varied counts
+            uint256 msgCount = (i + 1) * 2;
+            for (uint256 m = 0; m < msgCount; m++) {
+                onChat.sendMessage(sekiSlug, "Test message");
+            }
+            vm.stopBroadcast();
+        }
 
         // --- Output addresses for .env.local ---
         console.log("=== LOCAL DEV ADDRESSES ===");
@@ -93,6 +130,7 @@ contract DeployLocal is Script {
         console.log("VITE_HOUSE_WIND_ADDRESS=%s",  kaze);
         console.log("VITE_DOJO_RESOLVER_ADDRESS=%s", address(resolver));
         console.log("VITE_MOCK_BOND_ADDRESS=%s", address(bond));
+        console.log("VITE_ONCHAT_ADDRESS=%s", address(onChat));
         console.log("=== END ===");
     }
 }

@@ -31,7 +31,7 @@ deploy() {
   echo "$output"
 
   # Parse deployed addresses from script output
-  local seki dojo honoo mizu mori tsuchi kaze resolver bond
+  local seki dojo honoo mizu mori tsuchi kaze resolver bond onchat
   seki=$(echo "$output"   | grep 'VITE_SEKI_TOKEN_ADDRESS='   | sed 's/.*=//')
   dojo=$(echo "$output"   | grep 'VITE_DOJO_TOKEN_ADDRESS='   | sed 's/.*=//')
   honoo=$(echo "$output"  | grep 'VITE_HOUSE_FIRE_ADDRESS='   | sed 's/.*=//')
@@ -41,6 +41,7 @@ deploy() {
   kaze=$(echo "$output"   | grep 'VITE_HOUSE_WIND_ADDRESS='   | sed 's/.*=//')
   resolver=$(echo "$output" | grep 'VITE_DOJO_RESOLVER_ADDRESS=' | sed 's/.*=//')
   bond=$(echo "$output"   | grep 'VITE_MOCK_BOND_ADDRESS='    | sed 's/.*=//')
+  onchat=$(echo "$output" | grep 'VITE_ONCHAT_ADDRESS='       | sed 's/.*=//')
 
   # Write .env.local
   cat > "$ENV_FILE" <<EOF
@@ -68,6 +69,9 @@ VITE_HOUSE_WIND_ADDRESS=$kaze
 
 # Mock Bond contract (local only — replaces Mint Club Bond)
 VITE_MOCK_BOND_ADDRESS=$bond
+
+# OnChat contract (local mock)
+VITE_ONCHAT_ADDRESS=$onchat
 
 # Staking pool (not yet deployed)
 VITE_STAKING_POOL_ADDRESS=
