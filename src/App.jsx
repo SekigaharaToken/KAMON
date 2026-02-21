@@ -1,7 +1,9 @@
 import { lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
+import { Home, ArrowLeftRight, Layers, Trophy } from "lucide-react";
 import { Header } from "@/components/layout/Header.jsx";
 import { Footer } from "@/components/layout/Footer.jsx";
+import { BottomNav } from "@/components/layout/BottomNav.jsx";
 import { PageWrapper } from "@/components/layout/PageWrapper.jsx";
 import { NetworkGuardBanner } from "@/components/layout/NetworkGuardBanner.jsx";
 import { ErrorBoundary } from "@/components/layout/ErrorBoundary.jsx";
@@ -37,6 +39,14 @@ function App() {
         </PageWrapper>
       </ErrorBoundary>
       <Footer />
+      <BottomNav
+        items={[
+          { to: "/", icon: Home, labelKey: "nav.home" },
+          { to: "/swap", icon: ArrowLeftRight, labelKey: "nav.swap" },
+          { to: "/staking", icon: Layers, labelKey: "nav.staking" },
+          { to: "/leaderboard", icon: Trophy, labelKey: "nav.leaderboard" },
+        ]}
+      />
       <LoginModal />
     </div>
   );

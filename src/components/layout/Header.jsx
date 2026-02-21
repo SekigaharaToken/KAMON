@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useLocation } from "react-router-dom";
-import { Sun, Moon, Globe, LogOut } from "lucide-react";
+import { Sun, Moon, Globe, LogOut, Activity, MessageSquare } from "lucide-react";
 import { useAccount, useDisconnect } from "wagmi";
 import { createPublicClient, http, formatUnits } from "viem";
 import { Button } from "@/components/ui/button.jsx";
@@ -112,7 +112,7 @@ export const Header = () => {
           <Link to="/" className="font-serif text-xl font-bold tracking-wide">
             {t("app.name")}
           </Link>
-          <nav className="flex items-center gap-4">
+          <nav className="hidden items-center gap-4 md:flex">
             {[
               { to: "/", label: "nav.home" },
               { to: "/swap", label: "nav.swap" },
@@ -139,10 +139,10 @@ export const Header = () => {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          {/* Language Switcher */}
+          {/* Language Switcher (desktop) */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" aria-label={t("a11y.changeLanguage")}>
+              <Button variant="ghost" size="icon" className="hidden md:inline-flex" aria-label={t("a11y.changeLanguage")}>
                 <Globe className="size-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -161,11 +161,12 @@ export const Header = () => {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Theme Toggle */}
+          {/* Theme Toggle (desktop) */}
           <Button
             variant="ghost"
             size="icon"
             onClick={toggleTheme}
+            className="hidden md:inline-flex"
             aria-label={t("a11y.toggleTheme")}
           >
             {resolvedTheme === "dark" ? (
@@ -193,11 +194,44 @@ export const Header = () => {
                     {houseConfig.symbol} {t(houseConfig.nameKey)}
                   </DropdownMenuItem>
                 )}
+                {/* Activity & Chat (mobile) */}
+                <DropdownMenuItem asChild className="md:hidden">
+                  <Link to="/activity">
+                    <Activity className="mr-2 size-4" />
+                    {t("nav.activity")}
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="md:hidden">
+                  <Link to="/chat">
+                    <MessageSquare className="mr-2 size-4" />
+                    {t("nav.chat")}
+                  </Link>
+                </DropdownMenuItem>
                 {SWAP_TOKENS.map((token) => (
                   <DropdownMenuItem key={token.key} disabled className="text-xs text-muted-foreground">
                     <span className="font-mono">{token.label}</span>: {balancesLoading ? <Skeleton className="ml-1 inline-block h-3 w-16" /> : formatBalance(balances[token.key] ?? 0n)}
                   </DropdownMenuItem>
                 ))}
+                {/* Language & Theme (mobile) */}
+                <DropdownMenuSeparator className="md:hidden" />
+                {LANGUAGES.map((lang) => (
+                  <DropdownMenuItem
+                    key={lang.code}
+                    onClick={() => i18n.changeLanguage(lang.code)}
+                    className={cn("md:hidden", i18n.language === lang.code && "font-bold")}
+                  >
+                    <Globe className="mr-2 size-4" />
+                    {lang.label}
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuItem onClick={toggleTheme} className="md:hidden">
+                  {resolvedTheme === "dark" ? (
+                    <Sun className="mr-2 size-4" />
+                  ) : (
+                    <Moon className="mr-2 size-4" />
+                  )}
+                  {t("a11y.toggleTheme")}
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => { disconnect(); signOut?.(); }}>
                   <LogOut className="mr-2 size-4" />
