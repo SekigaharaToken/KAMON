@@ -18,6 +18,7 @@ import {
 import { useTheme } from "@/hooks/useTheme.js";
 import { useLoginModal } from "@/hooks/useLoginModal.js";
 import { useFarcaster } from "@/hooks/useFarcaster.js";
+import { useHouse } from "@/hooks/useHouse.js";
 import { useMiniAppContext } from "@/hooks/useMiniAppContext.js";
 import { activeChain } from "@/config/chains.js";
 import { SWAP_TOKENS } from "@/config/contracts.js";
@@ -55,6 +56,7 @@ export const Header = () => {
   const { openLoginModal } = useLoginModal();
   const { isAuthenticated, profile, signOut } = useFarcaster();
   const { context } = useMiniAppContext();
+  const { houseConfig } = useHouse();
   const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
   const location = useLocation();
@@ -186,6 +188,11 @@ export const Header = () => {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="min-w-44">
                 <DropdownMenuLabel>{displayName}</DropdownMenuLabel>
+                {houseConfig && (
+                  <DropdownMenuItem disabled className="text-xs" style={{ color: houseConfig.colors.primary }}>
+                    {houseConfig.symbol} {t(houseConfig.nameKey)}
+                  </DropdownMenuItem>
+                )}
                 {SWAP_TOKENS.map((token) => (
                   <DropdownMenuItem key={token.key} disabled className="text-xs text-muted-foreground">
                     <span className="font-mono">{token.label}</span>: {balancesLoading ? <Skeleton className="ml-1 inline-block h-3 w-16" /> : formatBalance(balances[token.key] ?? 0n)}

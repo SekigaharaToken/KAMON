@@ -32,6 +32,11 @@ vi.mock("@/hooks/useFarcaster.js", () => ({
   useFarcaster: (...args) => mockUseFarcaster(...args),
 }));
 
+// Mock useHouse (Header now imports it for avatar house info)
+vi.mock("@/hooks/useHouse.js", () => ({
+  useHouse: () => ({ selectedHouse: null, houseConfig: null, selectHouse: vi.fn() }),
+}));
+
 const { Header } = await import("../Header.jsx");
 
 describe("Header", () => {

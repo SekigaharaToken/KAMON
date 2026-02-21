@@ -4,7 +4,7 @@
  * In production (Base/Base Sepolia): uses Mint Club SDK.
  * In local dev (Anvil, chain 31337): uses direct viem calls to MockBond.
  *
- * Provides: getBuyPrice, mintHouseNFT, burnHouseNFT, getHouseBalance, getHouseSupply.
+ * Provides: getBuyPrice, getSellPrice, mintHouseNFT, burnHouseNFT, getHouseBalance, getHouseSupply.
  */
 
 import { isLocalDev } from "@/config/chains.js";
@@ -32,6 +32,18 @@ function getNft(houseAddress) {
   return getSdk().then(({ mintclub }) =>
     mintclub.network("base").nft(houseAddress),
   );
+}
+
+export async function getSellPrice(houseAddress) {
+  if (!houseAddress) return null;
+
+  if (isLocalDev) {
+    const local = await getLocal();
+    return local.localGetSellPrice(houseAddress);
+  }
+
+  const nft = await getNft(houseAddress);
+  return nft.getSellEstimation(1);
 }
 
 export async function getBuyPrice(houseAddress) {

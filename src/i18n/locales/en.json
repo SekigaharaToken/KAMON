@@ -49,7 +49,13 @@
     "cap": "/ 1,000",
     "price": "Mint Price",
     "switchHouse": "Switch House",
-    "myHouse": "My House"
+    "myHouse": "My House",
+    "abdicate": "Abdicate",
+    "abdicateConfirm": "Leave {{houseName}}?",
+    "abdicateDescription": "You will sell your House NFT back to the bonding curve and receive ~{{refund}} $SEKI. This cannot be undone.",
+    "abdicating": "Abdicating...",
+    "abdicateSuccess": "You have left the House.",
+    "abdicateFailed": "Failed to abdicate. Try again."
   },
   "staking": {
     "title": "Staking Pool",
