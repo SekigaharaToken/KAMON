@@ -10,6 +10,7 @@
 import { mintclub } from "@/lib/mintclub.js";
 
 function getPool(poolAddress) {
+  if (!mintclub) throw new Error("Mint Club SDK not available in local dev mode");
   return mintclub.network("base").token(poolAddress).stake();
 }
 

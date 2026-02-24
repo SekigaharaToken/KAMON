@@ -136,6 +136,16 @@ export function SwapPanel({ tokenConfig }) {
   const [amount, setAmount] = useState("");
   const [isPending, setIsPending] = useState(false);
 
+  if (!mintclub) {
+    return (
+      <Card className="w-full max-w-sm">
+        <CardContent className="py-6 text-center text-sm text-muted-foreground">
+          {t("swap.unavailableLocal", "Swap is not available in local dev mode.")}
+        </CardContent>
+      </Card>
+    );
+  }
+
   const token = mintclub.network(tokenConfig.network).token(tokenConfig.address);
 
   const parsedAmount = amount && Number(amount) > 0

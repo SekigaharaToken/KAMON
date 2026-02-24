@@ -22,7 +22,7 @@ export function useTokenPrice() {
       const [reserveAmount, royalty] = await token.getBuyEstimation(ONE_TOKEN);
       return { buyPrice: reserveAmount, royalty };
     },
-    enabled: !!SWAP_TOKEN_ADDRESS,
+    enabled: !!mintclub && !!SWAP_TOKEN_ADDRESS,
     staleTime: 10_000,
     retry: false,
   });

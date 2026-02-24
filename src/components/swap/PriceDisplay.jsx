@@ -26,7 +26,7 @@ export function PriceDisplay({ tokenConfig }) {
       const [reserveAmount, royalty] = await token.getBuyEstimation(ONE_TOKEN);
       return { buyPrice: reserveAmount, royalty };
     },
-    enabled: !!tokenConfig.address,
+    enabled: !!mintclub && !!tokenConfig.address,
     staleTime: 10_000,
     retry: false,
   });
