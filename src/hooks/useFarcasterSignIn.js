@@ -61,6 +61,7 @@ export const useFarcasterSignIn = ({ onSuccess, onError } = {}) => {
   });
 
   // Once the channel is created, start polling and show QR
+  /* eslint-disable react-hooks/set-state-in-effect -- state machine transition triggered by external auth-kit state */
   useEffect(() => {
     if (wantsToSignIn && channelToken && !isPolling) {
       signIn();
@@ -68,6 +69,7 @@ export const useFarcasterSignIn = ({ onSuccess, onError } = {}) => {
       setShowQrView(true);
     }
   }, [wantsToSignIn, channelToken, isPolling, signIn]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleSignInClick = useCallback(() => {
     setWantsToSignIn(true);

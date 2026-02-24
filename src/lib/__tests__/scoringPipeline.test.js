@@ -49,7 +49,7 @@ describe("Scoring pipeline — normalize → compute", () => {
   });
 
   it("uses 40/60 fallback when onChatPct is null", () => {
-    const dojo = normalizeDojoStreak(15); // 50
+    normalizeDojoStreak(15); // 50
     const staking = normalizeStaking(5000, 50000); // 10
 
     const score = computeWalletScore({

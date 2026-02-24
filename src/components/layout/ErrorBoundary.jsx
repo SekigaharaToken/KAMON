@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card.jsx";
 import { Button } from "@/components/ui/button.jsx";
 
+// eslint-disable-next-line react-refresh/only-export-components
 function ErrorFallback() {
   const { t } = useTranslation();
 

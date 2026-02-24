@@ -9,7 +9,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import useEmblaCarousel from "embla-carousel-react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import { HOUSE_LIST } from "@/config/houses.js";
 import { HouseCard } from "./HouseCard.jsx";
 import { fadeInUp, staggerDelay } from "@/lib/motion.js";
@@ -31,7 +31,6 @@ export function HouseCarousel({ supplies = {}, prices = {}, onJoin }) {
   useEffect(() => {
     if (!emblaApi) return;
     emblaApi.on("select", onSelect);
-    onSelect();
     return () => emblaApi.off("select", onSelect);
   }, [emblaApi, onSelect]);
 

@@ -10,6 +10,7 @@ import { HOUSES, HOUSE_LIST } from "@/config/houses.js";
 
 const STORAGE_KEY = "kamon:selected_house";
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const HouseContext = createContext(null);
 
 export function HouseProvider({ children }) {

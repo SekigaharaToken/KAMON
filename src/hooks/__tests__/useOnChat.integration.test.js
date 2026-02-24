@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { normalizeOnChat, computeWalletScore } from "@/lib/scoring.js";
+import { computeWalletScore } from "@/lib/scoring.js";
 
 /**
  * useOnChat integration test — exercises getLogsPaginated mock

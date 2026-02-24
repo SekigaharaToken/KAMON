@@ -29,10 +29,9 @@ export const FarcasterProvider = ({ children }) => {
     return null;
   });
 
-  // When auth-kit provides a fresh profile, persist it
+  // When auth-kit provides a fresh profile, persist it to sessionStorage
   useEffect(() => {
     if (isAuthKitAuthenticated && authKitProfile) {
-      setStoredProfile(authKitProfile);
       try {
         sessionStorage.setItem(
           PROFILE_STORAGE_KEY,

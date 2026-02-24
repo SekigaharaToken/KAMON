@@ -6,7 +6,7 @@ import { motion } from "motion/react";
 import { AdminPanel } from "@/components/admin/AdminPanel.jsx";
 import { SeasonSnapshot } from "@/components/admin/SeasonSnapshot.jsx";
 import { AirdropTrigger } from "@/components/admin/AirdropTrigger.jsx";
-import { fadeInUp, staggerDelay } from "@/lib/motion.js";
+import { fadeInUp } from "@/lib/motion.js";
 
 export default function AdminPage() {
   // TODO: Wire to useWalletAddress for operator check, useSeason for status
