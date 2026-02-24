@@ -52,7 +52,7 @@
     "myHouse": "My House",
     "abdicate": "Abdicate",
     "abdicateConfirm": "Leave {{houseName}}?",
-    "abdicateDescription": "You will sell your House NFT back to the bonding curve and receive ~{{refund}} $SEKI. This cannot be undone.",
+    "abdicateDescription": "You will sell your House NFT back to the bonding curve and receive ~{{refund}} $SEKI. To rejoin this house you will need to purchase a new NFT at the current price.",
     "abdicating": "Abdicating...",
     "abdicateSuccess": "You have left the House.",
     "abdicateFailed": "Failed to abdicate. Try again."

@@ -52,7 +52,7 @@
     "myHouse": "내 가문",
     "abdicate": "탈퇴",
     "abdicateConfirm": "{{houseName}}을(를) 떠나시겠습니까?",
-    "abdicateDescription": "하우스 NFT를 본딩 커브에 매도하고 약 {{refund}} $SEKI를 받습니다. 이 작업은 되돌릴 수 없습니다.",
+    "abdicateDescription": "하우스 NFT를 본딩 커브에 매도하고 약 {{refund}} $SEKI를 받습니다. 이 하우스에 다시 가입하려면 현재 가격으로 새 NFT를 구매해야 합니다.",
     "abdicating": "탈퇴 중...",
     "abdicateSuccess": "가문을 떠났습니다.",
     "abdicateFailed": "탈퇴에 실패했습니다. 다시 시도해주세요."
