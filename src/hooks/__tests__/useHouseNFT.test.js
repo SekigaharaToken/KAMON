@@ -16,7 +16,8 @@ vi.mock("@/config/chains.js", () => ({
 // Mock mintclub SDK before importing hook
 vi.mock("@/lib/mintclub.js", () => {
   const mockNft = {
-    getBuyPrice: vi.fn(),
+    getBuyEstimation: vi.fn(),
+    getSellEstimation: vi.fn(),
     buy: vi.fn(),
     sell: vi.fn(),
     getBalanceOf: vi.fn(),
@@ -27,10 +28,28 @@ vi.mock("@/lib/mintclub.js", () => {
       network: vi.fn(() => ({
         nft: vi.fn(() => mockNft),
       })),
+      withWalletClient: vi.fn(),
     },
     __mockNft: mockNft,
   };
 });
+
+// Mock viem for ensureWalletClient
+vi.mock("viem", async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    createWalletClient: vi.fn(() => ({ account: "0xmock" })),
+    custom: vi.fn(() => ({})),
+  };
+});
+
+// Mock window.ethereum for ensureWalletClient
+globalThis.window = {
+  ethereum: {
+    request: vi.fn().mockResolvedValue(["0xmockAccount"]),
+  },
+};
 
 // Import after mock setup
 const { __mockNft } = await import("@/lib/mintclub.js");
@@ -51,11 +70,11 @@ describe("useHouseNFT — getBuyPrice", () => {
   });
 
   it("returns buy price for 1 NFT", async () => {
-    __mockNft.getBuyPrice.mockResolvedValue(10500000000000000000n);
+    __mockNft.getBuyEstimation.mockResolvedValue([10500000000000000000n, 300000000000000000n]);
 
     const price = await getBuyPrice(TEST_HOUSE_ADDRESS);
     expect(price).toBe(10500000000000000000n);
-    expect(__mockNft.getBuyPrice).toHaveBeenCalledWith(1);
+    expect(__mockNft.getBuyEstimation).toHaveBeenCalledWith(1n);
   });
 
   it("returns null for missing address", async () => {
@@ -74,10 +93,9 @@ describe("useHouseNFT — mintHouseNFT", () => {
 
     const result = await mintHouseNFT(TEST_HOUSE_ADDRESS, TEST_WALLET);
     expect(result).toEqual({ hash: "0xabc" });
-    expect(__mockNft.buy).toHaveBeenCalledWith({
-      amount: 1,
-      recipient: TEST_WALLET,
-    });
+    expect(__mockNft.buy).toHaveBeenCalledWith(
+      expect.objectContaining({ amount: 1, recipient: TEST_WALLET }),
+    );
   });
 
   it("throws on missing address", async () => {
@@ -95,10 +113,9 @@ describe("useHouseNFT — burnHouseNFT", () => {
 
     const result = await burnHouseNFT(TEST_HOUSE_ADDRESS, TEST_WALLET);
     expect(result).toEqual({ hash: "0xdef" });
-    expect(__mockNft.sell).toHaveBeenCalledWith({
-      amount: 1,
-      recipient: TEST_WALLET,
-    });
+    expect(__mockNft.sell).toHaveBeenCalledWith(
+      expect.objectContaining({ amount: 1, recipient: TEST_WALLET }),
+    );
   });
 });
 

@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "dev:testnet": "VITE_CHAIN_ID=84532 vite --mode testnet"
   },
   "dependencies": {
     "@farcaster/auth-kit": "^0.8.2",

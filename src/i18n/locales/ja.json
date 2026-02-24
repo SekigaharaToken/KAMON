@@ -55,7 +55,16 @@
     "abdicateDescription": "ハウスNFTをボンディングカーブに売却し、約{{refund}} $SEKIを受け取ります。再加入するには、現在の価格で新しいNFTを購入する必要があります。",
     "abdicating": "脱退中...",
     "abdicateSuccess": "家を離れました。",
-    "abdicateFailed": "脱退に失敗しました。再試行してください。"
+    "abdicateFailed": "脱退に失敗しました。再試行してください。",
+    "joining": "加入中...",
+    "joinSuccess": "家へようこそ！",
+    "joinFailed": "加入に失敗しました。再試行してください。",
+    "attesting": "メンバーシップ登録中...",
+    "attestFailed": "メンバーシップ登録に失敗しました。ダッシュボードから再試行できます。",
+    "retryAttest": "メンバーシップ登録",
+    "multiHouseWarning": "複数の家のNFTを保有しています。ポイントを獲得するには余分なNFTを売却してください。",
+    "revoking": "メンバーシップ取消中...",
+    "revokeFailed": "メンバーシップ記録の取消に失敗しました。"
   },
   "staking": {
     "title": "ステーキングプール",

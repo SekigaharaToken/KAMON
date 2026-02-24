@@ -17,7 +17,7 @@ import { Progress } from "@/components/ui/progress.jsx";
 import { HOUSE_MAX_SUPPLY } from "@/config/houses.js";
 import { tapSpring } from "@/lib/motion.js";
 
-export function HouseCard({ house, supply, price, onJoin, isActive = false }) {
+export function HouseCard({ house, supply, price, onJoin, joining = false, isActive = false }) {
   const { t } = useTranslation();
 
   return (
@@ -60,8 +60,9 @@ export function HouseCard({ house, supply, price, onJoin, isActive = false }) {
             className="w-full"
             style={{ backgroundColor: house.colors.primary }}
             onClick={() => onJoin(house.id)}
+            disabled={joining}
           >
-            {t("house.join", { houseName: house.id })}
+            {joining ? t("house.joining") : t("house.join", { houseName: house.id })}
           </Button>
         </motion.div>
       </CardFooter>

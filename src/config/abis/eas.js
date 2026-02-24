@@ -27,6 +27,29 @@ export const easAbi = [
     outputs: [{ name: "", type: "bytes32" }],
   },
   {
+    name: "revoke",
+    type: "function",
+    stateMutability: "payable",
+    inputs: [
+      {
+        name: "request",
+        type: "tuple",
+        components: [
+          { name: "schema", type: "bytes32" },
+          {
+            name: "data",
+            type: "tuple",
+            components: [
+              { name: "uid", type: "bytes32" },
+              { name: "value", type: "uint256" },
+            ],
+          },
+        ],
+      },
+    ],
+    outputs: [],
+  },
+  {
     name: "Attested",
     type: "event",
     inputs: [

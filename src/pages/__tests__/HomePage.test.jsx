@@ -22,13 +22,27 @@ vi.mock("@/hooks/useHouse.js", () => ({
 // Mock useHouseNFT
 const mockBurnHouseNFT = vi.fn(() => Promise.resolve());
 const mockGetSellPrice = vi.fn(() => Promise.resolve(10000000000000000000n));
+const mockGetHouseBalance = vi.fn(() => Promise.resolve(1n));
 vi.mock("@/hooks/useHouseNFT.js", () => ({
   burnHouseNFT: (...args) => mockBurnHouseNFT(...args),
+  getHouseBalance: (...args) => mockGetHouseBalance(...args),
   getSellPrice: (...args) => mockGetSellPrice(...args),
 }));
 
+// Mock useHouseMembership
+const mockAttestHouse = vi.fn(() => Promise.resolve());
+const mockRevokeHouse = vi.fn(() => Promise.resolve());
+const mockRetryAttest = vi.fn(() => Promise.resolve());
+const mockGetAttestedHouse = vi.fn(() => Promise.resolve(0));
+vi.mock("@/hooks/useHouseMembership.js", () => ({
+  attestHouse: (...args) => mockAttestHouse(...args),
+  revokeHouse: (...args) => mockRevokeHouse(...args),
+  retryAttest: (...args) => mockRetryAttest(...args),
+  getAttestedHouse: (...args) => mockGetAttestedHouse(...args),
+}));
+
 // Mock sonner
-const mockToast = { success: vi.fn(), error: vi.fn() };
+const mockToast = { success: vi.fn(), error: vi.fn(), loading: vi.fn(), dismiss: vi.fn(), warning: vi.fn() };
 vi.mock("sonner", () => ({ toast: mockToast }));
 
 // Mock HouseCarousel to avoid embla-carousel matchMedia issue
@@ -153,6 +167,7 @@ describe("HomePage", () => {
     await waitFor(() => {
       expect(mockBurnHouseNFT).toHaveBeenCalledWith("0x1234", "0xabc123");
     });
+    expect(mockRevokeHouse).toHaveBeenCalledWith("0xabc123");
     expect(mockSelectHouse).toHaveBeenCalledWith(null);
     expect(mockToast.success).toHaveBeenCalled();
   });

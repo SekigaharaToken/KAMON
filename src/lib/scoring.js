@@ -63,6 +63,15 @@ export function computeWalletScore({ dojoStreak, stakePct, onChatPct }) {
 }
 
 /**
+ * Compute a validated wallet score — returns 0 if wallet holds multiple house NFTs.
+ * Wraps computeWalletScore with multi-house penalty enforcement.
+ */
+export function computeValidatedWalletScore({ dojoStreak, stakePct, onChatPct, isMultiHolder }) {
+  if (isMultiHolder) return 0;
+  return computeWalletScore({ dojoStreak, stakePct, onChatPct });
+}
+
+/**
  * Compute a House's total score from its members' scores.
  */
 export function computeHouseScore(walletScores) {

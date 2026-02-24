@@ -130,5 +130,13 @@ export const HOUSE_ADDRESSES = {
 export const STAKING_POOL_ADDRESS =
   getEnv("VITE_STAKING_POOL_ADDRESS", "").toLowerCase();
 
+// House membership resolver (EAS)
+export const HOUSE_RESOLVER_ADDRESS =
+  getEnv("VITE_HOUSE_RESOLVER_ADDRESS", "").toLowerCase();
+
+// House membership EAS schema UID
+export const HOUSE_SCHEMA_UID =
+  getEnv("VITE_HOUSE_SCHEMA_UID", "").toLowerCase();
+
 // OnChat contract (env-aware; falls back to Base mainnet)
 export const ONCHAT_ADDRESS = getEnv("VITE_ONCHAT_ADDRESS", "0x898D291C2160A9CB110398e9dF3693b7f2c4af2D");

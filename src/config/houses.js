@@ -8,6 +8,7 @@ import { getEnv } from "./env.js";
 export const HOUSES = {
   honoo: {
     id: "honoo",
+    numericId: 1,
     element: "fire",
     symbol: "炎",
     nameKey: "house.honoo",
@@ -22,6 +23,7 @@ export const HOUSES = {
   },
   mizu: {
     id: "mizu",
+    numericId: 2,
     element: "water",
     symbol: "水",
     nameKey: "house.mizu",
@@ -36,6 +38,7 @@ export const HOUSES = {
   },
   mori: {
     id: "mori",
+    numericId: 3,
     element: "forest",
     symbol: "森",
     nameKey: "house.mori",
@@ -50,6 +53,7 @@ export const HOUSES = {
   },
   tsuchi: {
     id: "tsuchi",
+    numericId: 4,
     element: "earth",
     symbol: "土",
     nameKey: "house.tsuchi",
@@ -64,6 +68,7 @@ export const HOUSES = {
   },
   kaze: {
     id: "kaze",
+    numericId: 5,
     element: "wind",
     symbol: "風",
     nameKey: "house.kaze",
@@ -85,6 +90,11 @@ export const HOUSE_LIST = Object.values(HOUSES);
 export function getHouseByAddress(address) {
   const normalized = address?.toLowerCase();
   return HOUSE_LIST.find((h) => h.address === normalized) ?? null;
+}
+
+/** Lookup House by numeric EAS houseId (1-5). Returns null for unknown IDs. */
+export function getHouseByNumericId(numericId) {
+  return HOUSE_LIST.find((h) => h.numericId === numericId) ?? null;
 }
 
 /** Maximum NFT supply per House */
