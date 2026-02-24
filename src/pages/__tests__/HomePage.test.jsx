@@ -33,7 +33,7 @@ vi.mock("sonner", () => ({ toast: mockToast }));
 
 // Mock HouseCarousel to avoid embla-carousel matchMedia issue
 vi.mock("@/components/house/HouseCarousel.jsx", () => ({
-  HouseCarousel: ({ onJoin }) => <div data-testid="carousel">carousel</div>,
+  HouseCarousel: () => <div data-testid="carousel">carousel</div>,
 }));
 
 // Mock chains for SDK guard

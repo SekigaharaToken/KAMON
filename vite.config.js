@@ -27,7 +27,12 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./src/test/setup.js"],
     css: false,
-    pool: "vmThreads",
+    pool: "forks",
     include: ["src/**/*.{test,spec}.{js,jsx}", "scripts/**/*.{test,spec}.{js,jsx}"],
+    server: {
+      deps: {
+        inline: ["react-router", "react-router-dom"],
+      },
+    },
   },
 });

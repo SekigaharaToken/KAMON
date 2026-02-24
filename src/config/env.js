@@ -1,3 +1,4 @@
+/* global process */
 /**
  * Environment variable helper — works in both Vite (import.meta.env)
  * and plain Node.js (process.env).

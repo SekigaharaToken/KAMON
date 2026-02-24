@@ -1,5 +1,6 @@
 import { createContext, useCallback, useMemo, useState } from "react";
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const LoginModalContext = createContext(null);
 
 export const LoginModalProvider = ({ children }) => {

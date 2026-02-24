@@ -4,8 +4,7 @@
  * Props:
  *   rankings    — array of { house, memberCount, score } sorted by rank
  *   lastUpdated — timestamp of last computation
- *   isComputing — whether a recomputation is in progress
- *   onRefresh   — callback to trigger refresh
+ *   (isComputing and onRefresh reserved for future use)
  */
 
 import { useTranslation } from "react-i18next";
@@ -17,8 +16,6 @@ import { fadeInUp, staggerDelay } from "@/lib/motion.js";
 export function Leaderboard({
   rankings = [],
   lastUpdated = null,
-  isComputing = false,
-  onRefresh,
 }) {
   const { t } = useTranslation();
 
@@ -28,15 +25,18 @@ export function Leaderboard({
       ? rankings
       : HOUSE_LIST.map((h) => ({ house: h, memberCount: 0, score: 0 }));
 
+  // eslint-disable-next-line react-hooks/purity -- intentional: display relative time
+  const minutesAgo = lastUpdated ? Math.round((Date.now() - lastUpdated) / 60000) : null;
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="font-serif text-xl font-bold">
           {t("leaderboard.title")}
         </h2>
-        {lastUpdated && (
+        {minutesAgo != null && (
           <span className="text-xs text-muted-foreground">
-            Updated {Math.round((Date.now() - lastUpdated) / 60000)}m ago
+            Updated {minutesAgo}m ago
           </span>
         )}
       </div>

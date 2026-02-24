@@ -18,7 +18,7 @@ export const BottomNav = ({ items }) => {
       <div
         className={cn("mx-auto grid max-w-3xl", gridCols[items.length])}
       >
-        {items.map(({ to, icon: Icon, labelKey }) => {
+        {items.map(({ to, icon: Icon, labelKey }) => { // eslint-disable-line no-unused-vars
           const isActive = location.pathname === to;
           return (
             <Link

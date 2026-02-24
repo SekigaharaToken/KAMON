@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "motion/react";
 import NumberFlow from "@number-flow/react";
@@ -45,7 +45,7 @@ function getAlertMessage({ mode, supplyIsZero, supplyIsMax, buyExceedsSupply, ex
   return null;
 }
 
-function SwapAlert({ mode, supplyIsZero, supplyIsMax, buyExceedsSupply, exceedsBalance, userBalance, sellAtLoss, parsedAmount, estimation, estimationLoading, tokenConfig, hasStaggered, t }) {
+function SwapAlert({ mode, supplyIsZero, supplyIsMax, buyExceedsSupply, exceedsBalance, userBalance, sellAtLoss, parsedAmount, estimation, estimationLoading, tokenConfig, hasStaggered, onStaggerComplete, t }) {
   const alert = getAlertMessage({ mode, supplyIsZero, supplyIsMax, buyExceedsSupply, exceedsBalance, userBalance, sellAtLoss, t });
   const showAlert = alert && (parsedAmount || supplyIsZero || supplyIsMax);
 
@@ -73,7 +73,7 @@ function SwapAlert({ mode, supplyIsZero, supplyIsMax, buyExceedsSupply, exceedsB
           exit={{ height: 0, opacity: 0 }}
           transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
           className="overflow-hidden"
-          onAnimationComplete={() => { hasStaggered.current = true; }}
+          onAnimationComplete={() => { onStaggerComplete(); }}
         >
           <div className="rounded-md border px-3 py-2 text-sm">
             {!estimation && estimationLoading ? (
@@ -83,7 +83,7 @@ function SwapAlert({ mode, supplyIsZero, supplyIsMax, buyExceedsSupply, exceedsB
                 estimation={estimation}
                 mode={mode}
                 tokenConfig={tokenConfig}
-                animate={!hasStaggered.current}
+                animate={!hasStaggered}
                 t={t}
               />
             ) : null}
@@ -136,17 +136,7 @@ export function SwapPanel({ tokenConfig }) {
   const [amount, setAmount] = useState("");
   const [isPending, setIsPending] = useState(false);
 
-  if (!mintclub) {
-    return (
-      <Card className="w-full max-w-sm">
-        <CardContent className="py-6 text-center text-sm text-muted-foreground">
-          {t("swap.unavailableLocal", "Swap is not available in local dev mode.")}
-        </CardContent>
-      </Card>
-    );
-  }
-
-  const token = mintclub.network(tokenConfig.network).token(tokenConfig.address);
+  const token = mintclub ? mintclub.network(tokenConfig.network).token(tokenConfig.address) : null;
 
   const parsedAmount = amount && Number(amount) > 0
     ? parseUnits(amount, 18)
@@ -161,7 +151,7 @@ export function SwapPanel({ tokenConfig }) {
       const [cost, royalty] = await fn;
       return { cost, royalty };
     },
-    enabled: !!parsedAmount,
+    enabled: !!mintclub && !!parsedAmount,
     placeholderData: (prev) => prev,
     staleTime: 5_000,
     retry: false,
@@ -174,7 +164,7 @@ export function SwapPanel({ tokenConfig }) {
       const [reserveAmount, royalty] = await token.getBuyEstimation(ONE_TOKEN);
       return { buyPrice: reserveAmount, royalty };
     },
-    enabled: !!tokenConfig.address,
+    enabled: !!mintclub && !!tokenConfig.address,
     staleTime: 10_000,
     retry: false,
   });
@@ -203,7 +193,7 @@ export function SwapPanel({ tokenConfig }) {
         currentSupply: detail.info.currentSupply,
       };
     },
-    enabled: !!tokenConfig.address,
+    enabled: !!mintclub && !!tokenConfig.address,
     staleTime: 10_000,
     retry: false,
   });
@@ -219,6 +209,20 @@ export function SwapPanel({ tokenConfig }) {
     args: [address],
     query: { enabled: !!address && !!tokenConfig.address, staleTime: 10_000 },
   });
+
+  // Track whether the estimation rows have already stagger-animated
+  const [hasStaggered, setHasStaggered] = useState(false);
+  if (!parsedAmount && hasStaggered) setHasStaggered(false);
+
+  if (!mintclub) {
+    return (
+      <Card className="w-full max-w-sm">
+        <CardContent className="py-6 text-center text-sm text-muted-foreground">
+          {t("swap.unavailableLocal", "Swap is not available in local dev mode.")}
+        </CardContent>
+      </Card>
+    );
+  }
 
   // Edge cases
   const supplyIsZero = currentSupply != null && currentSupply === 0n;
@@ -237,10 +241,6 @@ export function SwapPanel({ tokenConfig }) {
     && parsedAmount
     && buyPrice != null
     && (estimation.cost * ONE_TOKEN / parsedAmount) < buyPrice;
-
-  // Track whether the estimation rows have already stagger-animated
-  const hasStaggered = useRef(false);
-  if (!parsedAmount) hasStaggered.current = false;
 
   async function handleSubmit() {
     if (!amount || !address) return;
@@ -310,6 +310,7 @@ export function SwapPanel({ tokenConfig }) {
           estimationLoading={estimationLoading}
           tokenConfig={tokenConfig}
           hasStaggered={hasStaggered}
+          onStaggerComplete={() => setHasStaggered(true)}
           t={t}
         />
 
