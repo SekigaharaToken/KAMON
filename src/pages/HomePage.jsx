@@ -13,6 +13,7 @@ import { useAccount } from "wagmi";
 import { toast } from "sonner";
 import { useHouse } from "@/hooks/useHouse.js";
 import { burnHouseNFT, getSellPrice } from "@/hooks/useHouseNFT.js";
+import { isLocalDev } from "@/config/chains.js";
 import { HouseCarousel } from "@/components/house/HouseCarousel.jsx";
 import { BackSekiLink } from "@/components/layout/BackSekiLink.jsx";
 import { Button } from "@/components/ui/button.jsx";
@@ -50,11 +51,15 @@ function PostSelection() {
   const [refund, setRefund] = useState(null);
 
   async function handleOpenDialog() {
-    try {
-      const price = await getSellPrice(houseConfig.address);
-      setRefund(price != null ? formatUnits(price, 18) : "?");
-    } catch {
-      setRefund("?");
+    if (isLocalDev) {
+      setRefund("0");
+    } else {
+      try {
+        const price = await getSellPrice(houseConfig.address);
+        setRefund(price != null ? formatUnits(price, 18) : "?");
+      } catch {
+        setRefund("?");
+      }
     }
     setDialogOpen(true);
   }
@@ -62,6 +67,13 @@ function PostSelection() {
   async function handleAbdicate() {
     setAbdicating(true);
     try {
+      if (isLocalDev) {
+        // Skip NFT burn in local dev — just clear state
+        selectHouse(null);
+        toast.success(t("house.abdicateSuccess"));
+        setDialogOpen(false);
+        return;
+      }
       await burnHouseNFT(houseConfig.address, address);
       selectHouse(null);
       toast.success(t("house.abdicateSuccess"));
