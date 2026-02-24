@@ -29,5 +29,10 @@ export default defineConfig({
     css: false,
     pool: "vmThreads",
     include: ["src/**/*.{test,spec}.{js,jsx}", "scripts/**/*.{test,spec}.{js,jsx}"],
+    server: {
+      deps: {
+        inline: ["react-router"],
+      },
+    },
   },
 });
