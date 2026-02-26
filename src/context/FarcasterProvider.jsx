@@ -17,6 +17,19 @@ export const FarcasterProvider = ({ children }) => {
     useProfile();
   const { signOut } = useSignIn({});
   const [error, setError] = useState(null);
+  const [miniAppFid, setMiniAppFid] = useState(null);
+
+  // Resolve FID from MiniApp SDK context (Farcaster frames / mini-apps)
+  useEffect(() => {
+    import("@farcaster/miniapp-sdk").then((mod) => {
+      const sdk = mod.default || mod;
+      if (sdk.context && typeof sdk.context.then === "function") {
+        sdk.context.then((ctx) => {
+          if (ctx?.user?.fid) setMiniAppFid(ctx.user.fid);
+        }).catch(() => {});
+      }
+    }).catch(() => {});
+  }, []);
 
   // Restore profile from sessionStorage on mount
   const [storedProfile, setStoredProfile] = useState(() => {
@@ -56,7 +69,14 @@ export const FarcasterProvider = ({ children }) => {
 
   // Use auth-kit profile when live, fall back to stored profile
   const isAuthenticated = isAuthKitAuthenticated || storedProfile !== null;
-  const profile = (isAuthKitAuthenticated && authKitProfile) || storedProfile;
+  const baseProfile = (isAuthKitAuthenticated && authKitProfile) || storedProfile;
+
+  // Merge MiniApp FID into profile if auth-kit didn't provide one
+  const profile = useMemo(() => {
+    if (!baseProfile) return null;
+    if (baseProfile.fid || !miniAppFid) return baseProfile;
+    return { ...baseProfile, fid: miniAppFid };
+  }, [baseProfile, miniAppFid]);
 
   /**
    * Generate an alphanumeric nonce for SIWF.

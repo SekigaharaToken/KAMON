@@ -4,6 +4,7 @@ import {
   normalizeStaking,
   normalizeOnChat,
   computeWalletScore,
+  computeValidatedWalletScore,
   computeHouseScore,
   rankHouses,
 } from "@/lib/scoring.js";
@@ -105,6 +106,44 @@ describe("computeWalletScore", () => {
     });
     // 50*0.40 + 50*0.60 = 50
     expect(score).toBe(50);
+  });
+});
+
+describe("computeValidatedWalletScore", () => {
+  it("returns 0 when isMultiHolder is true", () => {
+    const score = computeValidatedWalletScore({
+      dojoStreak: 30,
+      stakePct: 100,
+      onChatPct: 100,
+      isMultiHolder: true,
+    });
+    expect(score).toBe(0);
+  });
+
+  it("delegates to computeWalletScore when isMultiHolder is false", () => {
+    const validated = computeValidatedWalletScore({
+      dojoStreak: 30,
+      stakePct: 100,
+      onChatPct: 100,
+      isMultiHolder: false,
+    });
+    const normal = computeWalletScore({
+      dojoStreak: 30,
+      stakePct: 100,
+      onChatPct: 100,
+    });
+    expect(validated).toBe(normal);
+    expect(validated).toBe(100);
+  });
+
+  it("uses fallback when onChatPct is null and not multi-holder", () => {
+    const score = computeValidatedWalletScore({
+      dojoStreak: 30,
+      stakePct: 100,
+      onChatPct: null,
+      isMultiHolder: false,
+    });
+    expect(score).toBe(100); // 100*0.40 + 100*0.60
   });
 });
 

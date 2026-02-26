@@ -55,7 +55,16 @@
     "abdicateDescription": "하우스 NFT를 본딩 커브에 매도하고 약 {{refund}} $SEKI를 받습니다. 이 하우스에 다시 가입하려면 현재 가격으로 새 NFT를 구매해야 합니다.",
     "abdicating": "탈퇴 중...",
     "abdicateSuccess": "가문을 떠났습니다.",
-    "abdicateFailed": "탈퇴에 실패했습니다. 다시 시도해주세요."
+    "abdicateFailed": "탈퇴에 실패했습니다. 다시 시도해주세요.",
+    "joining": "가입 중...",
+    "joinSuccess": "가문에 오신 것을 환영합니다!",
+    "joinFailed": "가입에 실패했습니다. 다시 시도해주세요.",
+    "attesting": "멤버십 등록 중...",
+    "attestFailed": "멤버십 등록에 실패했습니다. 대시보드에서 다시 시도할 수 있습니다.",
+    "retryAttest": "멤버십 등록",
+    "multiHouseWarning": "여러 가문의 NFT를 보유하고 있습니다. 포인트를 얻으려면 추가 NFT를 매도해주세요.",
+    "revoking": "멤버십 취소 중...",
+    "revokeFailed": "멤버십 기록 취소에 실패했습니다."
   },
   "staking": {
     "title": "스테이킹 풀",
@@ -166,6 +175,28 @@
     "description": "세키가하라 채널의 온체인 채팅. 메시지는 Base에 저장됩니다.",
     "loading": "OnChat 로딩 중...",
     "navLabel": "채팅"
+  },
+  "stepper": {
+    "joinTitle": "{{houseName}} 가입",
+    "abdicateTitle": "{{houseName}} 탈퇴",
+    "mintNFT": "하우스 NFT 민트",
+    "mintNFTDesc": "하우스 멤버십 토큰 구매",
+    "registerMembership": "멤버십 등록",
+    "registerDesc": "온체인 멤버십 증명 생성",
+    "burnNFT": "하우스 NFT 매도",
+    "burnNFTDesc": "본딩 커브에 매도 (약 {{refund}} $SEKI)",
+    "revokeMembership": "멤버십 취소",
+    "revokeDesc": "온체인 멤버십 기록 삭제",
+    "begin": "시작",
+    "confirm": "확인",
+    "confirmWallet": "지갑에서 확인...",
+    "processing": "처리 중...",
+    "done": "완료",
+    "retry": "재시도",
+    "skip": "건너뛰기",
+    "successJoin": "{{houseName}}에 오신 것을 환영합니다!",
+    "successAbdicate": "가문을 떠났습니다.",
+    "fidRequired": "가문에 가입하려면 Farcaster로 로그인하세요"
   },
   "footer": {
     "builtOn": "Base에서 구축",

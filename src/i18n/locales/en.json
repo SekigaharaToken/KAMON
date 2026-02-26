@@ -55,7 +55,16 @@
     "abdicateDescription": "You will sell your House NFT back to the bonding curve and receive ~{{refund}} $SEKI. To rejoin this house you will need to purchase a new NFT at the current price.",
     "abdicating": "Abdicating...",
     "abdicateSuccess": "You have left the House.",
-    "abdicateFailed": "Failed to abdicate. Try again."
+    "abdicateFailed": "Failed to abdicate. Try again.",
+    "joining": "Joining...",
+    "joinSuccess": "Welcome to the House!",
+    "joinFailed": "Failed to join. Try again.",
+    "attesting": "Registering membership...",
+    "attestFailed": "Membership registration failed. You can retry from your dashboard.",
+    "retryAttest": "Register Membership",
+    "multiHouseWarning": "You hold NFTs in multiple houses. Sell extras to earn points.",
+    "revoking": "Revoking membership...",
+    "revokeFailed": "Failed to revoke membership record."
   },
   "staking": {
     "title": "Staking Pool",
@@ -169,6 +178,28 @@
     "description": "On-chain chat in the Sekigahara channel. Messages are stored on Base.",
     "loading": "Loading OnChat...",
     "navLabel": "Chat"
+  },
+  "stepper": {
+    "joinTitle": "Join {{houseName}}",
+    "abdicateTitle": "Leave {{houseName}}",
+    "mintNFT": "Mint House NFT",
+    "mintNFTDesc": "Purchase your house membership token",
+    "registerMembership": "Register Membership",
+    "registerDesc": "Create on-chain membership attestation",
+    "burnNFT": "Sell House NFT",
+    "burnNFTDesc": "Sell back to bonding curve (~{{refund}} $SEKI)",
+    "revokeMembership": "Revoke Membership",
+    "revokeDesc": "Remove on-chain membership record",
+    "begin": "Begin",
+    "confirm": "Confirm",
+    "confirmWallet": "Confirm in wallet...",
+    "processing": "Processing...",
+    "done": "Done",
+    "retry": "Retry",
+    "skip": "Skip",
+    "successJoin": "Welcome to {{houseName}}!",
+    "successAbdicate": "You have left the house.",
+    "fidRequired": "Sign in with Farcaster to join a house"
   },
   "footer": {
     "builtOn": "Built on Base",

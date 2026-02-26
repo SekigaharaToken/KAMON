@@ -6,7 +6,7 @@
  *   supply   — Current NFT supply count
  *   price    — Current mint price string
  *   onJoin   — Callback when join button clicked, receives house.id
- *   isActive — Whether this card is the active carousel slide
+ *   isActive — Whether this card is the active carousel slide (default false)
  */
 
 import { useTranslation } from "react-i18next";
