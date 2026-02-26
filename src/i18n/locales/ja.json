@@ -80,7 +80,14 @@
     "unstake": "アンステーク",
     "claim": "報酬を請求",
     "pendingClaim": "{{amount}} $DOJOを請求",
-    "comingSoon": "ステーキングプールは近日公開。"
+    "comingSoon": "ステーキングプールは近日公開。",
+    "unavailable": "ローカル開発モードではステーキングは利用できません。",
+    "stakeSuccess": "トークンをステーキングしました。",
+    "stakeFailed": "ステーキングに失敗しました。再試行してください。",
+    "unstakeSuccess": "トークンをアンステーキングしました。",
+    "unstakeFailed": "アンステーキングに失敗しました。再試行してください。",
+    "claimSuccess": "報酬を請求しました！",
+    "claimFailed": "請求に失敗しました。再試行してください。"
   },
   "leaderboard": {
     "title": "リーダーボード",
