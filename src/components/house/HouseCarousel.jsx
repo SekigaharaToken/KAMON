@@ -14,7 +14,7 @@ import { HOUSE_LIST } from "@/config/houses.js";
 import { HouseCard } from "./HouseCard.jsx";
 import { fadeInUp, staggerDelay } from "@/lib/motion.js";
 
-export function HouseCarousel({ supplies = {}, prices = {}, onJoin, joining = false }) {
+export function HouseCarousel({ supplies = {}, prices = {}, onJoin }) {
   const { t } = useTranslation();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [emblaRef, emblaApi] = useEmblaCarousel({
@@ -79,7 +79,6 @@ export function HouseCarousel({ supplies = {}, prices = {}, onJoin, joining = fa
                   supply={supplies[house.id] ?? 0}
                   price={prices[house.id] ?? "—"}
                   onJoin={onJoin}
-                  joining={joining}
                   isActive={index === selectedIndex}
                 />
               </motion.div>

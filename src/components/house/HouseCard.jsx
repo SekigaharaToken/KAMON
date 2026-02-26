@@ -6,7 +6,7 @@
  *   supply   — Current NFT supply count
  *   price    — Current mint price string
  *   onJoin   — Callback when join button clicked, receives house.id
- *   isActive — Whether this card is the active carousel slide
+ *   isActive — Whether this card is the active carousel slide (default false)
  */
 
 import { useTranslation } from "react-i18next";
@@ -17,7 +17,7 @@ import { Progress } from "@/components/ui/progress.jsx";
 import { HOUSE_MAX_SUPPLY } from "@/config/houses.js";
 import { tapSpring } from "@/lib/motion.js";
 
-export function HouseCard({ house, supply, price, onJoin, joining = false, isActive = false }) {
+export function HouseCard({ house, supply, price, onJoin, isActive = false }) {
   const { t } = useTranslation();
 
   return (
@@ -60,9 +60,8 @@ export function HouseCard({ house, supply, price, onJoin, joining = false, isAct
             className="w-full"
             style={{ backgroundColor: house.colors.primary }}
             onClick={() => onJoin(house.id)}
-            disabled={joining}
           >
-            {joining ? t("house.joining") : t("house.join", { houseName: house.id })}
+            {t("house.join", { houseName: house.id })}
           </Button>
         </motion.div>
       </CardFooter>
