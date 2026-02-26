@@ -35,11 +35,14 @@ function getWalletClient() {
 }
 
 /**
- * Encode houseId as ABI-encoded uint8 for EAS attestation data.
- * Matches Solidity's abi.encode(uint8) — full 32-byte padded.
+ * Encode houseId + fid as ABI-encoded (uint8, uint256) for EAS attestation data.
+ * Matches Solidity's abi.encode(uint8, uint256) — HouseResolver V2 schema.
  */
-function encodeHouseId(houseId) {
-  return encodeAbiParameters([{ type: "uint8" }], [houseId]);
+function encodeMembershipData(houseId, fid) {
+  return encodeAbiParameters(
+    [{ type: "uint8" }, { type: "uint256" }],
+    [houseId, BigInt(fid)],
+  );
 }
 
 /**
@@ -102,17 +105,16 @@ export async function getMemberAttestationUID(walletAddress) {
 
 /**
  * Attest house membership via EAS. Creates an on-chain attestation
- * that the HouseResolver validates (checks NFT balance, single-house).
+ * that the HouseResolver validates (checks NFT balance, single-house, FID uniqueness).
  *
  * @param {number} houseId — 1-5 (honoo, mizu, mori, tsuchi, kaze)
  * @param {string} walletAddress — recipient wallet
+ * @param {number} fid — Farcaster user ID
  * @returns {Promise<string>} attestation UID (tx hash on success)
  */
-export async function attestHouse(houseId, walletAddress) {
+export async function attestHouse(houseId, walletAddress, fid) {
   if (isLocalDev) return ZERO_BYTES32;
-  if (!HOUSE_SCHEMA_UID || !EAS_ADDRESS) {
-    throw new Error("House membership not configured");
-  }
+  if (!HOUSE_SCHEMA_UID || !HOUSE_RESOLVER_ADDRESS) return ZERO_BYTES32;
 
   const walletClient = getWalletClient();
   const [account] = await walletClient.getAddresses();
@@ -129,7 +131,7 @@ export async function attestHouse(houseId, walletAddress) {
           expirationTime: 0n,
           revocable: true,
           refUID: ZERO_BYTES32,
-          data: encodeHouseId(houseId),
+          data: encodeMembershipData(houseId, fid),
           value: 0n,
         },
       },
@@ -152,9 +154,7 @@ export async function attestHouse(houseId, walletAddress) {
  */
 export async function revokeHouse(walletAddress) {
   if (isLocalDev) return ZERO_BYTES32;
-  if (!HOUSE_SCHEMA_UID || !EAS_ADDRESS) {
-    throw new Error("House membership not configured");
-  }
+  if (!HOUSE_SCHEMA_UID || !HOUSE_RESOLVER_ADDRESS) return ZERO_BYTES32;
 
   const uid = await getMemberAttestationUID(walletAddress);
   if (uid === ZERO_BYTES32) {
@@ -184,6 +184,25 @@ export async function revokeHouse(walletAddress) {
   await publicClient.waitForTransactionReceipt({ hash });
 
   return hash;
+}
+
+/**
+ * Get the wallet address registered for a given FID.
+ * @param {number} fid — Farcaster user ID
+ * @returns {Promise<string>} wallet address or zero address
+ */
+export async function getWalletByFid(fid) {
+  if (!fid) return "0x0000000000000000000000000000000000000000";
+  if (isLocalDev) return "0x0000000000000000000000000000000000000000";
+  if (!HOUSE_RESOLVER_ADDRESS) return "0x0000000000000000000000000000000000000000";
+
+  const client = getPublicClient();
+  return client.readContract({
+    address: HOUSE_RESOLVER_ADDRESS,
+    abi: houseResolverAbi,
+    functionName: "getWalletByFid",
+    args: [BigInt(fid)],
+  });
 }
 
 /**

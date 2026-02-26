@@ -179,6 +179,28 @@
     "loading": "Loading OnChat...",
     "navLabel": "Chat"
   },
+  "stepper": {
+    "joinTitle": "Join {{houseName}}",
+    "abdicateTitle": "Leave {{houseName}}",
+    "mintNFT": "Mint House NFT",
+    "mintNFTDesc": "Purchase your house membership token",
+    "registerMembership": "Register Membership",
+    "registerDesc": "Create on-chain membership attestation",
+    "burnNFT": "Sell House NFT",
+    "burnNFTDesc": "Sell back to bonding curve (~{{refund}} $SEKI)",
+    "revokeMembership": "Revoke Membership",
+    "revokeDesc": "Remove on-chain membership record",
+    "begin": "Begin",
+    "confirm": "Confirm",
+    "confirmWallet": "Confirm in wallet...",
+    "processing": "Processing...",
+    "done": "Done",
+    "retry": "Retry",
+    "skip": "Skip",
+    "successJoin": "Welcome to {{houseName}}!",
+    "successAbdicate": "You have left the house.",
+    "fidRequired": "Sign in with Farcaster to join a house"
+  },
   "footer": {
     "builtOn": "Built on Base",
     "poweredBy": "Powered by Sekigahara"

@@ -19,16 +19,19 @@ contract HouseResolver is SchemaResolver, Ownable {
     error NoNFTBalance(address wallet, uint8 houseId);
     error HouseTokenExists(uint8 houseId);
     error HouseTokenNotSet(uint8 houseId);
+    error FidAlreadyRegistered(uint256 fid, address existingWallet);
+    error InvalidFid(uint256 fid);
 
     // --- Storage ---
     mapping(address => uint8) public memberHouse;
     mapping(address => bytes32) public memberAttestationUID;
     mapping(uint8 => address) public houseTokens;
+    mapping(uint256 => address) public fidWallet;
     uint8 public houseCount;
 
     // --- Events ---
-    event HouseJoined(address indexed wallet, uint8 indexed houseId, bytes32 attestationUID);
-    event HouseLeft(address indexed wallet, uint8 indexed houseId, bytes32 attestationUID);
+    event HouseJoined(address indexed wallet, uint8 indexed houseId, uint256 fid, bytes32 attestationUID);
+    event HouseLeft(address indexed wallet, uint8 indexed houseId, uint256 fid, bytes32 attestationUID);
     event HouseTokenAdded(uint8 indexed houseId, address tokenAddress);
     event HouseTokenRemoved(uint8 indexed houseId, address previousAddress);
     event HouseTokenUpdated(uint8 indexed houseId, address previousAddress, address newAddress);
@@ -84,12 +87,23 @@ contract HouseResolver is SchemaResolver, Ownable {
         Attestation calldata attestation,
         uint256 /* value */
     ) internal override returns (bool) {
-        uint8 houseId = abi.decode(attestation.data, (uint8));
+        (uint8 houseId, uint256 fid) = abi.decode(attestation.data, (uint8, uint256));
         address wallet = attestation.recipient;
 
         // Validate houseId
         if (houseId == 0 || houseTokens[houseId] == address(0)) {
             revert InvalidHouseId(houseId);
+        }
+
+        // Validate FID
+        if (fid == 0) {
+            revert InvalidFid(fid);
+        }
+
+        // Reject if FID already registered to a different wallet
+        address existingWallet = fidWallet[fid];
+        if (existingWallet != address(0) && existingWallet != wallet) {
+            revert FidAlreadyRegistered(fid, existingWallet);
         }
 
         // Reject if wallet already has a house (must revoke first)
@@ -106,8 +120,9 @@ contract HouseResolver is SchemaResolver, Ownable {
         // Store membership
         memberHouse[wallet] = houseId;
         memberAttestationUID[wallet] = attestation.uid;
+        fidWallet[fid] = wallet;
 
-        emit HouseJoined(wallet, houseId, attestation.uid);
+        emit HouseJoined(wallet, houseId, fid, attestation.uid);
         return true;
     }
 
@@ -116,13 +131,18 @@ contract HouseResolver is SchemaResolver, Ownable {
         Attestation calldata attestation,
         uint256 /* value */
     ) internal override returns (bool) {
-        uint8 houseId = abi.decode(attestation.data, (uint8));
+        (uint8 houseId, uint256 fid) = abi.decode(attestation.data, (uint8, uint256));
         address wallet = attestation.recipient;
 
         delete memberHouse[wallet];
         delete memberAttestationUID[wallet];
 
-        emit HouseLeft(wallet, houseId, attestation.uid);
+        // Clear FID mapping only if it still points to this wallet
+        if (fidWallet[fid] == wallet) {
+            delete fidWallet[fid];
+        }
+
+        emit HouseLeft(wallet, houseId, fid, attestation.uid);
         return true;
     }
 
@@ -162,5 +182,10 @@ contract HouseResolver is SchemaResolver, Ownable {
     /// @notice Get the ERC-1155 token address for a given houseId.
     function getHouseToken(uint8 houseId) external view returns (address) {
         return houseTokens[houseId];
+    }
+
+    /// @notice Get the wallet address registered for a given FID. Returns zero if none.
+    function getWalletByFid(uint256 fid) external view returns (address) {
+        return fidWallet[fid];
     }
 }

@@ -8,79 +8,67 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
-import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
 import { toast } from "sonner";
 import { useHouse } from "@/hooks/useHouse.js";
-import { burnHouseNFT, getHouseBalance, getSellPrice, mintHouseNFT } from "@/hooks/useHouseNFT.js";
-import { attestHouse, revokeHouse, retryAttest, getAttestedHouse } from "@/hooks/useHouseMembership.js";
+import { useFarcaster } from "@/hooks/useFarcaster.js";
+import { retryAttest, getAttestedHouse } from "@/hooks/useHouseMembership.js";
 import { isLocalDev } from "@/config/chains.js";
 import { HOUSES } from "@/config/houses.js";
-import { useLoginModal } from "@/hooks/useLoginModal.js";
 import { HouseCarousel } from "@/components/house/HouseCarousel.jsx";
+import { JoinStepper } from "@/components/house/JoinStepper.jsx";
+import { AbdicateStepper } from "@/components/house/AbdicateStepper.jsx";
 import { BackSekiLink } from "@/components/layout/BackSekiLink.jsx";
 import { Button } from "@/components/ui/button.jsx";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog.jsx";
 import { fadeInUp, staggerDelay } from "@/lib/motion.js";
 
 function PreSelection() {
   const { t } = useTranslation();
   const { selectHouse } = useHouse();
-  const { address, isConnected } = useAccount();
-  const { openLoginModal } = useLoginModal();
-  const [joining, setJoining] = useState(false);
+  const { isConnected } = useAccount();
+  const { profile } = useFarcaster();
+  const fid = profile?.fid;
+  const [joinDialog, setJoinDialog] = useState({ open: false, house: null });
 
-  async function handleJoin(houseId) {
-    if (!isConnected) {
-      openLoginModal();
+  function handleJoin(houseId) {
+    const house = HOUSES[houseId];
+    if (!house) return;
+
+    // On local dev or when addresses aren't configured, just select immediately
+    if (isLocalDev || !house.address) {
+      selectHouse(houseId);
       return;
     }
 
-    const house = HOUSES[houseId];
-    if (!house?.address) return;
-
-    setJoining(true);
-    try {
-      if (isLocalDev) {
-        selectHouse(houseId);
-        toast.success(t("house.joinSuccess"));
-        return;
-      }
-      // Step 1: Mint NFT (wallet popup #1)
-      await mintHouseNFT(house.address, address);
-
-      // Step 2: Attest membership (wallet popup #2)
-      try {
-        toast.loading(t("house.attesting"), { id: "attest" });
-        await attestHouse(house.numericId, address);
-        toast.dismiss("attest");
-      } catch {
-        toast.dismiss("attest");
-        toast.warning(t("house.attestFailed"));
-        // NFT minted but attest failed — user can retry from dashboard
-      }
-
-      // Step 3: Update UI state
-      selectHouse(houseId);
-      toast.success(t("house.joinSuccess"));
-    } catch {
-      toast.error(t("house.joinFailed"));
-    } finally {
-      setJoining(false);
+    // Require wallet for on-chain mint
+    if (!isConnected) {
+      toast.error(t("errors.walletNotConnected"));
+      return;
     }
+
+    // Require Farcaster sign-in for FID-gated attestation
+    if (!fid) {
+      toast.error(t("stepper.fidRequired"));
+      return;
+    }
+
+    setJoinDialog({ open: true, house });
   }
 
   return (
     <div className="flex flex-col items-center gap-6 py-8">
-      <HouseCarousel onJoin={handleJoin} joining={joining} />
+      <HouseCarousel onJoin={handleJoin} />
+      {joinDialog.house && (
+        <JoinStepper
+          house={joinDialog.house}
+          open={joinDialog.open}
+          onOpenChange={(open) => setJoinDialog((prev) => ({ ...prev, open }))}
+          onComplete={(id) => {
+            selectHouse(id);
+            setJoinDialog({ open: false, house: null });
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -89,11 +77,9 @@ function PostSelection() {
   const { t } = useTranslation();
   const { houseConfig, selectHouse } = useHouse();
   const { address } = useAccount();
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [abdicating, setAbdicating] = useState(false);
+  const [abdicateOpen, setAbdicateOpen] = useState(false);
   const [attesting, setAttesting] = useState(false);
   const [needsAttest, setNeedsAttest] = useState(false);
-  const [refund, setRefund] = useState(null);
 
   // Check if user needs attestation (has house but no on-chain record)
   useState(() => {
@@ -117,64 +103,6 @@ function PostSelection() {
       toast.error(t("house.attestFailed"));
     } finally {
       setAttesting(false);
-    }
-  }
-
-  async function handleOpenDialog() {
-    if (isLocalDev) {
-      setRefund("0");
-    } else {
-      try {
-        const price = await getSellPrice(houseConfig.address);
-        setRefund(price != null ? formatUnits(price, 18) : "?");
-      } catch {
-        setRefund("?");
-      }
-    }
-    setDialogOpen(true);
-  }
-
-  async function handleAbdicate() {
-    setAbdicating(true);
-    try {
-      if (isLocalDev) {
-        selectHouse(null);
-        toast.success(t("house.abdicateSuccess"));
-        setDialogOpen(false);
-        return;
-      }
-
-      // Check NFT balance first — if 0, just clear frontend state
-      const balance = await getHouseBalance(houseConfig.address, address);
-      if (balance === 0n) {
-        selectHouse(null);
-        toast.success(t("house.abdicateSuccess"));
-        setDialogOpen(false);
-        return;
-      }
-
-      // Step 1: Burn NFT (wallet popup #1)
-      await burnHouseNFT(houseConfig.address, address);
-
-      // Step 2: Revoke attestation (wallet popup #2)
-      try {
-        toast.loading(t("house.revoking"), { id: "revoke" });
-        await revokeHouse(address);
-        toast.dismiss("revoke");
-      } catch {
-        toast.dismiss("revoke");
-        toast.warning(t("house.revokeFailed"));
-        // Stale attestation is harmless — NFT balance is 0
-      }
-
-      // Step 3: Clear UI state
-      selectHouse(null);
-      toast.success(t("house.abdicateSuccess"));
-      setDialogOpen(false);
-    } catch {
-      toast.error(t("house.abdicateFailed"));
-    } finally {
-      setAbdicating(false);
     }
   }
 
@@ -219,41 +147,20 @@ function PostSelection() {
         {...fadeInUp}
         transition={{ ...fadeInUp.transition, ...staggerDelay(needsAttest ? 4 : 3) }}
       >
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button variant="destructive" size="sm" onClick={handleOpenDialog}>
-              {t("house.abdicate")}
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>
-                {t("house.abdicateConfirm", { houseName })}
-              </DialogTitle>
-              <DialogDescription>
-                {t("house.abdicateDescription", { refund: refund ?? "..." })}
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setDialogOpen(false)}
-                disabled={abdicating}
-              >
-                {t("auth.cancel")}
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={handleAbdicate}
-                disabled={abdicating}
-              >
-                {abdicating ? t("house.abdicating") : t("house.abdicate")}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <Button variant="destructive" size="sm" onClick={() => setAbdicateOpen(true)}>
+          {t("house.abdicate")}
+        </Button>
         <BackSekiLink />
       </motion.div>
+      <AbdicateStepper
+        houseConfig={houseConfig}
+        open={abdicateOpen}
+        onOpenChange={setAbdicateOpen}
+        onComplete={() => {
+          selectHouse(null);
+          toast.success(t("house.abdicateSuccess"));
+        }}
+      />
     </div>
   );
 }

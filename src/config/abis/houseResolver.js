@@ -27,4 +27,11 @@ export const houseResolverAbi = [
     inputs: [{ name: "houseId", type: "uint8" }],
     outputs: [{ name: "", type: "address" }],
   },
+  {
+    name: "getWalletByFid",
+    type: "function",
+    stateMutability: "view",
+    inputs: [{ name: "fid", type: "uint256" }],
+    outputs: [{ name: "", type: "address" }],
+  },
 ];

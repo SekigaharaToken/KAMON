@@ -176,6 +176,28 @@
     "loading": "OnChat 로딩 중...",
     "navLabel": "채팅"
   },
+  "stepper": {
+    "joinTitle": "{{houseName}} 가입",
+    "abdicateTitle": "{{houseName}} 탈퇴",
+    "mintNFT": "하우스 NFT 민트",
+    "mintNFTDesc": "하우스 멤버십 토큰 구매",
+    "registerMembership": "멤버십 등록",
+    "registerDesc": "온체인 멤버십 증명 생성",
+    "burnNFT": "하우스 NFT 매도",
+    "burnNFTDesc": "본딩 커브에 매도 (약 {{refund}} $SEKI)",
+    "revokeMembership": "멤버십 취소",
+    "revokeDesc": "온체인 멤버십 기록 삭제",
+    "begin": "시작",
+    "confirm": "확인",
+    "confirmWallet": "지갑에서 확인...",
+    "processing": "처리 중...",
+    "done": "완료",
+    "retry": "재시도",
+    "skip": "건너뛰기",
+    "successJoin": "{{houseName}}에 오신 것을 환영합니다!",
+    "successAbdicate": "가문을 떠났습니다.",
+    "fidRequired": "가문에 가입하려면 Farcaster로 로그인하세요"
+  },
   "footer": {
     "builtOn": "Base에서 구축",
     "poweredBy": "Sekigahara 제공"

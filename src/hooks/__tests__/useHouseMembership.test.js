@@ -28,9 +28,12 @@ vi.mock("viem", () => ({
   }),
   http: () => ({}),
   custom: () => ({}),
-  encodeAbiParameters: vi.fn((types, values) =>
-    `0x${values[0].toString(16).padStart(64, "0")}`
-  ),
+  encodeAbiParameters: vi.fn((types, values) => {
+    if (values.length === 2) {
+      return `0x${values[0].toString(16).padStart(64, "0")}${BigInt(values[1]).toString(16).padStart(64, "0")}`;
+    }
+    return `0x${values[0].toString(16).padStart(64, "0")}`;
+  }),
 }));
 
 // Provide window.ethereum for wallet client creation
@@ -104,8 +107,8 @@ describe("useHouseMembership", () => {
   });
 
   describe("attestHouse", () => {
-    it("calls EAS.attest with encoded houseId", async () => {
-      await mod.attestHouse(1, "0xAlice");
+    it("calls EAS.attest with encoded houseId and fid", async () => {
+      await mod.attestHouse(1, "0xAlice", 12345);
 
       expect(mockWriteContract).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -122,10 +125,17 @@ describe("useHouseMembership", () => {
       );
       expect(callArgs.args[0].data.recipient).toBe("0xAlice");
       expect(callArgs.args[0].data.revocable).toBe(true);
+
+      // Verify encoded data includes both houseId and fid
+      const { encodeAbiParameters } = await import("viem");
+      expect(encodeAbiParameters).toHaveBeenCalledWith(
+        [{ type: "uint8" }, { type: "uint256" }],
+        [1, BigInt(12345)],
+      );
     });
 
     it("waits for transaction receipt", async () => {
-      await mod.attestHouse(1, "0xAlice");
+      await mod.attestHouse(1, "0xAlice", 12345);
       expect(mockWaitForTransactionReceipt).toHaveBeenCalledWith({
         hash: "0xtxhash",
       });
@@ -166,6 +176,26 @@ describe("useHouseMembership", () => {
       await expect(mod.revokeHouse("0xAlice")).rejects.toThrow(
         "No attestation to revoke",
       );
+    });
+  });
+
+  describe("getWalletByFid", () => {
+    it("returns wallet address from resolver", async () => {
+      mockReadContract.mockResolvedValue("0xAlice");
+      const result = await mod.getWalletByFid(12345);
+      expect(result).toBe("0xAlice");
+      expect(mockReadContract).toHaveBeenCalledWith(
+        expect.objectContaining({
+          functionName: "getWalletByFid",
+          args: [BigInt(12345)],
+        }),
+      );
+    });
+
+    it("returns zero address for null fid", async () => {
+      const result = await mod.getWalletByFid(null);
+      expect(result).toBe("0x0000000000000000000000000000000000000000");
+      expect(mockReadContract).not.toHaveBeenCalled();
     });
   });
 
