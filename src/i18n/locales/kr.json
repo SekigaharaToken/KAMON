@@ -80,7 +80,14 @@
     "unstake": "언스테이크",
     "claim": "보상 청구",
     "pendingClaim": "{{amount}} $DOJO 청구",
-    "comingSoon": "스테이킹 풀 곧 출시."
+    "comingSoon": "스테이킹 풀 곧 출시.",
+    "unavailable": "로컬 개발 모드에서는 스테이킹을 사용할 수 없습니다.",
+    "stakeSuccess": "토큰이 스테이킹되었습니다.",
+    "stakeFailed": "스테이킹에 실패했습니다. 다시 시도해주세요.",
+    "unstakeSuccess": "토큰이 언스테이킹되었습니다.",
+    "unstakeFailed": "언스테이킹에 실패했습니다. 다시 시도해주세요.",
+    "claimSuccess": "보상이 청구되었습니다!",
+    "claimFailed": "청구에 실패했습니다. 다시 시도해주세요."
   },
   "leaderboard": {
     "title": "리더보드",

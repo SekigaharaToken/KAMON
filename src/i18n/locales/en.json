@@ -80,7 +80,14 @@
     "unstake": "Unstake",
     "claim": "Claim Rewards",
     "pendingClaim": "Claim {{amount}} $DOJO",
-    "comingSoon": "Staking pool coming soon."
+    "comingSoon": "Staking pool coming soon.",
+    "unavailable": "Staking is not available in local development mode.",
+    "stakeSuccess": "Tokens staked successfully.",
+    "stakeFailed": "Staking failed. Try again.",
+    "unstakeSuccess": "Tokens unstaked successfully.",
+    "unstakeFailed": "Unstaking failed. Try again.",
+    "claimSuccess": "Rewards claimed!",
+    "claimFailed": "Claim failed. Try again."
   },
   "leaderboard": {
     "title": "Leaderboard",
