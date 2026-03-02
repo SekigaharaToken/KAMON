@@ -9,18 +9,71 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
 import { useAccount } from "wagmi";
+import { useQueries } from "@tanstack/react-query";
+import { formatUnits } from "viem";
 import { toast } from "sonner";
 import { useHouse } from "@/hooks/useHouse.js";
 import { useFarcaster } from "@/hooks/useFarcaster.js";
 import { retryAttest, getAttestedHouse } from "@/hooks/useHouseMembership.js";
+import { getBuyPrice, getHouseSupply } from "@/hooks/useHouseNFT.js";
 import { isLocalDev } from "@/config/chains.js";
-import { HOUSES } from "@/config/houses.js";
+import { HOUSES, HOUSE_LIST } from "@/config/houses.js";
+import { mintclub } from "@/lib/mintclub.js";
 import { HouseCarousel } from "@/components/house/HouseCarousel.jsx";
 import { JoinStepper } from "@/components/house/JoinStepper.jsx";
 import { AbdicateStepper } from "@/components/house/AbdicateStepper.jsx";
 import { BackSekiLink } from "@/components/layout/BackSekiLink.jsx";
 import { Button } from "@/components/ui/button.jsx";
 import { fadeInUp, staggerDelay } from "@/lib/motion.js";
+
+/**
+ * Fetch supply and price for all 5 houses via useQueries.
+ * Returns { supplies, prices } objects keyed by house id.
+ * Falls back to empty objects when mintclub SDK is unavailable (local dev).
+ */
+function useHouseCarouselData() {
+  const sdkAvailable = !!mintclub;
+
+  const supplyQueries = useQueries({
+    queries: HOUSE_LIST.map((house) => ({
+      queryKey: ["houseSupply", house.id],
+      queryFn: () => getHouseSupply(house.address),
+      enabled: sdkAvailable && !!house.address,
+      staleTime: 30_000,
+    })),
+  });
+
+  const priceQueries = useQueries({
+    queries: HOUSE_LIST.map((house) => ({
+      queryKey: ["housePrice", house.id],
+      queryFn: () => getBuyPrice(house.address),
+      enabled: sdkAvailable && !!house.address,
+      staleTime: 30_000,
+    })),
+  });
+
+  if (!sdkAvailable) {
+    return { supplies: {}, prices: {} };
+  }
+
+  const supplies = {};
+  const prices = {};
+
+  HOUSE_LIST.forEach((house, index) => {
+    const supplyData = supplyQueries[index]?.data;
+    const priceData = priceQueries[index]?.data;
+
+    if (supplyData != null) {
+      supplies[house.id] = supplyData.toString();
+    }
+
+    if (priceData != null) {
+      prices[house.id] = formatUnits(priceData, 18);
+    }
+  });
+
+  return { supplies, prices };
+}
 
 function PreSelection() {
   const { t } = useTranslation();
@@ -29,6 +82,8 @@ function PreSelection() {
   const { profile } = useFarcaster();
   const fid = profile?.fid;
   const [joinDialog, setJoinDialog] = useState({ open: false, house: null });
+
+  const { supplies, prices } = useHouseCarouselData();
 
   function handleJoin(houseId) {
     const house = HOUSES[houseId];
@@ -57,7 +112,7 @@ function PreSelection() {
 
   return (
     <div className="flex flex-col items-center gap-6 py-8">
-      <HouseCarousel onJoin={handleJoin} />
+      <HouseCarousel supplies={supplies} prices={prices} onJoin={handleJoin} />
       {joinDialog.house && (
         <JoinStepper
           house={joinDialog.house}
