@@ -87,7 +87,10 @@
     "unstakeSuccess": "토큰이 언스테이킹되었습니다.",
     "unstakeFailed": "언스테이킹에 실패했습니다. 다시 시도해주세요.",
     "claimSuccess": "보상이 청구되었습니다!",
-    "claimFailed": "청구에 실패했습니다. 다시 시도해주세요."
+    "claimFailed": "청구에 실패했습니다. 다시 시도해주세요.",
+    "badgeProgress": "스테이킹 배지: {{threshold}}주 중 {{weeks}}주",
+    "badgeEarned": "스테이킹 배지 획득!",
+    "badgeDescription": "{{threshold}}주 연속 스테이킹으로 배지를 획득하세요."
   },
   "leaderboard": {
     "title": "리더보드",
