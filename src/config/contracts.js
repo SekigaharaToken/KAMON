@@ -143,3 +143,7 @@ export const ONCHAT_ADDRESS = getEnv("VITE_ONCHAT_ADDRESS", "0x898D291C2160A9CB1
 
 // Operator wallet address for admin actions (lowercase for comparison)
 export const OPERATOR_ADDRESS = getEnv("VITE_OPERATOR_ADDRESS", "").toLowerCase();
+
+// MerkleDistributor contract for season-end airdrops
+export const MERKLE_DISTRIBUTOR_ADDRESS =
+  getEnv("VITE_MERKLE_DISTRIBUTOR_ADDRESS", "").toLowerCase();
