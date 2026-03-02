@@ -93,6 +93,7 @@
     "title": "리더보드",
     "currentSeason": "시즌 {{seasonId}}",
     "previousWinner": "이전 시즌 우승자",
+    "previousScore": "점수: {{score}}",
     "rank": "순위",
     "house": "가문",
     "members": "멤버",

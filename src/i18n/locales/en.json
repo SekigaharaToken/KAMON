@@ -93,6 +93,7 @@
     "title": "Leaderboard",
     "currentSeason": "Season {{seasonId}}",
     "previousWinner": "Previous Season Winner",
+    "previousScore": "Score: {{score}}",
     "rank": "Rank",
     "house": "House",
     "members": "Members",
