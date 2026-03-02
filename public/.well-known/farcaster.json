@@ -1,0 +1,23 @@
+{
+  "miniapp": {
+    "version": "1",
+    "name": "KAMON",
+    "iconUrl": "https://seki-kamon.vercel.app/icon.png",
+    "homeUrl": "https://seki-kamon.vercel.app",
+    "imageUrl": "https://seki-kamon.vercel.app/og-image.png",
+    "splashImageUrl": "https://seki-kamon.vercel.app/splash.png",
+    "splashBackgroundColor": "#000000",
+    "buttonTitle": "Open KAMON",
+    "subtitle": "House identity & competitive staking",
+    "description": "Choose your House, stake $SEKI, earn $DOJO rewards, and compete for seasonal dominance across 5 elemental clans.",
+    "primaryCategory": "games",
+    "tags": ["defi", "staking", "nft", "leaderboard", "base"],
+    "requiredChains": ["eip155:8453"],
+    "requiredCapabilities": [
+      "wallet.getEthereumProvider"
+    ],
+    "ogTitle": "KAMON — Sekigahara",
+    "ogDescription": "Choose your House. Stake your claim. Compete for seasonal dominance.",
+    "ogImageUrl": "https://seki-kamon.vercel.app/og-image.png"
+  }
+}
