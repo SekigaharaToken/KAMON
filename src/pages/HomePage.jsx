@@ -9,12 +9,12 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
 import { useAccount } from "wagmi";
-import { useQueries } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { formatUnits } from "viem";
 import { toast } from "sonner";
 import { useHouse } from "@/hooks/useHouse.js";
 import { useFarcaster } from "@/hooks/useFarcaster.js";
-import { retryAttest, getAttestedHouse } from "@/hooks/useHouseMembership.js";
+import { retryAttest, getAttestedHouse, getIsMultiHouseHolder } from "@/hooks/useHouseMembership.js";
 import { getBuyPrice, getHouseSupply } from "@/hooks/useHouseNFT.js";
 import { isLocalDev } from "@/config/chains.js";
 import { HOUSES, HOUSE_LIST } from "@/config/houses.js";
@@ -24,6 +24,7 @@ import { JoinStepper } from "@/components/house/JoinStepper.jsx";
 import { AbdicateStepper } from "@/components/house/AbdicateStepper.jsx";
 import { BackSekiLink } from "@/components/layout/BackSekiLink.jsx";
 import { Button } from "@/components/ui/button.jsx";
+import { Alert, AlertDescription } from "@/components/ui/alert.jsx";
 import { fadeInUp, staggerDelay } from "@/lib/motion.js";
 
 /**
@@ -133,8 +134,17 @@ function PostSelection() {
   const { houseConfig, selectHouse } = useHouse();
   const { address } = useAccount();
   const [abdicateOpen, setAbdicateOpen] = useState(false);
+  const [switchMode, setSwitchMode] = useState(false);
   const [attesting, setAttesting] = useState(false);
   const [needsAttest, setNeedsAttest] = useState(false);
+
+  // Check if user holds NFTs in multiple houses
+  const { data: isMultiHouseHolder } = useQuery({
+    queryKey: ["multiHouseHolder", address],
+    queryFn: () => getIsMultiHouseHolder(address),
+    enabled: !isLocalDev && !!address,
+    staleTime: 30_000,
+  });
 
   // Check if user needs attestation (has house but no on-chain record)
   useState(() => {
@@ -161,6 +171,11 @@ function PostSelection() {
     }
   }
 
+  function handleSwitchHouse() {
+    setSwitchMode(true);
+    setAbdicateOpen(true);
+  }
+
   const houseName = t(houseConfig.nameKey);
 
   return (
@@ -182,10 +197,21 @@ function PostSelection() {
       >
         {t("house.myHouse")}
       </motion.p>
+      {isMultiHouseHolder && (
+        <motion.div
+          className="w-full max-w-sm"
+          {...fadeInUp}
+          transition={{ ...fadeInUp.transition, ...staggerDelay(3) }}
+        >
+          <Alert>
+            <AlertDescription>{t("house.multiHouseWarning")}</AlertDescription>
+          </Alert>
+        </motion.div>
+      )}
       {needsAttest && (
         <motion.div
           {...fadeInUp}
-          transition={{ ...fadeInUp.transition, ...staggerDelay(3) }}
+          transition={{ ...fadeInUp.transition, ...staggerDelay(isMultiHouseHolder ? 4 : 3) }}
         >
           <Button
             variant="outline"
@@ -200,20 +226,36 @@ function PostSelection() {
       <motion.div
         className="flex items-center gap-3"
         {...fadeInUp}
-        transition={{ ...fadeInUp.transition, ...staggerDelay(needsAttest ? 4 : 3) }}
+        transition={{
+          ...fadeInUp.transition,
+          ...staggerDelay(
+            (isMultiHouseHolder ? 1 : 0) + (needsAttest ? 1 : 0) + 3,
+          ),
+        }}
       >
         <Button variant="destructive" size="sm" onClick={() => setAbdicateOpen(true)}>
           {t("house.abdicate")}
+        </Button>
+        <Button variant="outline" size="sm" onClick={handleSwitchHouse}>
+          {t("house.switchHouse")}
         </Button>
         <BackSekiLink />
       </motion.div>
       <AbdicateStepper
         houseConfig={houseConfig}
         open={abdicateOpen}
-        onOpenChange={setAbdicateOpen}
+        onOpenChange={(open) => {
+          setAbdicateOpen(open);
+          if (!open) setSwitchMode(false);
+        }}
         onComplete={() => {
-          selectHouse(null);
-          toast.success(t("house.abdicateSuccess"));
+          if (switchMode) {
+            selectHouse(null);
+          } else {
+            selectHouse(null);
+            toast.success(t("house.abdicateSuccess"));
+          }
+          setSwitchMode(false);
         }}
       />
     </div>
