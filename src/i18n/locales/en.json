@@ -87,7 +87,10 @@
     "unstakeSuccess": "Tokens unstaked successfully.",
     "unstakeFailed": "Unstaking failed. Try again.",
     "claimSuccess": "Rewards claimed!",
-    "claimFailed": "Claim failed. Try again."
+    "claimFailed": "Claim failed. Try again.",
+    "badgeProgress": "Staking Badge: Week {{weeks}} of {{threshold}}",
+    "badgeEarned": "Staking Badge Earned!",
+    "badgeDescription": "Stake continuously for {{threshold}} weeks to earn a badge."
   },
   "leaderboard": {
     "title": "Leaderboard",
