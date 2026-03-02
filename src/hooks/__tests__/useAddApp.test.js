@@ -7,11 +7,12 @@ const mockUseMiniAppContext = vi.fn(() => ({
   isAppAdded: false,
 }));
 
-vi.mock("@farcaster/miniapp-sdk", () => ({
-  default: {
+vi.mock("@farcaster/miniapp-sdk", () => {
+  const mock = {
     actions: { addFrame: (...args) => mockAddFrame(...args) },
-  },
-}));
+  };
+  return { default: mock, sdk: mock };
+});
 
 vi.mock("@/hooks/useMiniAppContext.js", () => ({
   useMiniAppContext: (...args) => mockUseMiniAppContext(...args),

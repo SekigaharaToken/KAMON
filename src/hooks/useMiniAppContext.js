@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import sdk from "@farcaster/miniapp-sdk";
+import { sdk } from "@farcaster/miniapp-sdk";
 
 /**
  * Wraps sdk.context in a React hook. Resolves the promise once
