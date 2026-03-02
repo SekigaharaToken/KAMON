@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useConnect, useAccount } from "wagmi";
-import sdk from "@farcaster/miniapp-sdk";
+import { sdk } from "@farcaster/miniapp-sdk";
 import { useMiniAppContext } from "@/hooks/useMiniAppContext.js";
 
 /**

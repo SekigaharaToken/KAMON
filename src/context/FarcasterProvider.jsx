@@ -21,10 +21,9 @@ export const FarcasterProvider = ({ children }) => {
 
   // Resolve FID from MiniApp SDK context (Farcaster frames / mini-apps)
   useEffect(() => {
-    import("@farcaster/miniapp-sdk").then((mod) => {
-      const sdk = mod.default || mod;
-      if (sdk.context && typeof sdk.context.then === "function") {
-        sdk.context.then((ctx) => {
+    import("@farcaster/miniapp-sdk").then(({ sdk: miniSdk }) => {
+      if (miniSdk.context && typeof miniSdk.context.then === "function") {
+        miniSdk.context.then((ctx) => {
           if (ctx?.user?.fid) setMiniAppFid(ctx.user.fid);
         }).catch(() => {});
       }

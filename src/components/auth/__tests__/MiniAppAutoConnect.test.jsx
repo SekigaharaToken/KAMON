@@ -15,14 +15,15 @@ vi.mock("wagmi", () => ({
 // Mock Farcaster SDK
 const mockContextPromise = vi.fn();
 const mockReady = vi.fn();
-vi.mock("@farcaster/miniapp-sdk", () => ({
-  default: {
+vi.mock("@farcaster/miniapp-sdk", () => {
+  const mock = {
     get context() {
       return mockContextPromise();
     },
     actions: { ready: mockReady },
-  },
-}));
+  };
+  return { default: mock, sdk: mock };
+});
 
 const { MiniAppAutoConnect } = await import(
   "@/components/auth/MiniAppAutoConnect.jsx"

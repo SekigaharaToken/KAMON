@@ -1,4 +1,4 @@
-import sdk from "@farcaster/miniapp-sdk";
+import { sdk } from "@farcaster/miniapp-sdk";
 import { useMiniAppContext } from "@/hooks/useMiniAppContext.js";
 
 export function MiniAppLink({ href, children, ...props }) {
