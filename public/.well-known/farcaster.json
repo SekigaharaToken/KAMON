@@ -1,4 +1,9 @@
 {
+  "accountAssociation": {
+    "header": "eyJmaWQiOjEzODM3LCJ0eXBlIjoiYXV0aCIsImtleSI6IjB4NDhGRkNiQ2FCYjBCMTBCMkExODVEMzk4RUU2N2M0ODA4MGI5RDdlNyJ9",
+    "payload": "eyJkb21haW4iOiJzZWtpLWthbW9uLnZlcmNlbC5hcHAifQ",
+    "signature": "zox55O4qQnG4mvMMml82Uz6lbnuhn1XBvuSRSXGhfJlDpov+vhx6/9BC6PzjpTQh8dN6bKFaMQqIFSllrf/+qxw="
+  },
   "miniapp": {
     "version": "1",
     "name": "KAMON",
