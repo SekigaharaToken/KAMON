@@ -140,3 +140,6 @@ export const HOUSE_SCHEMA_UID =
 
 // OnChat contract (env-aware; falls back to Base mainnet)
 export const ONCHAT_ADDRESS = getEnv("VITE_ONCHAT_ADDRESS", "0x898D291C2160A9CB110398e9dF3693b7f2c4af2D");
+
+// Operator wallet address for admin actions (lowercase for comparison)
+export const OPERATOR_ADDRESS = getEnv("VITE_OPERATOR_ADDRESS", "").toLowerCase();
