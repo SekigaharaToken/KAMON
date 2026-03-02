@@ -65,21 +65,16 @@ export const MINT_CLUB_NETWORK =
   chainId === 84532 ? "basesepolia" :
   "base";
 
-// Placeholder token for swap UI until bonding curve is live
-// CATTBUTT on Base mainnet: https://mint.club/token/base/CATTBUTT
-const PLACEHOLDER_SWAP_TOKEN = "0xC5aAEFD024Aa95C59712A931b3295e237fFD3f81";
-const PLACEHOLDER_SWAP_NETWORK = "base";
-
-// Use real app token on mainnet; on testnet (or when unconfigured) use placeholder
+// Swap token addresses — null when not configured (no placeholder fallback)
 const hasMainnetToken = APP_TOKEN_ADDRESS && chainId === 8453;
-export const SWAP_TOKEN_ADDRESS = hasMainnetToken ? APP_TOKEN_ADDRESS : PLACEHOLDER_SWAP_TOKEN;
-export const SWAP_NETWORK = hasMainnetToken ? MINT_CLUB_NETWORK : PLACEHOLDER_SWAP_NETWORK;
+export const SWAP_TOKEN_ADDRESS = hasMainnetToken ? APP_TOKEN_ADDRESS : null;
+export const SWAP_NETWORK = hasMainnetToken ? MINT_CLUB_NETWORK : null;
 
-// Token configs for the swap UI tabs
 const hasMainnetSeki = SEKI_TOKEN_ADDRESS && chainId === 8453;
-export const SEKI_SWAP_TOKEN_ADDRESS = hasMainnetSeki ? SEKI_TOKEN_ADDRESS : PLACEHOLDER_SWAP_TOKEN;
-export const SEKI_SWAP_NETWORK = hasMainnetSeki ? MINT_CLUB_NETWORK : PLACEHOLDER_SWAP_NETWORK;
+export const SEKI_SWAP_TOKEN_ADDRESS = hasMainnetSeki ? SEKI_TOKEN_ADDRESS : null;
+export const SEKI_SWAP_NETWORK = hasMainnetSeki ? MINT_CLUB_NETWORK : null;
 
+// Token configs for the swap UI tabs — only include tokens with real addresses
 export const SWAP_TOKENS = [
   {
     key: "dojo",
@@ -101,7 +96,7 @@ export const SWAP_TOKENS = [
     buyKey: "swap.buySeki",
     sellKey: "swap.sellSeki",
   },
-];
+].filter((t) => t.address);
 
 // --- KAMON-specific addresses ---
 

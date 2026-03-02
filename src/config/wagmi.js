@@ -21,6 +21,9 @@ function isInIframe() {
 }
 
 const projectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || "placeholder";
+if (projectId === "placeholder") {
+  console.warn("[KAMON] VITE_WALLETCONNECT_PROJECT_ID not set — WalletConnect will not work");
+}
 
 const rainbowConnectors = connectorsForWallets(
   [

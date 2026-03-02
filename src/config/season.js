@@ -2,6 +2,12 @@
  * Season configuration — timing, rewards, and structure.
  */
 
+/** Current season number (bump each season via VITE_SEASON_NUMBER) */
+export const SEASON_NUMBER = Number(import.meta.env.VITE_SEASON_NUMBER) || 1;
+
+/** Mint Club staking pool ID for current season */
+export const STAKING_POOL_ID = Number(import.meta.env.VITE_STAKING_POOL_ID) || 0;
+
 /** Season duration in weeks */
 export const SEASON_ACTIVE_WEEKS = 12;
 

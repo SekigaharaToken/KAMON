@@ -11,7 +11,24 @@ import { fadeInUp, staggerDelay, tabContent } from "@/lib/motion.js";
 
 export default function SwapPage() {
   const { t } = useTranslation();
-  const [activeToken, setActiveToken] = useState(SWAP_TOKENS[0].key);
+  const [activeToken, setActiveToken] = useState(SWAP_TOKENS[0]?.key ?? "");
+
+  if (SWAP_TOKENS.length === 0) {
+    return (
+      <div className="flex flex-col items-center gap-6 py-8">
+        <motion.h1
+          className="font-serif text-3xl font-bold"
+          {...fadeInUp}
+        >
+          {t("swap.title")}
+        </motion.h1>
+        <p className="text-sm text-muted-foreground">
+          {t("swap.notConfigured", "Swap tokens are not configured for this network.")}
+        </p>
+        <BackSekiLink />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center gap-6 py-8">
