@@ -3,30 +3,43 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 /**
  * useStaking tests — verify staking pool operations via Mint Club SDK.
  *
- * Mocks the mintclub SDK since we can't hit real contracts in unit tests.
+ * Mocks the mintclub SDK using the pool-ID-based Stake helper API
+ * (mintclub.network().stake), NOT the per-token API.
  */
 
-vi.mock("@/lib/mintclub.js", () => {
-  const mockPool = {
-    getPoolState: vi.fn(),
-    getPosition: vi.fn(),
-    deposit: vi.fn(),
-    withdraw: vi.fn(),
-    claim: vi.fn(),
-  };
-  return {
-    mintclub: {
-      network: vi.fn(() => ({
-        token: vi.fn(() => ({
-          stake: vi.fn(() => mockPool),
-        })),
-      })),
-    },
-    __mockPool: mockPool,
-  };
-});
+vi.mock("@/config/season.js", () => ({
+  STAKING_POOL_ID: 206,
+  SEASON_NUMBER: 1,
+  SEASON_ACTIVE_WEEKS: 12,
+  SEASON_COOLDOWN_WEEKS: 1,
+  SEASON_REWARD_POOL: 500_000,
+  LEADERBOARD_CACHE_TTL: 15 * 60 * 1000,
+  LEADERBOARD_CACHE_KEY: "kamon_leaderboard_cache",
+  SCORING_WEIGHTS: { dojo: 0.4, staking: 0.3, onchat: 0.3 },
+  SCORING_WEIGHTS_FALLBACK: { dojo: 0.4, staking: 0.6 },
+  MAX_DOJO_STREAK: 30,
+  STAKING_BADGE_WEEKS: 4,
+  ONCHAT_CHANNEL_SLUG: "sekigahara",
+  ONCHAT_CACHE_TTL: 60 * 60 * 1000,
+}));
 
-const { __mockPool } = await import("@/lib/mintclub.js");
+const mockStake = {
+  getPool: vi.fn(),
+  getUserPoolStake: vi.fn(),
+  getClaimableReward: vi.fn(),
+  stake: vi.fn(),
+  unstake: vi.fn(),
+  claim: vi.fn(),
+};
+
+vi.mock("@/lib/mintclub.js", () => ({
+  mintclub: {
+    network: vi.fn(() => ({
+      stake: mockStake,
+    })),
+  },
+}));
+
 const {
   getPoolState,
   getUserPosition,
@@ -43,21 +56,23 @@ describe("useStaking — getPoolState", () => {
     vi.clearAllMocks();
   });
 
-  it("returns pool state", async () => {
-    const mockState = {
+  it("returns normalized pool state from SDK", async () => {
+    mockStake.getPool.mockResolvedValue({
+      poolId: 206,
+      pool: {
+        totalStaked: 100000n,
+        rewardAmount: 500000n,
+        rewardStartsAt: 1700000000n,
+      },
+    });
+
+    const state = await getPoolState();
+    expect(state).toEqual({
       totalStaked: 100000n,
       rewardPool: 500000n,
       startTime: 1700000000n,
-    };
-    __mockPool.getPoolState.mockResolvedValue(mockState);
-
-    const state = await getPoolState(TEST_POOL_ADDRESS);
-    expect(state).toEqual(mockState);
-  });
-
-  it("returns null for missing address", async () => {
-    const state = await getPoolState(null);
-    expect(state).toBeNull();
+    });
+    expect(mockStake.getPool).toHaveBeenCalledWith({ poolId: 206 });
   });
 });
 
@@ -66,15 +81,23 @@ describe("useStaking — getUserPosition", () => {
     vi.clearAllMocks();
   });
 
-  it("returns user position", async () => {
-    const mockPosition = {
-      staked: 5000n,
-      pendingRewards: 150n,
-    };
-    __mockPool.getPosition.mockResolvedValue(mockPosition);
+  it("returns user position with staked amount and pending rewards", async () => {
+    mockStake.getUserPoolStake.mockResolvedValue({ stakedAmount: 5000n });
+    mockStake.getClaimableReward.mockResolvedValue(150n);
 
     const position = await getUserPosition(TEST_POOL_ADDRESS, TEST_WALLET);
-    expect(position).toEqual(mockPosition);
+    expect(position).toEqual({
+      staked: 5000n,
+      pendingRewards: 150n,
+    });
+    expect(mockStake.getUserPoolStake).toHaveBeenCalledWith({
+      user: TEST_WALLET,
+      poolId: 206,
+    });
+    expect(mockStake.getClaimableReward).toHaveBeenCalledWith({
+      poolId: 206,
+      staker: TEST_WALLET,
+    });
   });
 
   it("returns null for missing wallet", async () => {
@@ -88,12 +111,12 @@ describe("useStaking — stakeTokens", () => {
     vi.clearAllMocks();
   });
 
-  it("deposits amount into pool", async () => {
-    __mockPool.deposit.mockResolvedValue({ hash: "0xstake" });
+  it("stakes amount into pool", async () => {
+    mockStake.stake.mockResolvedValue({ hash: "0xstake" });
 
     const result = await stakeTokens(TEST_POOL_ADDRESS, 1000n);
     expect(result).toEqual({ hash: "0xstake" });
-    expect(__mockPool.deposit).toHaveBeenCalledWith({ amount: 1000n });
+    expect(mockStake.stake).toHaveBeenCalledWith({ poolId: 206, amount: 1000n });
   });
 
   it("throws on zero amount", async () => {
@@ -106,12 +129,12 @@ describe("useStaking — unstakeTokens", () => {
     vi.clearAllMocks();
   });
 
-  it("withdraws amount from pool", async () => {
-    __mockPool.withdraw.mockResolvedValue({ hash: "0xunstake" });
+  it("unstakes amount from pool", async () => {
+    mockStake.unstake.mockResolvedValue({ hash: "0xunstake" });
 
     const result = await unstakeTokens(TEST_POOL_ADDRESS, 500n);
     expect(result).toEqual({ hash: "0xunstake" });
-    expect(__mockPool.withdraw).toHaveBeenCalledWith({ amount: 500n });
+    expect(mockStake.unstake).toHaveBeenCalledWith({ poolId: 206, amount: 500n });
   });
 });
 
@@ -121,10 +144,10 @@ describe("useStaking — claimRewards", () => {
   });
 
   it("claims pending rewards", async () => {
-    __mockPool.claim.mockResolvedValue({ hash: "0xclaim" });
+    mockStake.claim.mockResolvedValue({ hash: "0xclaim" });
 
     const result = await claimRewards(TEST_POOL_ADDRESS);
     expect(result).toEqual({ hash: "0xclaim" });
-    expect(__mockPool.claim).toHaveBeenCalled();
+    expect(mockStake.claim).toHaveBeenCalledWith({ poolId: 206 });
   });
 });

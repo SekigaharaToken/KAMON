@@ -14,6 +14,7 @@ import { Leaderboard } from "@/components/leaderboard/Leaderboard.jsx";
 import { PreviousWinner } from "@/components/leaderboard/PreviousWinner.jsx";
 import { useLeaderboard } from "@/hooks/useLeaderboard.js";
 import { getPreviousWinner, savePreviousWinner } from "@/lib/seasonHistory.js";
+import { SEASON_NUMBER } from "@/config/season.js";
 import { fadeInUp } from "@/lib/motion.js";
 
 export default function LeaderboardPage() {
@@ -30,9 +31,7 @@ export default function LeaderboardPage() {
     const top = rankings[0];
     if (!top?.house?.id) return;
     savePreviousWinner(
-      // Use a placeholder seasonId of 0 — the actual season ID wiring
-      // can be added when a useSeason hook exposes a numeric seasonId.
-      0,
+      SEASON_NUMBER,
       {
         houseId: top.house.id,
         score: top.score ?? 0,

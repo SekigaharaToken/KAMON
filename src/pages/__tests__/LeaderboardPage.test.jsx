@@ -155,7 +155,7 @@ describe("LeaderboardPage", () => {
     expect(pw).toHaveTextContent("PreviousWinner:honoo");
   });
 
-  it("saves #1 ranked house as previous winner when rankings exist", () => {
+  it("saves #1 ranked house as previous winner with SEASON_NUMBER", () => {
     const mockRankings = [
       { house: { id: "mizu" }, memberCount: 15, score: 320 },
       { house: { id: "honoo" }, memberCount: 10, score: 200 },
@@ -171,9 +171,9 @@ describe("LeaderboardPage", () => {
 
     render(<LeaderboardPage />, { wrapper: TestWrapper });
 
-    // savePreviousWinner should have been called with the first-ranked house
+    // savePreviousWinner should use SEASON_NUMBER (defaults to 1), not hardcoded 0
     expect(savePreviousWinner).toHaveBeenCalledWith(
-      expect.anything(),
+      1,
       expect.objectContaining({ houseId: "mizu" }),
     );
   });

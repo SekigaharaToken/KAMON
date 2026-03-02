@@ -13,6 +13,16 @@ vi.mock("@/config/chains.js", () => ({
   SUPPORTED_CHAINS: [{ id: 8453, name: "Base" }],
 }));
 
+// Provide configured swap token addresses for tests
+vi.mock("@/config/contracts.js", async (importOriginal) => {
+  const original = await importOriginal();
+  return {
+    ...original,
+    SWAP_TOKEN_ADDRESS: "0xC5aAEFD024Aa95C59712A931b3295e237fFD3f81",
+    SWAP_NETWORK: "base",
+  };
+});
+
 // Mock the Mint Club SDK
 const mockGetBuyEstimation = vi.fn();
 
