@@ -40,9 +40,11 @@ vi.mock("@/hooks/useHouse.js", () => ({
 // Mock useHouseMembership
 const mockRetryAttest = vi.fn(() => Promise.resolve());
 const mockGetAttestedHouse = vi.fn(() => Promise.resolve(0));
+const mockGetIsMultiHouseHolder = vi.fn(() => Promise.resolve(false));
 vi.mock("@/hooks/useHouseMembership.js", () => ({
   retryAttest: (...args) => mockRetryAttest(...args),
   getAttestedHouse: (...args) => mockGetAttestedHouse(...args),
+  getIsMultiHouseHolder: (...args) => mockGetIsMultiHouseHolder(...args),
 }));
 
 // Mock sonner
@@ -123,6 +125,7 @@ describe("HomePage", () => {
     });
     mockGetHouseSupply.mockResolvedValue(42n);
     mockGetBuyPrice.mockResolvedValue(50000000000000000n);
+    mockGetIsMultiHouseHolder.mockResolvedValue(false);
   });
 
   it("renders carousel when no house selected", () => {
@@ -214,5 +217,121 @@ describe("HomePage", () => {
       expect(mockGetHouseSupply).toHaveBeenCalled();
       expect(mockGetBuyPrice).toHaveBeenCalled();
     });
+  });
+
+  it("shows multi-house warning when getIsMultiHouseHolder returns true", async () => {
+    mockGetIsMultiHouseHolder.mockResolvedValue(true);
+    mockUseHouse.mockReturnValue({
+      selectedHouse: "honoo",
+      houseConfig: {
+        id: "honoo",
+        symbol: "炎",
+        nameKey: "house.honoo",
+        descriptionKey: "house.description.honoo",
+        address: "0x1234",
+        numericId: 1,
+        colors: { primary: "#c92a22" },
+      },
+      selectHouse: mockSelectHouse,
+    });
+
+    render(
+      <FreshWrapper>
+        <HomePage />
+      </FreshWrapper>,
+    );
+
+    await vi.waitFor(() => {
+      expect(
+        screen.getByText("You hold NFTs in multiple houses. Sell extras to earn points."),
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("does not show warning when getIsMultiHouseHolder returns false", async () => {
+    mockGetIsMultiHouseHolder.mockResolvedValue(false);
+    mockUseHouse.mockReturnValue({
+      selectedHouse: "honoo",
+      houseConfig: {
+        id: "honoo",
+        symbol: "炎",
+        nameKey: "house.honoo",
+        descriptionKey: "house.description.honoo",
+        address: "0x1234",
+        numericId: 1,
+        colors: { primary: "#c92a22" },
+      },
+      selectHouse: mockSelectHouse,
+    });
+
+    render(
+      <FreshWrapper>
+        <HomePage />
+      </FreshWrapper>,
+    );
+
+    // Give query time to resolve
+    await vi.waitFor(() => {
+      expect(mockGetIsMultiHouseHolder).toHaveBeenCalled();
+    });
+
+    expect(
+      screen.queryByText("You hold NFTs in multiple houses. Sell extras to earn points."),
+    ).not.toBeInTheDocument();
+  });
+
+  it("renders Switch House button in PostSelection", () => {
+    mockUseHouse.mockReturnValue({
+      selectedHouse: "honoo",
+      houseConfig: {
+        id: "honoo",
+        symbol: "炎",
+        nameKey: "house.honoo",
+        descriptionKey: "house.description.honoo",
+        address: "0x1234",
+        numericId: 1,
+        colors: { primary: "#c92a22" },
+      },
+      selectHouse: mockSelectHouse,
+    });
+
+    render(
+      <TestWrapper>
+        <HomePage />
+      </TestWrapper>,
+    );
+
+    expect(screen.getByText("Switch House")).toBeInTheDocument();
+  });
+
+  it("Switch House opens abdicate stepper", async () => {
+    mockUseHouse.mockReturnValue({
+      selectedHouse: "honoo",
+      houseConfig: {
+        id: "honoo",
+        symbol: "炎",
+        nameKey: "house.honoo",
+        descriptionKey: "house.description.honoo",
+        address: "0x1234",
+        numericId: 1,
+        colors: { primary: "#c92a22" },
+      },
+      selectHouse: mockSelectHouse,
+    });
+
+    const { default: userEvent } = await import("@testing-library/user-event");
+    const user = userEvent.setup();
+
+    render(
+      <TestWrapper>
+        <HomePage />
+      </TestWrapper>,
+    );
+
+    expect(screen.queryByTestId("abdicate-stepper")).not.toBeInTheDocument();
+
+    await user.click(screen.getByText("Switch House"));
+
+    expect(screen.getByTestId("abdicate-stepper")).toBeInTheDocument();
   });
 });
