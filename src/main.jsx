@@ -39,35 +39,45 @@ const authKitConfig = {
 
 import { ErrorBoundary } from "@/components/layout/ErrorBoundary.jsx";
 
-createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <ErrorBoundary>
-      <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-        <WagmiProvider config={wagmiConfig}>
-          <QueryClientProvider client={queryClient}>
-            <MiniAppAutoConnect />
-            <AuthKitProvider config={authKitConfig}>
-              <RainbowKitProvider
-                theme={darkTheme({
-                  accentColor: "#c92a22",
-                  borderRadius: "medium",
-                })}
-              >
-                <FarcasterProvider>
-                  <HouseProvider>
-                    <LoginModalProvider>
-                      <BrowserRouter>
-                        <App />
-                        <Toaster />
-                      </BrowserRouter>
-                    </LoginModalProvider>
-                  </HouseProvider>
-                </FarcasterProvider>
-              </RainbowKitProvider>
-            </AuthKitProvider>
-          </QueryClientProvider>
-        </WagmiProvider>
-      </ThemeProvider>
-    </ErrorBoundary>
-  </StrictMode>,
-);
+try {
+  createRoot(document.getElementById("root")).render(
+    <StrictMode>
+      <ErrorBoundary>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+          <WagmiProvider config={wagmiConfig}>
+            <QueryClientProvider client={queryClient}>
+              <MiniAppAutoConnect />
+              <AuthKitProvider config={authKitConfig}>
+                <RainbowKitProvider
+                  theme={darkTheme({
+                    accentColor: "#c92a22",
+                    borderRadius: "medium",
+                  })}
+                >
+                  <FarcasterProvider>
+                    <HouseProvider>
+                      <LoginModalProvider>
+                        <BrowserRouter>
+                          <App />
+                          <Toaster />
+                        </BrowserRouter>
+                      </LoginModalProvider>
+                    </HouseProvider>
+                  </FarcasterProvider>
+                </RainbowKitProvider>
+              </AuthKitProvider>
+            </QueryClientProvider>
+          </WagmiProvider>
+        </ThemeProvider>
+      </ErrorBoundary>
+    </StrictMode>,
+  );
+} catch (err) {
+  // Vanilla DOM fallback — visible even if React or providers crash
+  const root = document.getElementById("root");
+  root.innerHTML = `<div style="padding:2rem;color:#fff;background:#1a0505;font-family:monospace;min-height:100vh">
+    <h1 style="color:#c92a22">KAMON failed to start</h1>
+    <pre style="white-space:pre-wrap;margin-top:1rem;color:#dccf8e">${String(err?.message || err)}</pre>
+    <pre style="white-space:pre-wrap;margin-top:0.5rem;color:#6f5652;font-size:0.8rem">${String(err?.stack || "")}</pre>
+  </div>`;
+}
