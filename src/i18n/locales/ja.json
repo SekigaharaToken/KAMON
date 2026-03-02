@@ -93,6 +93,7 @@
     "title": "リーダーボード",
     "currentSeason": "シーズン{{seasonId}}",
     "previousWinner": "前シーズンの勝者",
+    "previousScore": "スコア: {{score}}",
     "rank": "ランク",
     "house": "家",
     "members": "メンバー",
