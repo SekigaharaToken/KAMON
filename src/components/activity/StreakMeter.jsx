@@ -12,6 +12,9 @@ import { motion } from "motion/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card.jsx";
 import { Badge } from "@/components/ui/badge.jsx";
 import { Button } from "@/components/ui/button.jsx";
+import { MiniAppLink } from "@/components/ui/miniapp-link.jsx";
+
+const DOJO_APP_URL = "https://seki-dojo.vercel.app";
 
 export function StreakMeter({
   currentStreak = 0,
@@ -44,13 +47,9 @@ export function StreakMeter({
           Longest: {longestStreak} days
         </p>
         <Button variant="outline" className="w-full" asChild>
-          <a
-            href="https://dojo.sekigahara.io"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Check In on DOJO
-          </a>
+          <MiniAppLink href={DOJO_APP_URL}>
+            Check In on The Dojo App
+          </MiniAppLink>
         </Button>
       </CardContent>
     </Card>
