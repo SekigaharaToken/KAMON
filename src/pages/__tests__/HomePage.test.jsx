@@ -88,9 +88,11 @@ vi.mock("@/hooks/useHouseNFT.js", () => ({
   getBuyPrice: (...args) => mockGetBuyPrice(...args),
 }));
 
-// Mock mintclub — available (non-null) so queries are enabled
+// Mock mintclub — useMintClubReady returns true so queries are enabled
 vi.mock("@/lib/mintclub.js", () => ({
-  mintclub: { network: vi.fn() },
+  mintclub: null,
+  getMintClub: vi.fn(() => Promise.resolve({ network: vi.fn() })),
+  useMintClubReady: vi.fn(() => true),
 }));
 
 // Mock houses with non-empty addresses so the `enabled` guard passes in tests

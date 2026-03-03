@@ -19,7 +19,7 @@ import {
   isStreakAtRisk,
 } from "@/hooks/useEASStreaks.js";
 import { getUserPosition } from "@/hooks/useStaking.js";
-import { mintclub } from "@/lib/mintclub.js";
+import { useMintClubReady } from "@/lib/mintclub.js";
 import { STAKING_POOL_ADDRESS } from "@/config/contracts.js";
 import { ONCHAT_CACHE_TTL } from "@/config/season.js";
 import { MyActivity } from "@/components/activity/MyActivity.jsx";
@@ -32,7 +32,7 @@ export default function ActivityPage() {
   const { houseConfig } = useHouse();
   const { address } = useWalletAddress();
 
-  const sdkEnabled = !!mintclub;
+  const sdkEnabled = useMintClubReady();
 
   // OnChat queries
   const { data: messageCount } = useQuery({

@@ -45,7 +45,9 @@ vi.mock("@/hooks/useStaking.js", () => ({
 }));
 
 vi.mock("@/lib/mintclub.js", () => ({
-  mintclub: { network: vi.fn() },
+  mintclub: null,
+  getMintClub: vi.fn(() => Promise.resolve({ network: vi.fn() })),
+  useMintClubReady: vi.fn(() => true),
 }));
 
 vi.mock("@/config/season.js", () => ({

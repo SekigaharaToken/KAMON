@@ -23,13 +23,16 @@ vi.mock("@/lib/mintclub.js", () => {
     getBalanceOf: vi.fn(),
     getTotalSupply: vi.fn(),
   };
+  const mockSdk = {
+    network: vi.fn(() => ({
+      nft: vi.fn(() => mockNft),
+    })),
+    withWalletClient: vi.fn(),
+  };
   return {
-    mintclub: {
-      network: vi.fn(() => ({
-        nft: vi.fn(() => mockNft),
-      })),
-      withWalletClient: vi.fn(),
-    },
+    mintclub: mockSdk,
+    getMintClub: vi.fn(() => Promise.resolve(mockSdk)),
+    useMintClubReady: vi.fn(() => true),
     __mockNft: mockNft,
   };
 });

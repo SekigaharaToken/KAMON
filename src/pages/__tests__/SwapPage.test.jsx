@@ -11,13 +11,17 @@ vi.mock("wagmi", () => ({
 }));
 
 vi.mock("@/lib/mintclub.js", () => ({
-  mintclub: {
-    network: () => ({
-      token: () => ({
-        getBuyEstimation: vi.fn().mockResolvedValue([50000000000000000n, 1000000000000000n]),
+  mintclub: null,
+  getMintClub: vi.fn(() =>
+    Promise.resolve({
+      network: () => ({
+        token: () => ({
+          getBuyEstimation: vi.fn().mockResolvedValue([50000000000000000n, 1000000000000000n]),
+        }),
       }),
     }),
-  },
+  ),
+  useMintClubReady: vi.fn(() => true),
 }));
 
 vi.mock("mint.club-v2-sdk", () => ({
@@ -81,7 +85,11 @@ describe("SwapPage — unconfigured tokens", () => {
       SWAP_TOKENS: [],
     }));
     // Re-mock dependencies needed by SwapPage
-    vi.doMock("@/lib/mintclub.js", () => ({ mintclub: null }));
+    vi.doMock("@/lib/mintclub.js", () => ({
+      mintclub: null,
+      getMintClub: vi.fn(() => Promise.resolve(null)),
+      useMintClubReady: vi.fn(() => false),
+    }));
     vi.doMock("mint.club-v2-sdk", () => ({
       mintclub: null,
       wei: (num) => BigInt(num) * 10n ** 18n,

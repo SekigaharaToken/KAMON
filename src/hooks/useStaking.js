@@ -9,13 +9,14 @@
  *   getUserPosition → { staked, pendingRewards, stakedSince }
  */
 
-import { mintclub } from "@/lib/mintclub.js";
+import { getMintClub } from "@/lib/mintclub.js";
 import { MINT_CLUB_NETWORK } from "@/config/contracts.js";
 import { STAKING_POOL_ID } from "@/config/season.js";
 
-function getStakeHelper() {
-  if (!mintclub) throw new Error("Mint Club SDK not available in local dev mode");
-  return mintclub.network(MINT_CLUB_NETWORK).stake;
+async function getStakeHelper() {
+  const mc = await getMintClub();
+  if (!mc) throw new Error("Mint Club SDK not available in local dev mode");
+  return mc.network(MINT_CLUB_NETWORK).stake;
 }
 
 /**
@@ -24,7 +25,8 @@ function getStakeHelper() {
  */
 export async function getPoolState() {
   if (!STAKING_POOL_ID) return null;
-  const result = await getStakeHelper().getPool({ poolId: STAKING_POOL_ID });
+  const stake = await getStakeHelper();
+  const result = await stake.getPool({ poolId: STAKING_POOL_ID });
   // SDK returns { poolId, pool: { totalStaked, rewardAmount, rewardStartsAt, ... }, ... }
   const p = result.pool;
   return {
@@ -42,7 +44,7 @@ export async function getPoolState() {
  */
 export async function getUserPosition(_unused, walletAddress) {
   if (!STAKING_POOL_ID || !walletAddress) return null;
-  const stake = getStakeHelper();
+  const stake = await getStakeHelper();
 
   const [userStake, claimable] = await Promise.all([
     stake.getUserPoolStake({ user: walletAddress, poolId: STAKING_POOL_ID }),
@@ -63,7 +65,8 @@ export async function getUserPosition(_unused, walletAddress) {
  */
 export async function stakeTokens(_unused, amount) {
   if (!amount || amount <= 0n) throw new Error("Stake amount must be greater than 0");
-  return getStakeHelper().stake({ poolId: STAKING_POOL_ID, amount });
+  const stake = await getStakeHelper();
+  return stake.stake({ poolId: STAKING_POOL_ID, amount });
 }
 
 /**
@@ -73,7 +76,8 @@ export async function stakeTokens(_unused, amount) {
  * @returns {Promise<object>} — tx receipt
  */
 export async function unstakeTokens(_unused, amount) {
-  return getStakeHelper().unstake({ poolId: STAKING_POOL_ID, amount });
+  const stake = await getStakeHelper();
+  return stake.unstake({ poolId: STAKING_POOL_ID, amount });
 }
 
 /**
@@ -82,5 +86,6 @@ export async function unstakeTokens(_unused, amount) {
  * @returns {Promise<object>} — tx receipt
  */
 export async function claimRewards(/* _unused */) {
-  return getStakeHelper().claim({ poolId: STAKING_POOL_ID });
+  const stake = await getStakeHelper();
+  return stake.claim({ poolId: STAKING_POOL_ID });
 }

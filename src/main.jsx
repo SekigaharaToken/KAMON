@@ -1,4 +1,3 @@
-console.log("[KAMON] main.jsx: start imports");
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
@@ -19,11 +18,9 @@ import "./i18n";
 import "./index.css";
 import "@rainbow-me/rainbowkit/styles.css";
 
-console.log("[KAMON] main.jsx: imports done, calling ready");
 // Signal ready to Farcaster immediately — must fire even if React crashes.
 // MiniAppAutoConnect also calls this, but this top-level call is the safety net.
 sdk.actions.ready().catch(() => {});
-console.log("[KAMON] main.jsx: ready called, setting up React");
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -42,7 +39,6 @@ const authKitConfig = {
 
 import { ErrorBoundary } from "@/components/layout/ErrorBoundary.jsx";
 
-console.log("[KAMON] main.jsx: about to render");
 try {
   createRoot(document.getElementById("root")).render(
     <StrictMode>
