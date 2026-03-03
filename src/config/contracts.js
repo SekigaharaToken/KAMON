@@ -55,8 +55,9 @@ export const MINT_CLUB =
 // Project tokens (loaded from env — set after Mint Club creation)
 export const SEKI_TOKEN_ADDRESS =
   getEnv("VITE_SEKI_TOKEN_ADDRESS", "");
+// $DOJO is the app token for swap; reuse VITE_DOJO_TOKEN_ADDRESS
 export const APP_TOKEN_ADDRESS =
-  getEnv("VITE_APP_TOKEN_ADDRESS", "");
+  getEnv("VITE_DOJO_TOKEN_ADDRESS", "");
 
 // Mint Club SDK network name matching chain ID
 // Local dev doesn't use the SDK, but hooks check this for routing

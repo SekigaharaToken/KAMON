@@ -32,7 +32,7 @@ export function UnstakeInput({ staked = "0", onUnstake, isLoading = false }) {
       </Alert>
       <div className="flex items-center justify-between text-sm">
         <span className="text-muted-foreground">{t("swap.amount")}</span>
-        <span className="text-muted-foreground">Staked: {staked} $SEKI</span>
+        <span className="text-muted-foreground">Staked: <span data-testid="staked-value" className="font-mono tabular-nums">{staked}</span> $SEKI</span>
       </div>
       <Input
         type="number"

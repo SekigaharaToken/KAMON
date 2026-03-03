@@ -19,7 +19,7 @@ export function ClaimRewards({ pendingAmount = "0", onClaim, isLoading = false }
     <div className="space-y-4 text-center">
       <div>
         <p className="text-sm text-muted-foreground">{t("staking.claimable")}</p>
-        <p className="font-mono text-3xl font-bold">{pendingAmount}</p>
+        <p data-testid="pending-value" className="font-mono tabular-nums text-3xl font-bold">{pendingAmount}</p>
         <p className="text-sm text-muted-foreground">$DOJO</p>
       </div>
       <motion.div {...tapSpring}>
