@@ -13,6 +13,7 @@ import { formatTokenAmount } from "@/lib/formatTokenAmount.js";
 import { useReadContract } from "wagmi";
 import { motion } from "motion/react";
 import { toast } from "sonner";
+import { parseContractError } from "@/lib/parseContractError.js";
 import { useWalletAddress } from "@/hooks/useWalletAddress.js";
 import { useMintClubReady } from "@/lib/mintclub.js";
 import {
@@ -117,6 +118,11 @@ export default function StakingPage() {
     (userPos?.staked && userPos.staked > 0n ? poolState?.startTime : null);
   const badgeProgress = getBadgeProgress(stakeTimestamp);
 
+  function showTxError(err) {
+    const { key, params } = parseContractError(err);
+    toast.error(t(key, params));
+  }
+
   async function handleStake(amount) {
     if (!canTransact) return;
     setIsPending(true);
@@ -125,8 +131,8 @@ export default function StakingPage() {
       toast.success(t("staking.stakeSuccess"));
       refetchPos();
       refetchBalance();
-    } catch {
-      toast.error(t("staking.stakeFailed"));
+    } catch (err) {
+      showTxError(err);
     } finally {
       setIsPending(false);
     }
@@ -140,8 +146,8 @@ export default function StakingPage() {
       toast.success(t("staking.unstakeSuccess"));
       refetchPos();
       refetchBalance();
-    } catch {
-      toast.error(t("staking.unstakeFailed"));
+    } catch (err) {
+      showTxError(err);
     } finally {
       setIsPending(false);
     }
@@ -154,8 +160,8 @@ export default function StakingPage() {
       await claimRewards(STAKING_POOL_ADDRESS);
       toast.success(t("staking.claimSuccess"));
       refetchPos();
-    } catch {
-      toast.error(t("staking.claimFailed"));
+    } catch (err) {
+      showTxError(err);
     } finally {
       setIsPending(false);
     }

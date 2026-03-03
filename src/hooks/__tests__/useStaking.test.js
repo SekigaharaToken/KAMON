@@ -126,6 +126,13 @@ describe("useStaking — stakeTokens", () => {
   it("throws on zero amount", async () => {
     await expect(stakeTokens(TEST_POOL_ADDRESS, 0n)).rejects.toThrow();
   });
+
+  it("throws when SDK returns undefined (user rejected)", async () => {
+    // Mint Club SDK swallows errors and returns undefined
+    mockStake.stake.mockResolvedValue(undefined);
+
+    await expect(stakeTokens(TEST_POOL_ADDRESS, 1000n)).rejects.toThrow();
+  });
 });
 
 describe("useStaking — unstakeTokens", () => {
@@ -140,6 +147,12 @@ describe("useStaking — unstakeTokens", () => {
     expect(result).toEqual({ hash: "0xunstake" });
     expect(mockStake.unstake).toHaveBeenCalledWith({ poolId: 206, amount: 500n });
   });
+
+  it("throws when SDK returns undefined (user rejected)", async () => {
+    mockStake.unstake.mockResolvedValue(undefined);
+
+    await expect(unstakeTokens(TEST_POOL_ADDRESS, 500n)).rejects.toThrow();
+  });
 });
 
 describe("useStaking — claimRewards", () => {
@@ -153,5 +166,11 @@ describe("useStaking — claimRewards", () => {
     const result = await claimRewards(TEST_POOL_ADDRESS);
     expect(result).toEqual({ hash: "0xclaim" });
     expect(mockStake.claim).toHaveBeenCalledWith({ poolId: 206 });
+  });
+
+  it("throws when SDK returns undefined (user rejected)", async () => {
+    mockStake.claim.mockResolvedValue(undefined);
+
+    await expect(claimRewards(TEST_POOL_ADDRESS)).rejects.toThrow();
   });
 });
