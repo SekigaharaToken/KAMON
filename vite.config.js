@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import { execSync } from "child_process";
+import { nodePolyfills } from "vite-plugin-node-polyfills";
 
 let commitHash = "unknown";
 try {
@@ -13,7 +14,14 @@ try {
 }
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    nodePolyfills({
+      include: ["buffer"],
+      globals: { Buffer: true },
+    }),
+  ],
   define: {
     __COMMIT_HASH__: JSON.stringify(commitHash),
   },

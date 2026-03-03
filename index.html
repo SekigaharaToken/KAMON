@@ -15,23 +15,6 @@
     <meta property="og:description" content="Choose your House. Stake your claim. Compete for seasonal dominance." />
     <meta property="og:image" content="https://seki-kamon.vercel.app/og-image.png" />
     <title>KAMON</title>
-    <script>
-      window.onerror = function(msg, src, line, col, err) {
-        var root = document.getElementById("root");
-        if (root) root.innerHTML = '<div style="padding:2rem;color:#fff;background:#1a0505;font-family:monospace;min-height:100vh">'
-          + '<h1 style="color:#c92a22">KAMON boot error</h1>'
-          + '<pre style="white-space:pre-wrap;margin-top:1rem;color:#dccf8e">' + msg + '</pre>'
-          + '<pre style="white-space:pre-wrap;margin-top:0.5rem;color:#6f5652;font-size:0.8rem">' + (src||'') + ':' + (line||'') + ':' + (col||'') + '</pre>'
-          + '<pre style="white-space:pre-wrap;margin-top:0.5rem;color:#6f5652;font-size:0.8rem">' + (err && err.stack ? err.stack : '') + '</pre></div>';
-      };
-      window.addEventListener("unhandledrejection", function(e) {
-        var root = document.getElementById("root");
-        if (root && !root.innerHTML.includes("boot error")) root.innerHTML = '<div style="padding:2rem;color:#fff;background:#1a0505;font-family:monospace;min-height:100vh">'
-          + '<h1 style="color:#c92a22">KAMON boot error (unhandled rejection)</h1>'
-          + '<pre style="white-space:pre-wrap;margin-top:1rem;color:#dccf8e">' + (e.reason && e.reason.message ? e.reason.message : String(e.reason)) + '</pre>'
-          + '<pre style="white-space:pre-wrap;margin-top:0.5rem;color:#6f5652;font-size:0.8rem">' + (e.reason && e.reason.stack ? e.reason.stack : '') + '</pre></div>';
-      });
-    </script>
   </head>
   <body>
     <div id="root"></div>
