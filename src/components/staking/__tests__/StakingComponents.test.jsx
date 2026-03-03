@@ -37,6 +37,32 @@ describe("PoolStats", () => {
       expect(el.className).toMatch(/tabular-nums/);
     }
   });
+
+  it("shows $SEKI symbol below totalStaked value", () => {
+    render(
+      <PoolStats totalStaked="1000" seasonEnd="3d" poolSize="500" />,
+      { wrapper: TestWrapper },
+    );
+    const sekiSymbols = screen.getAllByText("$SEKI");
+    expect(sekiSymbols.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("shows $DOJO symbol below poolSize value", () => {
+    render(
+      <PoolStats totalStaked="1000" seasonEnd="3d" poolSize="500" />,
+      { wrapper: TestWrapper },
+    );
+    expect(screen.getByText("$DOJO")).toBeInTheDocument();
+  });
+
+  it("renders token symbols with stat-symbol testid", () => {
+    render(
+      <PoolStats totalStaked="1000" seasonEnd="3d" poolSize="500" />,
+      { wrapper: TestWrapper },
+    );
+    const symbols = screen.getAllByTestId("stat-symbol");
+    expect(symbols).toHaveLength(2); // $SEKI and $DOJO (seasonEnd has no symbol)
+  });
 });
 
 describe("StakeInput", () => {
@@ -204,7 +230,9 @@ describe("StakingPool", () => {
     await waitFor(() => {
       expect(screen.getByText("7.5")).toBeInTheDocument();
     });
-    expect(screen.getByText("$DOJO")).toBeInTheDocument();
+    // PoolStats also renders $DOJO, so use getAllByText
+    const dojoLabels = screen.getAllByText("$DOJO");
+    expect(dojoLabels.length).toBeGreaterThanOrEqual(2);
   });
 
   it("clicking Unstake tab shows UnstakeInput panel", async () => {
