@@ -107,6 +107,13 @@ describe("UnstakeInput", () => {
     expect(screen.getByText(/Unstaking stops/)).toBeInTheDocument();
   });
 
+  it("renders alert text inside AlertDescription for proper grid layout", () => {
+    render(<UnstakeInput onUnstake={vi.fn()} />, { wrapper: TestWrapper });
+    const alertText = screen.getByText(/Unstaking stops/);
+    // AlertDescription renders with col-start-2 so text lands in the 1fr column
+    expect(alertText.className).toMatch(/col-start-2/);
+  });
+
   it("button is disabled when input is empty", () => {
     render(<UnstakeInput onUnstake={vi.fn()} />, { wrapper: TestWrapper });
     const button = screen.getByRole("button");

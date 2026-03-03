@@ -12,7 +12,7 @@ import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
 import { Input } from "@/components/ui/input.jsx";
 import { Button } from "@/components/ui/button.jsx";
-import { Alert } from "@/components/ui/alert.jsx";
+import { Alert, AlertDescription } from "@/components/ui/alert.jsx";
 import { tapSpring } from "@/lib/motion.js";
 
 export function UnstakeInput({ staked = "0", onUnstake, isLoading = false }) {
@@ -27,8 +27,10 @@ export function UnstakeInput({ staked = "0", onUnstake, isLoading = false }) {
 
   return (
     <div className="space-y-3">
-      <Alert variant="destructive" className="text-sm">
-        Unstaking stops your reward stream. You can restake at any time.
+      <Alert variant="destructive">
+        <AlertDescription className="text-sm">
+          Unstaking stops your reward stream. You can restake at any time.
+        </AlertDescription>
       </Alert>
       <div className="flex items-center justify-between text-sm">
         <span className="text-muted-foreground">{t("swap.amount")}</span>
