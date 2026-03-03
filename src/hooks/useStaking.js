@@ -66,7 +66,10 @@ export async function getUserPosition(_unused, walletAddress) {
 export async function stakeTokens(_unused, amount) {
   if (!amount || amount <= 0n) throw new Error("Stake amount must be greater than 0");
   const stake = await getStakeHelper();
-  return stake.stake({ poolId: STAKING_POOL_ID, amount });
+  const receipt = await stake.stake({ poolId: STAKING_POOL_ID, amount });
+  // Mint Club SDK swallows errors and returns undefined — re-throw
+  if (!receipt) throw new Error("Transaction was not completed");
+  return receipt;
 }
 
 /**
@@ -77,7 +80,9 @@ export async function stakeTokens(_unused, amount) {
  */
 export async function unstakeTokens(_unused, amount) {
   const stake = await getStakeHelper();
-  return stake.unstake({ poolId: STAKING_POOL_ID, amount });
+  const receipt = await stake.unstake({ poolId: STAKING_POOL_ID, amount });
+  if (!receipt) throw new Error("Transaction was not completed");
+  return receipt;
 }
 
 /**
@@ -87,5 +92,7 @@ export async function unstakeTokens(_unused, amount) {
  */
 export async function claimRewards(/* _unused */) {
   const stake = await getStakeHelper();
-  return stake.claim({ poolId: STAKING_POOL_ID });
+  const receipt = await stake.claim({ poolId: STAKING_POOL_ID });
+  if (!receipt) throw new Error("Transaction was not completed");
+  return receipt;
 }

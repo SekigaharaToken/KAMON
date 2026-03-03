@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, act } from "@testing-library/react";
 import { TestWrapper } from "@/test/wrapper.jsx";
 
 // Mutable ref so we can toggle SDK readiness per test
@@ -54,16 +54,22 @@ vi.mock("sonner", () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }));
 
-// Mock StakingPool to avoid deep dependency tree
+// Capture StakingPool callback props for testing
+let capturedProps = {};
 vi.mock("@/components/staking/StakingPool.jsx", () => ({
-  StakingPool: (props) => (
-    <div data-testid="staking-pool" data-props={JSON.stringify(props)}>
-      StakingPool
-    </div>
-  ),
+  StakingPool: (props) => {
+    capturedProps = props;
+    return (
+      <div data-testid="staking-pool" data-props={JSON.stringify(props)}>
+        StakingPool
+      </div>
+    );
+  },
 }));
 
 import StakingPage from "@/pages/StakingPage.jsx";
+import { stakeTokens, unstakeTokens, claimRewards } from "@/hooks/useStaking.js";
+import { toast } from "sonner";
 
 describe("StakingPage", () => {
   beforeEach(() => {
@@ -131,5 +137,73 @@ describe("StakingPage wiring", () => {
     // Functions are not serializable to JSON, so they'll be absent/null
     // But isLoading should be present
     expect(props.isLoading).toBeDefined();
+  });
+});
+
+describe("StakingPage error toasts", () => {
+  beforeEach(() => {
+    mockSdkReady.value = true;
+    vi.clearAllMocks();
+    capturedProps = {};
+  });
+
+  it("shows user-rejected toast when wallet rejects stake", async () => {
+    stakeTokens.mockRejectedValueOnce(new Error("User rejected the request."));
+    render(<StakingPage />, { wrapper: TestWrapper });
+
+    await act(async () => {
+      await capturedProps.onStake?.("10");
+    });
+
+    expect(toast.error).toHaveBeenCalledWith("Transaction was rejected");
+    expect(toast.success).not.toHaveBeenCalled();
+  });
+
+  it("shows user-rejected toast when wallet rejects unstake", async () => {
+    unstakeTokens.mockRejectedValueOnce(new Error("User denied transaction signature"));
+    render(<StakingPage />, { wrapper: TestWrapper });
+
+    await act(async () => {
+      await capturedProps.onUnstake?.("5");
+    });
+
+    expect(toast.error).toHaveBeenCalledWith("Transaction was rejected");
+    expect(toast.success).not.toHaveBeenCalled();
+  });
+
+  it("shows user-rejected toast when wallet rejects claim", async () => {
+    claimRewards.mockRejectedValueOnce(new Error("user rejected"));
+    render(<StakingPage />, { wrapper: TestWrapper });
+
+    await act(async () => {
+      await capturedProps.onClaim?.();
+    });
+
+    expect(toast.error).toHaveBeenCalledWith("Transaction was rejected");
+    expect(toast.success).not.toHaveBeenCalled();
+  });
+
+  it("shows insufficient funds toast", async () => {
+    stakeTokens.mockRejectedValueOnce(new Error("insufficient funds for gas"));
+    render(<StakingPage />, { wrapper: TestWrapper });
+
+    await act(async () => {
+      await capturedProps.onStake?.("10");
+    });
+
+    expect(toast.error).toHaveBeenCalledWith("Insufficient funds for gas");
+    expect(toast.success).not.toHaveBeenCalled();
+  });
+
+  it("shows success toast on successful stake", async () => {
+    stakeTokens.mockResolvedValueOnce({ hash: "0x123" });
+    render(<StakingPage />, { wrapper: TestWrapper });
+
+    await act(async () => {
+      await capturedProps.onStake?.("10");
+    });
+
+    expect(toast.success).toHaveBeenCalled();
+    expect(toast.error).not.toHaveBeenCalled();
   });
 });
