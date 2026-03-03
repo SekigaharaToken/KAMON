@@ -28,7 +28,7 @@ export function StakeInput({ balance = "0", onStake, isLoading = false }) {
     <div className="space-y-3">
       <div className="flex items-center justify-between text-sm">
         <span className="text-muted-foreground">{t("swap.amount")}</span>
-        <span className="text-muted-foreground">Balance: {balance} $SEKI</span>
+        <span className="text-muted-foreground">Balance: <span data-testid="balance-value" className="font-mono tabular-nums">{balance}</span> $SEKI</span>
       </div>
       <Input
         type="number"

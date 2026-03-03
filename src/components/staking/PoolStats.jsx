@@ -18,15 +18,15 @@ export function PoolStats({ totalStaked = "—", seasonEnd = "—", poolSize = "
       <CardContent className="grid grid-cols-3 gap-4 text-center">
         <div>
           <p className="text-sm text-muted-foreground">{t("staking.totalStaked")}</p>
-          <p className="font-mono text-lg font-bold">{totalStaked}</p>
+          <p data-testid="stat-value" className="font-mono tabular-nums text-lg font-bold">{totalStaked}</p>
         </div>
         <div>
           <p className="text-sm text-muted-foreground">{t("staking.seasonEnd")}</p>
-          <p className="font-mono text-lg font-bold">{seasonEnd}</p>
+          <p data-testid="stat-value" className="font-mono tabular-nums text-lg font-bold">{seasonEnd}</p>
         </div>
         <div>
           <p className="text-sm text-muted-foreground">{t("staking.poolSize")}</p>
-          <p className="font-mono text-lg font-bold">{poolSize}</p>
+          <p data-testid="stat-value" className="font-mono tabular-nums text-lg font-bold">{poolSize}</p>
         </div>
       </CardContent>
     </Card>

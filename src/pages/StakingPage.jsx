@@ -9,6 +9,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { formatUnits, parseUnits, erc20Abi } from "viem";
+import { formatTokenAmount } from "@/lib/formatTokenAmount.js";
 import { useReadContract } from "wagmi";
 import { motion } from "motion/react";
 import { toast } from "sonner";
@@ -41,7 +42,7 @@ function formatCountdown(ms) {
   return `${days}d`;
 }
 
-const fmt = (v) => (v != null ? formatUnits(v, 18) : "0");
+const fmt = (v) => formatTokenAmount(v != null ? formatUnits(v, 18) : "0");
 
 export default function StakingPage() {
   const { t } = useTranslation();

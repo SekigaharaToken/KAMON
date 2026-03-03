@@ -24,6 +24,19 @@ describe("PoolStats", () => {
     const dashes = screen.getAllByText("—");
     expect(dashes).toHaveLength(3);
   });
+
+  it("applies font-mono tabular-nums to numeric values", () => {
+    render(
+      <PoolStats totalStaked="1000" seasonEnd="3d" poolSize="500" />,
+      { wrapper: TestWrapper },
+    );
+    const numerics = screen.getAllByTestId("stat-value");
+    expect(numerics).toHaveLength(3);
+    for (const el of numerics) {
+      expect(el.className).toMatch(/font-mono/);
+      expect(el.className).toMatch(/tabular-nums/);
+    }
+  });
 });
 
 describe("StakeInput", () => {
@@ -79,9 +92,12 @@ describe("StakeInput", () => {
     expect(button).toBeDisabled();
   });
 
-  it("displays balance", () => {
+  it("displays balance with font-mono tabular-nums", () => {
     render(<StakeInput balance="42.5" onStake={vi.fn()} />, { wrapper: TestWrapper });
-    expect(screen.getByText(/42\.5/)).toBeInTheDocument();
+    const balanceEl = screen.getByTestId("balance-value");
+    expect(balanceEl.textContent).toContain("42.5");
+    expect(balanceEl.className).toMatch(/font-mono/);
+    expect(balanceEl.className).toMatch(/tabular-nums/);
   });
 });
 
@@ -110,16 +126,22 @@ describe("UnstakeInput", () => {
     expect(input).toHaveValue(null);
   });
 
-  it("displays staked amount", () => {
+  it("displays staked amount with font-mono tabular-nums", () => {
     render(<UnstakeInput staked="100" onUnstake={vi.fn()} />, { wrapper: TestWrapper });
-    expect(screen.getByText(/100/)).toBeInTheDocument();
+    const stakedEl = screen.getByTestId("staked-value");
+    expect(stakedEl.textContent).toContain("100");
+    expect(stakedEl.className).toMatch(/font-mono/);
+    expect(stakedEl.className).toMatch(/tabular-nums/);
   });
 });
 
 describe("ClaimRewards", () => {
-  it("renders pending amount", () => {
+  it("renders pending amount with font-mono tabular-nums", () => {
     render(<ClaimRewards pendingAmount="12.5" onClaim={vi.fn()} />, { wrapper: TestWrapper });
-    expect(screen.getByText("12.5")).toBeInTheDocument();
+    const amountEl = screen.getByTestId("pending-value");
+    expect(amountEl.textContent).toBe("12.5");
+    expect(amountEl.className).toMatch(/font-mono/);
+    expect(amountEl.className).toMatch(/tabular-nums/);
     expect(screen.getByText("$DOJO")).toBeInTheDocument();
   });
 
