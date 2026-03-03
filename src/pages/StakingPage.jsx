@@ -13,7 +13,7 @@ import { useReadContract } from "wagmi";
 import { motion } from "motion/react";
 import { toast } from "sonner";
 import { useWalletAddress } from "@/hooks/useWalletAddress.js";
-import { mintclub } from "@/lib/mintclub.js";
+import { useMintClubReady } from "@/lib/mintclub.js";
 import {
   STAKING_POOL_ADDRESS,
   SEKI_TOKEN_ADDRESS,
@@ -47,8 +47,9 @@ export default function StakingPage() {
   const { t } = useTranslation();
   const { address, canTransact } = useWalletAddress();
   const [isPending, setIsPending] = useState(false);
+  const sdkReady = useMintClubReady();
 
-  const enabled = !!mintclub;
+  const enabled = sdkReady;
 
   const { data: poolState, isLoading: poolLoading } = useQuery({
     queryKey: ["stakingPool", STAKING_POOL_ADDRESS],
@@ -76,7 +77,7 @@ export default function StakingPage() {
     query: { enabled: enabled && !!SEKI_TOKEN_ADDRESS && !!address },
   });
 
-  if (!mintclub) {
+  if (!sdkReady) {
     return (
       <div className="max-w-lg mx-auto space-y-6">
         <motion.h1 className="font-serif text-2xl font-bold" {...fadeInUp}>

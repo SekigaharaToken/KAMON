@@ -8,7 +8,7 @@ import { useReadContract } from "wagmi";
 import { TriangleAlert } from "lucide-react";
 import { toast } from "sonner";
 import { useWalletAddress } from "@/hooks/useWalletAddress.js";
-import { mintclub } from "@/lib/mintclub.js";
+import { getMintClub, useMintClubReady } from "@/lib/mintclub.js";
 import { wei } from "mint.club-v2-sdk";
 import {
   Card,
@@ -135,8 +135,7 @@ export function SwapPanel({ tokenConfig }) {
   const [mode, setMode] = useState("buy");
   const [amount, setAmount] = useState("");
   const [isPending, setIsPending] = useState(false);
-
-  const token = mintclub ? mintclub.network(tokenConfig.network).token(tokenConfig.address) : null;
+  const sdkReady = useMintClubReady();
 
   const parsedAmount = amount && Number(amount) > 0
     ? parseUnits(amount, 18)
@@ -145,13 +144,15 @@ export function SwapPanel({ tokenConfig }) {
   const { data: estimation, isLoading: estimationLoading } = useQuery({
     queryKey: ["swapEstimation", tokenConfig.address, mode, amount],
     queryFn: async () => {
+      const mc = await getMintClub();
+      const token = mc.network(tokenConfig.network).token(tokenConfig.address);
       const fn = mode === "buy"
         ? token.getBuyEstimation(parsedAmount)
         : token.getSellEstimation(parsedAmount);
       const [cost, royalty] = await fn;
       return { cost, royalty };
     },
-    enabled: !!mintclub && !!parsedAmount,
+    enabled: sdkReady && !!parsedAmount,
     placeholderData: (prev) => prev,
     staleTime: 5_000,
     retry: false,
@@ -161,10 +162,12 @@ export function SwapPanel({ tokenConfig }) {
   const { data: priceData } = useQuery({
     queryKey: ["tokenPrice", tokenConfig.address],
     queryFn: async () => {
+      const mc = await getMintClub();
+      const token = mc.network(tokenConfig.network).token(tokenConfig.address);
       const [reserveAmount, royalty] = await token.getBuyEstimation(ONE_TOKEN);
       return { buyPrice: reserveAmount, royalty };
     },
-    enabled: !!mintclub && !!tokenConfig.address,
+    enabled: sdkReady && !!tokenConfig.address,
     staleTime: 10_000,
     retry: false,
   });
@@ -176,6 +179,8 @@ export function SwapPanel({ tokenConfig }) {
   const { data: tokenDetail } = useQuery({
     queryKey: ["tokenDetail", tokenConfig.address],
     queryFn: async () => {
+      const mc = await getMintClub();
+      const token = mc.network(tokenConfig.network).token(tokenConfig.address);
       if (cached) {
         // Only fetch mutable currentSupply
         const supply = await token.getTotalSupply();
@@ -193,7 +198,7 @@ export function SwapPanel({ tokenConfig }) {
         currentSupply: detail.info.currentSupply,
       };
     },
-    enabled: !!mintclub && !!tokenConfig.address,
+    enabled: sdkReady && !!tokenConfig.address,
     staleTime: 10_000,
     retry: false,
   });
@@ -214,7 +219,7 @@ export function SwapPanel({ tokenConfig }) {
   const [hasStaggered, setHasStaggered] = useState(false);
   if (!parsedAmount && hasStaggered) setHasStaggered(false);
 
-  if (!mintclub) {
+  if (!sdkReady) {
     return (
       <Card className="w-full max-w-sm">
         <CardContent className="py-6 text-center text-sm text-muted-foreground">
@@ -246,6 +251,8 @@ export function SwapPanel({ tokenConfig }) {
     if (!amount || !address) return;
     setIsPending(true);
     try {
+      const mc = await getMintClub();
+      const token = mc.network(tokenConfig.network).token(tokenConfig.address);
       const amountWei = wei(amount);
       if (mode === "buy") {
         await token.buy({ amount: amountWei, slippage: 2 });

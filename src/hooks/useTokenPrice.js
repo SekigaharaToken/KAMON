@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { parseUnits } from "viem";
-import { mintclub } from "@/lib/mintclub.js";
+import { getMintClub, useMintClubReady } from "@/lib/mintclub.js";
 import { SWAP_TOKEN_ADDRESS, SWAP_NETWORK } from "@/config/contracts.js";
 
 const ONE_TOKEN = parseUnits("1", 18);
@@ -11,6 +11,7 @@ const ONE_TOKEN = parseUnits("1", 18);
  * @returns {{ buyPrice: bigint|null, sellPrice: bigint|null, isLoading: boolean, isError: boolean }}
  */
 export function useTokenPrice() {
+  const sdkReady = useMintClubReady();
   const {
     data,
     isLoading,
@@ -18,11 +19,12 @@ export function useTokenPrice() {
   } = useQuery({
     queryKey: ["tokenPrice", SWAP_TOKEN_ADDRESS],
     queryFn: async () => {
-      const token = mintclub.network(SWAP_NETWORK).token(SWAP_TOKEN_ADDRESS);
+      const mc = await getMintClub();
+      const token = mc.network(SWAP_NETWORK).token(SWAP_TOKEN_ADDRESS);
       const [reserveAmount, royalty] = await token.getBuyEstimation(ONE_TOKEN);
       return { buyPrice: reserveAmount, royalty };
     },
-    enabled: !!mintclub && !!SWAP_TOKEN_ADDRESS,
+    enabled: sdkReady && !!SWAP_TOKEN_ADDRESS,
     staleTime: 10_000,
     retry: false,
   });

@@ -2,15 +2,15 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { TestWrapper } from "@/test/wrapper.jsx";
 
-// Mutable mintclub ref so we can toggle null per test
-const { mockMintclub } = vi.hoisted(() => ({
-  mockMintclub: { value: { network: vi.fn() } },
+// Mutable ref so we can toggle SDK readiness per test
+const { mockSdkReady } = vi.hoisted(() => ({
+  mockSdkReady: { value: true },
 }));
 
 vi.mock("@/lib/mintclub.js", () => ({
-  get mintclub() {
-    return mockMintclub.value;
-  },
+  mintclub: null,
+  getMintClub: vi.fn(() => Promise.resolve({ network: vi.fn() })),
+  useMintClubReady: vi.fn(() => mockSdkReady.value),
 }));
 
 vi.mock("@/hooks/useWalletAddress.js", () => ({
@@ -67,7 +67,7 @@ import StakingPage from "@/pages/StakingPage.jsx";
 
 describe("StakingPage", () => {
   beforeEach(() => {
-    mockMintclub.value = { network: vi.fn() };
+    mockSdkReady.value = true;
   });
 
   it("renders without crashing", () => {
@@ -83,7 +83,7 @@ describe("StakingPage", () => {
 
 describe("StakingPage SDK guard", () => {
   it("renders unavailable fallback when mintclub is null", () => {
-    mockMintclub.value = null;
+    mockSdkReady.value = false;
     render(<StakingPage />, { wrapper: TestWrapper });
     expect(screen.getByText(/not available in local development/i)).toBeInTheDocument();
     expect(screen.queryByTestId("staking-pool")).not.toBeInTheDocument();
@@ -92,7 +92,7 @@ describe("StakingPage SDK guard", () => {
 
 describe("StakingPage wiring", () => {
   beforeEach(() => {
-    mockMintclub.value = { network: vi.fn() };
+    mockSdkReady.value = true;
   });
 
   it("passes formatted poolStats props to StakingPool", () => {

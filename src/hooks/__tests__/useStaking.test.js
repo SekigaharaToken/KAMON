@@ -33,11 +33,15 @@ const mockStake = {
 };
 
 vi.mock("@/lib/mintclub.js", () => ({
-  mintclub: {
-    network: vi.fn(() => ({
-      stake: mockStake,
-    })),
-  },
+  mintclub: null,
+  getMintClub: vi.fn(() =>
+    Promise.resolve({
+      network: vi.fn(() => ({
+        stake: mockStake,
+      })),
+    }),
+  ),
+  useMintClubReady: vi.fn(() => true),
 }));
 
 const {

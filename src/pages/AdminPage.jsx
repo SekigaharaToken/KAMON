@@ -13,13 +13,14 @@ import { useWalletAddress } from "@/hooks/useWalletAddress.js";
 import { getSeasonStatus, getWeekNumber } from "@/hooks/useSeason.js";
 import { OPERATOR_ADDRESS, STAKING_POOL_ADDRESS, DOJO_TOKEN_ADDRESS } from "@/config/contracts.js";
 import { getPoolState } from "@/hooks/useStaking.js";
-import { mintclub } from "@/lib/mintclub.js";
+import { useMintClubReady } from "@/lib/mintclub.js";
 import { useLeaderboard } from "@/hooks/useLeaderboard.js";
 import { createAirdrop } from "@/lib/merkleAirdrop.js";
 import { SEASON_REWARD_POOL } from "@/config/season.js";
 
 export default function AdminPage() {
   const { address } = useWalletAddress();
+  const sdkReady = useMintClubReady();
 
   const isOperator =
     !!address &&
@@ -30,7 +31,7 @@ export default function AdminPage() {
   const { data: poolState } = useQuery({
     queryKey: ["stakingPool", STAKING_POOL_ADDRESS],
     queryFn: () => getPoolState(STAKING_POOL_ADDRESS),
-    enabled: !!mintclub && !!STAKING_POOL_ADDRESS,
+    enabled: sdkReady && !!STAKING_POOL_ADDRESS,
     staleTime: 30_000,
   });
 

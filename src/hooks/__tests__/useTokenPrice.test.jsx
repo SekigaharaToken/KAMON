@@ -26,6 +26,20 @@ vi.mock("@/config/contracts.js", async (importOriginal) => {
 // Mock the Mint Club SDK
 const mockGetBuyEstimation = vi.fn();
 
+vi.mock("@/lib/mintclub.js", () => ({
+  mintclub: null,
+  getMintClub: vi.fn(() =>
+    Promise.resolve({
+      network: () => ({
+        token: () => ({
+          getBuyEstimation: mockGetBuyEstimation,
+        }),
+      }),
+    }),
+  ),
+  useMintClubReady: vi.fn(() => true),
+}));
+
 vi.mock("mint.club-v2-sdk", () => ({
   mintclub: {
     withPublicClient: vi.fn(),

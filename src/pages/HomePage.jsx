@@ -18,7 +18,7 @@ import { retryAttest, getAttestedHouse, getIsMultiHouseHolder } from "@/hooks/us
 import { getBuyPrice, getHouseSupply } from "@/hooks/useHouseNFT.js";
 import { isLocalDev } from "@/config/chains.js";
 import { HOUSES, HOUSE_LIST } from "@/config/houses.js";
-import { mintclub } from "@/lib/mintclub.js";
+import { useMintClubReady } from "@/lib/mintclub.js";
 import { HouseCarousel } from "@/components/house/HouseCarousel.jsx";
 import { JoinStepper } from "@/components/house/JoinStepper.jsx";
 import { AbdicateStepper } from "@/components/house/AbdicateStepper.jsx";
@@ -33,7 +33,7 @@ import { fadeInUp, staggerDelay } from "@/lib/motion.js";
  * Falls back to empty objects when mintclub SDK is unavailable (local dev).
  */
 function useHouseCarouselData() {
-  const sdkAvailable = !!mintclub;
+  const sdkAvailable = useMintClubReady();
 
   const supplyQueries = useQueries({
     queries: HOUSE_LIST.map((house) => ({

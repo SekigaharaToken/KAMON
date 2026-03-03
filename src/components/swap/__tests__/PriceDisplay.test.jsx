@@ -5,13 +5,17 @@ import { TestWrapper } from "@/test/wrapper.jsx";
 const mockGetBuyEstimation = vi.fn();
 
 vi.mock("@/lib/mintclub.js", () => ({
-  mintclub: {
-    network: () => ({
-      token: () => ({
-        getBuyEstimation: mockGetBuyEstimation,
+  mintclub: null,
+  getMintClub: vi.fn(() =>
+    Promise.resolve({
+      network: () => ({
+        token: () => ({
+          getBuyEstimation: mockGetBuyEstimation,
+        }),
       }),
     }),
-  },
+  ),
+  useMintClubReady: vi.fn(() => true),
 }));
 
 const { PriceDisplay } = await import(

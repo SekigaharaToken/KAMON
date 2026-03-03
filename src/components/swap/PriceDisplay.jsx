@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import NumberFlow from "@number-flow/react";
 import { formatUnits, parseUnits } from "viem";
 import { useQuery } from "@tanstack/react-query";
-import { mintclub } from "@/lib/mintclub.js";
+import { getMintClub, useMintClubReady } from "@/lib/mintclub.js";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -19,14 +19,16 @@ function toPrice(wei) {
 export function PriceDisplay({ tokenConfig }) {
   const { t } = useTranslation();
 
+  const sdkReady = useMintClubReady();
   const { data, isLoading, isError } = useQuery({
     queryKey: ["tokenPrice", tokenConfig.address],
     queryFn: async () => {
-      const token = mintclub.network(tokenConfig.network).token(tokenConfig.address);
+      const mc = await getMintClub();
+      const token = mc.network(tokenConfig.network).token(tokenConfig.address);
       const [reserveAmount, royalty] = await token.getBuyEstimation(ONE_TOKEN);
       return { buyPrice: reserveAmount, royalty };
     },
-    enabled: !!mintclub && !!tokenConfig.address,
+    enabled: sdkReady && !!tokenConfig.address,
     staleTime: 10_000,
     retry: false,
   });
