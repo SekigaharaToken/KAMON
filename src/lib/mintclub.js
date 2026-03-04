@@ -9,21 +9,19 @@
  * because it doesn't support custom chains. Instead, useHouseNFT.js
  * routes calls through src/lib/localBond.js which uses direct viem calls.
  *
- * IMPORTANT: This module uses lazy dynamic imports to avoid top-level await,
- * which blocks the ES module graph in production bundles.
+ * Follows AMATERASU's pattern: direct synchronous import of the SDK
+ * singleton with lazy initialization via ensureInitialized().
  */
 
-import { useState, useEffect } from "react";
-import { isLocalDev } from "@/config/chains.js";
+import { createPublicClient, http } from "viem";
+import { base, baseSepolia } from "viem/chains";
+import { mintclub } from "mint.club-v2-sdk";
 
-let mintclub = null;
-let _initPromise = null;
-const _listeners = new Set();
+let initialized = false;
 
-async function initMintClub() {
-  const { createPublicClient, http } = await import("viem");
-  const { base, baseSepolia } = await import("viem/chains");
-  const sdk = await import("mint.club-v2-sdk");
+function ensureInitialized() {
+  if (initialized) return;
+  initialized = true;
 
   const alchemyKey = import.meta.env.VITE_ALCHEMY_API_KEY;
 
@@ -35,59 +33,29 @@ async function initMintClub() {
     ? `https://base-sepolia.g.alchemy.com/v2/${alchemyKey}`
     : "https://base-sepolia-rpc.publicnode.com";
 
-  const baseClient = createPublicClient({
-    chain: base,
-    transport: http(baseMainnetRpc),
-  });
+  mintclub.withPublicClient(
+    createPublicClient({ chain: base, transport: http(baseMainnetRpc) }),
+  );
+  mintclub.withPublicClient(
+    createPublicClient({ chain: baseSepolia, transport: http(baseSepoliaRpc) }),
+  );
+}
 
-  const baseSepoliaClient = createPublicClient({
-    chain: baseSepolia,
-    transport: http(baseSepoliaRpc),
-  });
-
-  mintclub = sdk.mintclub;
-  mintclub.withPublicClient(baseClient);
-  mintclub.withPublicClient(baseSepoliaClient);
-
-  // Notify all listeners that SDK is ready
-  for (const fn of _listeners) fn();
-
+/**
+ * Async accessor for callers that used the old lazy-init API.
+ * Returns the same singleton after ensuring initialization.
+ */
+async function getMintClub() {
+  ensureInitialized();
   return mintclub;
 }
 
 /**
- * Returns the initialized Mint Club SDK instance.
- * Lazily initializes on first call for production chains.
- * Returns null in local dev mode.
+ * React hook — always returns true since initialization is now synchronous.
+ * Kept for backward compatibility with components that gate on SDK readiness.
  */
-export async function getMintClub() {
-  if (isLocalDev) return null;
-  if (mintclub) return mintclub;
-  if (!_initPromise) _initPromise = initMintClub();
-  return _initPromise;
+function useMintClubReady() {
+  return true;
 }
 
-// Eagerly start initialization for production chains (non-blocking)
-if (!isLocalDev) {
-  _initPromise = initMintClub();
-}
-
-/**
- * React hook that returns true once the Mint Club SDK is initialized.
- * Triggers a re-render when the SDK becomes available.
- */
-export function useMintClubReady() {
-  const [ready, setReady] = useState(() => !!mintclub);
-
-  useEffect(() => {
-    if (ready) return;
-
-    const listener = () => setReady(true);
-    _listeners.add(listener);
-    return () => _listeners.delete(listener);
-  }, [ready]);
-
-  return ready;
-}
-
-export { mintclub };
+export { mintclub, ensureInitialized, getMintClub, useMintClubReady };

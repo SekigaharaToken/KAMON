@@ -13,33 +13,29 @@ vi.mock("@/config/chains.js", () => ({
   activeChain: { id: 8453, name: "Base" },
 }));
 
-// Mock mintclub SDK before importing hook
+// Mock mintclub SDK — mirrors AMATERASU's direct-export pattern
+const mockNft = {
+  getBuyEstimation: vi.fn(),
+  getSellEstimation: vi.fn(),
+  buy: vi.fn(),
+  sell: vi.fn(),
+  getBalanceOf: vi.fn(),
+  getTotalSupply: vi.fn(),
+};
 const mockWithWalletClient = vi.fn();
-vi.mock("@/lib/mintclub.js", () => {
-  const mockNft = {
-    getBuyEstimation: vi.fn(),
-    getSellEstimation: vi.fn(),
-    buy: vi.fn(),
-    sell: vi.fn(),
-    getBalanceOf: vi.fn(),
-    getTotalSupply: vi.fn(),
-  };
-  const mockSdk = {
-    network: vi.fn(() => ({
-      nft: vi.fn(() => mockNft),
-    })),
-    withWalletClient: mockWithWalletClient,
-  };
-  return {
-    mintclub: mockSdk,
-    getMintClub: vi.fn(() => Promise.resolve(mockSdk)),
-    useMintClubReady: vi.fn(() => true),
-    __mockNft: mockNft,
-  };
-});
+const mockMintclub = {
+  network: vi.fn(() => ({
+    nft: vi.fn(() => mockNft),
+  })),
+  withWalletClient: mockWithWalletClient,
+};
+
+vi.mock("@/lib/mintclub.js", () => ({
+  mintclub: mockMintclub,
+  ensureInitialized: vi.fn(),
+}));
 
 // Import after mock setup
-const { __mockNft } = await import("@/lib/mintclub.js");
 const {
   getBuyPrice,
   mintHouseNFT,
@@ -58,11 +54,11 @@ describe("useHouseNFT — getBuyPrice", () => {
   });
 
   it("returns buy price for 1 NFT", async () => {
-    __mockNft.getBuyEstimation.mockResolvedValue([10500000000000000000n, 300000000000000000n]);
+    mockNft.getBuyEstimation.mockResolvedValue([10500000000000000000n, 300000000000000000n]);
 
     const price = await getBuyPrice(TEST_HOUSE_ADDRESS);
     expect(price).toBe(10500000000000000000n);
-    expect(__mockNft.getBuyEstimation).toHaveBeenCalledWith(1n);
+    expect(mockNft.getBuyEstimation).toHaveBeenCalledWith(1n);
   });
 
   it("returns null for missing address", async () => {
@@ -77,12 +73,12 @@ describe("useHouseNFT — mintHouseNFT", () => {
   });
 
   it("calls buy with quantity 1 and injects walletClient", async () => {
-    __mockNft.buy.mockResolvedValue({ hash: "0xabc" });
+    mockNft.buy.mockResolvedValue({ hash: "0xabc" });
 
     const result = await mintHouseNFT(TEST_HOUSE_ADDRESS, TEST_WALLET, mockWalletClient);
     expect(result).toEqual({ hash: "0xabc" });
     expect(mockWithWalletClient).toHaveBeenCalledWith(mockWalletClient);
-    expect(__mockNft.buy).toHaveBeenCalledWith(
+    expect(mockNft.buy).toHaveBeenCalledWith(
       expect.objectContaining({ amount: 1, recipient: TEST_WALLET }),
     );
   });
@@ -102,12 +98,12 @@ describe("useHouseNFT — burnHouseNFT", () => {
   });
 
   it("calls sell with quantity 1 and injects walletClient", async () => {
-    __mockNft.sell.mockResolvedValue({ hash: "0xdef" });
+    mockNft.sell.mockResolvedValue({ hash: "0xdef" });
 
     const result = await burnHouseNFT(TEST_HOUSE_ADDRESS, TEST_WALLET, mockWalletClient);
     expect(result).toEqual({ hash: "0xdef" });
     expect(mockWithWalletClient).toHaveBeenCalledWith(mockWalletClient);
-    expect(__mockNft.sell).toHaveBeenCalledWith(
+    expect(mockNft.sell).toHaveBeenCalledWith(
       expect.objectContaining({ amount: 1, recipient: TEST_WALLET }),
     );
   });
@@ -123,15 +119,15 @@ describe("useHouseNFT — getHouseBalance", () => {
   });
 
   it("returns balance for wallet", async () => {
-    __mockNft.getBalanceOf.mockResolvedValue(1n);
+    mockNft.getBalanceOf.mockResolvedValue(1n);
 
     const balance = await getHouseBalance(TEST_HOUSE_ADDRESS, TEST_WALLET);
     expect(balance).toBe(1n);
-    expect(__mockNft.getBalanceOf).toHaveBeenCalledWith(TEST_WALLET);
+    expect(mockNft.getBalanceOf).toHaveBeenCalledWith(TEST_WALLET);
   });
 
   it("returns 0n for no ownership", async () => {
-    __mockNft.getBalanceOf.mockResolvedValue(0n);
+    mockNft.getBalanceOf.mockResolvedValue(0n);
 
     const balance = await getHouseBalance(TEST_HOUSE_ADDRESS, TEST_WALLET);
     expect(balance).toBe(0n);
@@ -144,14 +140,14 @@ describe("useHouseNFT — getHouseSupply", () => {
   });
 
   it("returns current supply", async () => {
-    __mockNft.getTotalSupply.mockResolvedValue(247n);
+    mockNft.getTotalSupply.mockResolvedValue(247n);
 
     const supply = await getHouseSupply(TEST_HOUSE_ADDRESS);
     expect(supply).toBe(247n);
   });
 
   it("returns 0n for new House", async () => {
-    __mockNft.getTotalSupply.mockResolvedValue(0n);
+    mockNft.getTotalSupply.mockResolvedValue(0n);
 
     const supply = await getHouseSupply(TEST_HOUSE_ADDRESS);
     expect(supply).toBe(0n);
