@@ -86,6 +86,7 @@
     "stakeFailed": "ステーキングに失敗しました。再試行してください。",
     "unstakeSuccess": "トークンをアンステーキングしました。",
     "unstakeFailed": "アンステーキングに失敗しました。再試行してください。",
+    "yourStake": "あなたのステーク",
     "claimSuccess": "報酬を請求しました！",
     "claimFailed": "請求に失敗しました。再試行してください。",
     "badgeProgress": "ステーキングバッジ：{{threshold}}週中{{weeks}}週",
