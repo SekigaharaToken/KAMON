@@ -4,11 +4,11 @@ import { motion, AnimatePresence } from "motion/react";
 import NumberFlow from "@number-flow/react";
 import { useQuery } from "@tanstack/react-query";
 import { formatUnits, parseUnits, erc20Abi } from "viem";
-import { useReadContract } from "wagmi";
+import { useReadContract, useWalletClient } from "wagmi";
 import { TriangleAlert } from "lucide-react";
 import { toast } from "sonner";
 import { useWalletAddress } from "@/hooks/useWalletAddress.js";
-import { getMintClub, useMintClubReady } from "@/lib/mintclub.js";
+import { mintclub, ensureInitialized, getMintClub, useMintClubReady } from "@/lib/mintclub.js";
 import { wei } from "mint.club-v2-sdk";
 import {
   Card,
@@ -135,6 +135,7 @@ export function SwapPanel({ tokenConfig }) {
   const [mode, setMode] = useState("buy");
   const [amount, setAmount] = useState("");
   const [isPending, setIsPending] = useState(false);
+  const { data: walletClient } = useWalletClient();
   const sdkReady = useMintClubReady();
 
   const parsedAmount = amount && Number(amount) > 0
@@ -248,16 +249,22 @@ export function SwapPanel({ tokenConfig }) {
     && (estimation.cost * ONE_TOKEN / parsedAmount) < buyPrice;
 
   async function handleSubmit() {
-    if (!amount || !address) return;
+    if (!amount || !address || !walletClient) return;
     setIsPending(true);
     try {
-      const mc = await getMintClub();
-      const token = mc.network(tokenConfig.network).token(tokenConfig.address);
+      ensureInitialized();
+      mintclub.withWalletClient(walletClient);
+      const token = mintclub.network(tokenConfig.network).token(tokenConfig.address);
       const amountWei = wei(amount);
+      let receipt;
       if (mode === "buy") {
-        await token.buy({ amount: amountWei, slippage: 2 });
+        receipt = await token.buy({ amount: amountWei, slippage: 2 });
       } else {
-        await token.sell({ amount: amountWei, slippage: 2 });
+        receipt = await token.sell({ amount: amountWei, slippage: 2 });
+      }
+      if (!receipt) {
+        toast.error(t("toast.swapFailed"));
+        return;
       }
       toast.success(t(mode === "buy" ? "toast.swapBuySuccess" : "toast.swapSellSuccess"));
       setAmount("");
@@ -326,6 +333,7 @@ export function SwapPanel({ tokenConfig }) {
           disabled={
             !amount
             || isPending
+            || !walletClient
             || (mode === "sell" && supplyIsZero)
             || (mode === "buy" && supplyIsMax)
             || buyExceedsSupply
