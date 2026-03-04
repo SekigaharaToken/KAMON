@@ -250,6 +250,23 @@ describe("StakingPool", () => {
     });
   });
 
+  it("shows user staked amount above tabs when staked > 0", () => {
+    render(
+      <StakingPool userPosition={{ staked: "250.5", pendingRewards: "0" }} />,
+      { wrapper: TestWrapper },
+    );
+    expect(screen.getByText("Your Stake")).toBeInTheDocument();
+    expect(screen.getByText("250.5")).toBeInTheDocument();
+  });
+
+  it("does not show staked amount when staked is 0", () => {
+    render(
+      <StakingPool userPosition={{ staked: "0", pendingRewards: "0" }} />,
+      { wrapper: TestWrapper },
+    );
+    expect(screen.queryByText("Your Stake")).not.toBeInTheDocument();
+  });
+
   it("passes callbacks through to child components", async () => {
     const user = userEvent.setup();
     const onStake = vi.fn();

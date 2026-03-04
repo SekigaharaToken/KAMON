@@ -36,6 +36,14 @@ export function StakingPool({
         poolSize={poolStats.poolSize ?? "—"}
       />
 
+      {userPosition.staked && userPosition.staked !== "0" && (
+        <div className="text-center">
+          <p className="text-sm text-muted-foreground">{t("staking.yourStake")}</p>
+          <p className="font-mono tabular-nums text-2xl font-bold">{userPosition.staked}</p>
+          <p className="text-sm text-muted-foreground">$SEKI</p>
+        </div>
+      )}
+
       <TabsPrimitive.Root value={activeTab} onValueChange={setActiveTab}>
         <AnimatedTabsList activeValue={activeTab} className="w-full">
           <AnimatedTabsTrigger value="stake" layoutId="staking-tab">

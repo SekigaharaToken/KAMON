@@ -86,6 +86,7 @@
     "stakeFailed": "Staking failed. Try again.",
     "unstakeSuccess": "Tokens unstaked successfully.",
     "unstakeFailed": "Unstaking failed. Try again.",
+    "yourStake": "Your Stake",
     "claimSuccess": "Rewards claimed!",
     "claimFailed": "Claim failed. Try again.",
     "badgeProgress": "Staking Badge: Week {{weeks}} of {{threshold}}",

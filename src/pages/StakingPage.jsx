@@ -104,9 +104,19 @@ export default function StakingPage() {
       : "—",
   };
 
+  // Format pending rewards with more precision — streaming $DOJO can be very small
+  const pendingRaw = userPos?.pendingRewards;
+  const pendingStr = pendingRaw != null ? formatUnits(pendingRaw, 18) : "0";
+  const pendingNum = parseFloat(pendingStr);
+  const pendingFormatted = !Number.isFinite(pendingNum) || pendingNum === 0
+    ? "0"
+    : pendingNum < 0.0001
+      ? pendingNum.toFixed(8).replace(/0+$/, "").replace(/\.$/, "")
+      : fmt(pendingRaw);
+
   const userPosition = {
     staked: fmt(userPos?.staked),
-    pendingRewards: fmt(userPos?.pendingRewards),
+    pendingRewards: pendingFormatted,
   };
 
   const balance = fmt(sekiBalance);
