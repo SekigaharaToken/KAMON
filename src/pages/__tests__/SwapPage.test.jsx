@@ -8,21 +8,26 @@ vi.mock("@/hooks/useWalletAddress.js", () => ({
 
 vi.mock("wagmi", () => ({
   useReadContract: () => ({ data: undefined }),
+  useWalletClient: () => ({ data: { account: "0xmock", chain: { id: 8453 } } }),
 }));
 
-vi.mock("@/lib/mintclub.js", () => ({
-  mintclub: null,
-  getMintClub: vi.fn(() =>
-    Promise.resolve({
-      network: () => ({
-        token: () => ({
-          getBuyEstimation: vi.fn().mockResolvedValue([50000000000000000n, 1000000000000000n]),
-        }),
+vi.mock("@/lib/mintclub.js", () => {
+  const mockSdk = {
+    network: () => ({
+      token: () => ({
+        getBuyEstimation: vi.fn().mockResolvedValue([50000000000000000n, 1000000000000000n]),
       }),
     }),
-  ),
-  useMintClubReady: vi.fn(() => true),
-}));
+    withWalletClient: vi.fn(),
+    withPublicClient: vi.fn(),
+  };
+  return {
+    mintclub: mockSdk,
+    ensureInitialized: vi.fn(),
+    getMintClub: vi.fn(() => Promise.resolve(mockSdk)),
+    useMintClubReady: vi.fn(() => true),
+  };
+});
 
 vi.mock("mint.club-v2-sdk", () => ({
   mintclub: {
