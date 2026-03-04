@@ -19,6 +19,7 @@ import { useTheme } from "@/hooks/useTheme.js";
 import { useLoginModal } from "@/hooks/useLoginModal.js";
 import { useFarcaster } from "@/hooks/useFarcaster.js";
 import { useHouse } from "@/hooks/useHouse.js";
+import { useMembershipStatus } from "@/hooks/useMembershipStatus.js";
 import { useMiniAppContext } from "@/hooks/useMiniAppContext.js";
 import { activeChain } from "@/config/chains.js";
 import { SWAP_TOKENS } from "@/config/contracts.js";
@@ -57,6 +58,8 @@ export const Header = () => {
   const { isAuthenticated, profile, signOut } = useFarcaster();
   const { context } = useMiniAppContext();
   const { houseConfig } = useHouse();
+  const membership = useMembershipStatus();
+  const verifiedHouse = membership.isComplete ? houseConfig : null;
   const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
   const location = useLocation();
@@ -180,7 +183,11 @@ export const Header = () => {
           {isLoggedIn ? (
             <DropdownMenu onOpenChange={(open) => { if (open) fetchBalances(); }}>
               <DropdownMenuTrigger asChild>
-                <button type="button" className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <button
+                  type="button"
+                  className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  style={verifiedHouse ? { boxShadow: `0 0 0 2px ${verifiedHouse.colors.primary}` } : undefined}
+                >
                   <Avatar>
                     {pfpUrl && <AvatarImage src={pfpUrl} alt={displayName} />}
                     <AvatarFallback>{initials || "?"}</AvatarFallback>
@@ -189,9 +196,9 @@ export const Header = () => {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="min-w-44">
                 <DropdownMenuLabel>{displayName}</DropdownMenuLabel>
-                {houseConfig && (
-                  <DropdownMenuItem disabled className="text-xs" style={{ color: houseConfig.colors.primary }}>
-                    {houseConfig.symbol} {t(houseConfig.nameKey)}
+                {verifiedHouse && (
+                  <DropdownMenuItem disabled className="text-xs" style={{ color: verifiedHouse.colors.primary }}>
+                    {verifiedHouse.symbol} {t(verifiedHouse.nameKey)}
                   </DropdownMenuItem>
                 )}
                 {/* Activity (mobile — also in bottom nav but kept for quick access) */}
