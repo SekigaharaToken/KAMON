@@ -162,7 +162,7 @@ describe("HomePage", () => {
     expect(screen.queryByText("Abdicate")).not.toBeInTheDocument();
   });
 
-  it("renders house name and abdicate button when house selected", () => {
+  it("renders house name, logo, and switch house button when house selected", () => {
     mockUseHouse.mockReturnValue({
       selectedHouse: "honoo",
       houseConfig: {
@@ -184,7 +184,9 @@ describe("HomePage", () => {
     );
 
     expect(screen.getByText("炎 Honoo")).toBeInTheDocument();
-    expect(screen.getByText("Abdicate")).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "炎 Honoo" })).toHaveAttribute("src", "/house-logos/honoo.png");
+    expect(screen.getByText("Switch House")).toBeInTheDocument();
+    expect(screen.queryByText("Abdicate")).not.toBeInTheDocument();
   });
 
   it("does not render join or abdicate steppers when not triggered", () => {

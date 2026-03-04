@@ -161,23 +161,30 @@ function PostSelection() {
   }
 
   const houseName = t(houseConfig.nameKey);
+  const houseLogo = `/house-logos/${houseConfig.id}.png`;
 
   return (
     <div className="flex flex-col items-center gap-6 py-8">
-      <motion.h1 className="font-serif text-3xl font-bold" {...fadeInUp}>
+      <motion.img
+        src={houseLogo}
+        alt={houseName}
+        className="size-32 object-contain"
+        {...fadeInUp}
+      />
+      <motion.h1 className="font-serif text-3xl font-bold" {...fadeInUp} transition={{ ...fadeInUp.transition, ...staggerDelay(1) }}>
         {houseName}
       </motion.h1>
       <motion.p
-        className="text-muted-foreground text-center"
+        className="text-muted-foreground text-center max-w-sm"
         {...fadeInUp}
-        transition={{ ...fadeInUp.transition, ...staggerDelay(1) }}
+        transition={{ ...fadeInUp.transition, ...staggerDelay(2) }}
       >
         {t(houseConfig.descriptionKey)}
       </motion.p>
       <motion.p
         className="text-sm text-muted-foreground"
         {...fadeInUp}
-        transition={{ ...fadeInUp.transition, ...staggerDelay(2) }}
+        transition={{ ...fadeInUp.transition, ...staggerDelay(3) }}
       >
         {t("house.myHouse")}
       </motion.p>
@@ -185,7 +192,7 @@ function PostSelection() {
         <motion.div
           className="w-full max-w-sm"
           {...fadeInUp}
-          transition={{ ...fadeInUp.transition, ...staggerDelay(3) }}
+          transition={{ ...fadeInUp.transition, ...staggerDelay(4) }}
         >
           <Alert>
             <AlertDescription>{t("house.multiHouseWarning")}</AlertDescription>
@@ -193,16 +200,13 @@ function PostSelection() {
         </motion.div>
       )}
       <motion.div
-        className="flex items-center gap-3"
+        className="flex flex-col items-center gap-3"
         {...fadeInUp}
         transition={{
           ...fadeInUp.transition,
-          ...staggerDelay((isMultiHouseHolder ? 1 : 0) + 3),
+          ...staggerDelay((isMultiHouseHolder ? 1 : 0) + 4),
         }}
       >
-        <Button variant="destructive" size="sm" onClick={() => setAbdicateOpen(true)}>
-          {t("house.abdicate")}
-        </Button>
         <Button variant="outline" size="sm" onClick={handleSwitchHouse}>
           {t("house.switchHouse")}
         </Button>
