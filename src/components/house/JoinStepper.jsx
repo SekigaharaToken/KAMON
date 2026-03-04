@@ -40,33 +40,43 @@ export function JoinStepper({ house, open, onOpenChange, onComplete }) {
 
   const houseName = house ? t(house.nameKey) : "";
 
-  async function handleBegin() {
-    stepper.start();
-
-    // Step 1: Mint NFT
+  async function runMint() {
     try {
       await mintHouseNFT(house.address, address, walletClient);
     } catch (err) {
       stepper.fail(err?.shortMessage || err?.message || t("errors.txFailed"));
-      return;
+      return false;
     }
-
     stepper.advance();
+    return true;
+  }
 
-    // Step 2: Attest membership (non-fatal)
+  async function runAttest() {
     try {
       await attestHouse(house.numericId, address, fid, walletClient);
     } catch (err) {
       stepper.fail(err?.shortMessage || err?.message || t("house.attestFailed"));
-      return;
+      return false;
     }
-
     stepper.advance();
+    return true;
   }
 
-  function handleRetry() {
-    stepper.reset();
-    handleBegin();
+  async function handleBegin() {
+    stepper.start();
+    if (!(await runMint())) return;
+    await runAttest();
+  }
+
+  async function handleRetry() {
+    const failedStep = stepper.steps.findIndex((s) => s.status === "error");
+    stepper.retry();
+    if (failedStep === 0) {
+      if (!(await runMint())) return;
+      await runAttest();
+    } else {
+      await runAttest();
+    }
   }
 
   function handleSkip() {

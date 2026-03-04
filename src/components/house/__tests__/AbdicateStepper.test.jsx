@@ -135,6 +135,32 @@ describe("AbdicateStepper", () => {
     });
   });
 
+  it("retry after revoke failure only retries revoke, not burn", async () => {
+    mockRevokeHouse.mockRejectedValueOnce(new Error("revoke failed"));
+    const user = userEvent.setup();
+    render(
+      <TestWrapper>
+        <AbdicateStepper houseConfig={houseConfig} open={true} onOpenChange={vi.fn()} onComplete={vi.fn()} />
+      </TestWrapper>,
+    );
+
+    await user.click(screen.getByText("Confirm"));
+
+    await waitFor(() => {
+      expect(screen.getByText("Retry")).toBeInTheDocument();
+    });
+
+    mockBurnHouseNFT.mockClear();
+    mockRevokeHouse.mockClear();
+
+    await user.click(screen.getByText("Retry"));
+
+    await waitFor(() => {
+      expect(mockRevokeHouse).toHaveBeenCalledWith("0xabc123", mockWalletClient);
+    });
+    expect(mockBurnHouseNFT).not.toHaveBeenCalled();
+  });
+
   it("completes immediately when balance is 0", async () => {
     mockGetHouseBalance.mockResolvedValueOnce(0n);
     const user = userEvent.setup();

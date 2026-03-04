@@ -67,4 +67,42 @@ describe("useTransactionStepper", () => {
     expect(result.current.isComplete).toBe(false);
     expect(result.current.activeStep).toBe(-1);
   });
+
+  it("retry sets errored step back to active, preserving completed steps", () => {
+    const { result } = renderHook(() => useTransactionStepper(twoSteps));
+    // Complete step 0, then fail on step 1
+    act(() => result.current.start());
+    act(() => result.current.advance());
+    act(() => result.current.fail("attest failed"));
+    expect(result.current.steps[0].status).toBe("completed");
+    expect(result.current.steps[1].status).toBe("error");
+
+    // Retry should re-activate step 1, keep step 0 completed
+    act(() => result.current.retry());
+    expect(result.current.steps[0].status).toBe("completed");
+    expect(result.current.steps[1].status).toBe("active");
+    expect(result.current.steps[1].errorMessage).toBeNull();
+    expect(result.current.activeStep).toBe(1);
+    expect(result.current.isActive).toBe(true);
+  });
+
+  it("retry on step 0 error re-activates step 0", () => {
+    const { result } = renderHook(() => useTransactionStepper(twoSteps));
+    act(() => result.current.start());
+    act(() => result.current.fail("mint failed"));
+    expect(result.current.steps[0].status).toBe("error");
+
+    act(() => result.current.retry());
+    expect(result.current.steps[0].status).toBe("active");
+    expect(result.current.steps[1].status).toBe("pending");
+    expect(result.current.activeStep).toBe(0);
+  });
+
+  it("retry is a no-op when no step is in error", () => {
+    const { result } = renderHook(() => useTransactionStepper(twoSteps));
+    act(() => result.current.start());
+    const stepsBefore = result.current.steps;
+    act(() => result.current.retry());
+    expect(result.current.steps).toBe(stepsBefore);
+  });
 });
