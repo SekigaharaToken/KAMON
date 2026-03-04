@@ -64,11 +64,9 @@ export async function mintHouseNFT(houseAddress, recipient, walletClient) {
   ensureInitialized();
   mintclub.withWalletClient(walletClient);
   const nft = mintclub.network(MINT_CLUB_NETWORK).nft(houseAddress);
-  return nft.buy({
-    amount: 1,
-    recipient,
-    onError: (e) => { throw e; },
-  });
+  const receipt = await nft.buy({ amount: 1, recipient });
+  if (!receipt) throw new Error("Transaction was not completed");
+  return receipt;
 }
 
 export async function burnHouseNFT(houseAddress, recipient, walletClient) {
@@ -83,11 +81,9 @@ export async function burnHouseNFT(houseAddress, recipient, walletClient) {
   ensureInitialized();
   mintclub.withWalletClient(walletClient);
   const nft = mintclub.network(MINT_CLUB_NETWORK).nft(houseAddress);
-  return nft.sell({
-    amount: 1,
-    recipient,
-    onError: (e) => { throw e; },
-  });
+  const receipt = await nft.sell({ amount: 1, recipient });
+  if (!receipt) throw new Error("Transaction was not completed");
+  return receipt;
 }
 
 export async function getHouseBalance(houseAddress, walletAddress) {
