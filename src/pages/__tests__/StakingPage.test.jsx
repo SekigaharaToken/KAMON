@@ -23,6 +23,7 @@ vi.mock("@/hooks/useWalletAddress.js", () => ({
 
 vi.mock("wagmi", () => ({
   useReadContract: () => ({ data: 5000000000000000000n, refetch: vi.fn() }),
+  useWalletClient: () => ({ data: { account: "0xmock", chain: { id: 8453 } } }),
 }));
 
 vi.mock("@/config/chains.js", () => ({

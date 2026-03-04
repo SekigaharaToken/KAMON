@@ -10,7 +10,7 @@ import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { formatUnits, parseUnits, erc20Abi } from "viem";
 import { formatTokenAmount } from "@/lib/formatTokenAmount.js";
-import { useReadContract } from "wagmi";
+import { useReadContract, useWalletClient } from "wagmi";
 import { motion } from "motion/react";
 import { toast } from "sonner";
 import { parseContractError } from "@/lib/parseContractError.js";
@@ -49,6 +49,7 @@ export default function StakingPage() {
   const { t } = useTranslation();
   const { address, canTransact } = useWalletAddress();
   const [isPending, setIsPending] = useState(false);
+  const { data: walletClient } = useWalletClient();
   const sdkReady = useMintClubReady();
 
   const enabled = sdkReady;
@@ -127,7 +128,7 @@ export default function StakingPage() {
     if (!canTransact) return;
     setIsPending(true);
     try {
-      await stakeTokens(STAKING_POOL_ADDRESS, parseUnits(amount, 18));
+      await stakeTokens(STAKING_POOL_ADDRESS, parseUnits(amount, 18), walletClient);
       toast.success(t("staking.stakeSuccess"));
       refetchPos();
       refetchBalance();
@@ -142,7 +143,7 @@ export default function StakingPage() {
     if (!canTransact) return;
     setIsPending(true);
     try {
-      await unstakeTokens(STAKING_POOL_ADDRESS, parseUnits(amount, 18));
+      await unstakeTokens(STAKING_POOL_ADDRESS, parseUnits(amount, 18), walletClient);
       toast.success(t("staking.unstakeSuccess"));
       refetchPos();
       refetchBalance();
@@ -157,7 +158,7 @@ export default function StakingPage() {
     if (!canTransact) return;
     setIsPending(true);
     try {
-      await claimRewards(STAKING_POOL_ADDRESS);
+      await claimRewards(STAKING_POOL_ADDRESS, walletClient);
       toast.success(t("staking.claimSuccess"));
       refetchPos();
     } catch (err) {

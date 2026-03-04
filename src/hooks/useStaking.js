@@ -9,7 +9,7 @@
  *   getUserPosition → { staked, pendingRewards, stakedSince }
  */
 
-import { getMintClub } from "@/lib/mintclub.js";
+import { mintclub, ensureInitialized, getMintClub } from "@/lib/mintclub.js";
 import { MINT_CLUB_NETWORK } from "@/config/contracts.js";
 import { STAKING_POOL_ID } from "@/config/season.js";
 
@@ -61,11 +61,15 @@ export async function getUserPosition(_unused, walletAddress) {
  * Stake tokens into the pool.
  * @param {string} _unused — kept for call-site compat (was poolAddress)
  * @param {bigint} amount — amount to stake (must be > 0)
+ * @param {object} walletClient — viem WalletClient from useWalletClient()
  * @returns {Promise<object>} — tx receipt
  */
-export async function stakeTokens(_unused, amount) {
+export async function stakeTokens(_unused, amount, walletClient) {
   if (!amount || amount <= 0n) throw new Error("Stake amount must be greater than 0");
-  const stake = await getStakeHelper();
+  if (!walletClient) throw new Error("Wallet client is required");
+  ensureInitialized();
+  mintclub.withWalletClient(walletClient);
+  const stake = mintclub.network(MINT_CLUB_NETWORK).stake;
   const receipt = await stake.stake({ poolId: STAKING_POOL_ID, amount });
   // Mint Club SDK swallows errors and returns undefined — re-throw
   if (!receipt) throw new Error("Transaction was not completed");
@@ -76,10 +80,14 @@ export async function stakeTokens(_unused, amount) {
  * Unstake tokens from the pool.
  * @param {string} _unused — kept for call-site compat (was poolAddress)
  * @param {bigint} amount — amount to withdraw
+ * @param {object} walletClient — viem WalletClient from useWalletClient()
  * @returns {Promise<object>} — tx receipt
  */
-export async function unstakeTokens(_unused, amount) {
-  const stake = await getStakeHelper();
+export async function unstakeTokens(_unused, amount, walletClient) {
+  if (!walletClient) throw new Error("Wallet client is required");
+  ensureInitialized();
+  mintclub.withWalletClient(walletClient);
+  const stake = mintclub.network(MINT_CLUB_NETWORK).stake;
   const receipt = await stake.unstake({ poolId: STAKING_POOL_ID, amount });
   if (!receipt) throw new Error("Transaction was not completed");
   return receipt;
@@ -88,10 +96,14 @@ export async function unstakeTokens(_unused, amount) {
 /**
  * Claim pending $DOJO rewards.
  * @param {string} _unused — kept for call-site compat (was poolAddress)
+ * @param {object} walletClient — viem WalletClient from useWalletClient()
  * @returns {Promise<object>} — tx receipt
  */
-export async function claimRewards(/* _unused */) {
-  const stake = await getStakeHelper();
+export async function claimRewards(_unused, walletClient) {
+  if (!walletClient) throw new Error("Wallet client is required");
+  ensureInitialized();
+  mintclub.withWalletClient(walletClient);
+  const stake = mintclub.network(MINT_CLUB_NETWORK).stake;
   const receipt = await stake.claim({ poolId: STAKING_POOL_ID });
   if (!receipt) throw new Error("Transaction was not completed");
   return receipt;
