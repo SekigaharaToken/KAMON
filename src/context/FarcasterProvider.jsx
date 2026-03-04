@@ -67,14 +67,18 @@ export const FarcasterProvider = ({ children }) => {
   }, [signOut]);
 
   // Use auth-kit profile when live, fall back to stored profile
-  const isAuthenticated = isAuthKitAuthenticated || storedProfile !== null;
   const baseProfile = (isAuthKitAuthenticated && authKitProfile) || storedProfile;
+  const isAuthenticated = isAuthKitAuthenticated || storedProfile !== null || !!miniAppFid;
 
-  // Merge MiniApp FID into profile if auth-kit didn't provide one
+  // Merge MiniApp FID into profile — create a minimal profile if none exists
+  // (MiniApp users auto-connect wallet without SIWF, so baseProfile is null)
   const profile = useMemo(() => {
-    if (!baseProfile) return null;
-    if (baseProfile.fid || !miniAppFid) return baseProfile;
-    return { ...baseProfile, fid: miniAppFid };
+    if (baseProfile) {
+      if (baseProfile.fid || !miniAppFid) return baseProfile;
+      return { ...baseProfile, fid: miniAppFid };
+    }
+    if (miniAppFid) return { fid: miniAppFid };
+    return null;
   }, [baseProfile, miniAppFid]);
 
   /**
