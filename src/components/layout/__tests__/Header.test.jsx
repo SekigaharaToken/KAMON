@@ -68,7 +68,7 @@ describe("Header", () => {
     expect(screen.getByText("Home")).toBeInTheDocument();
     expect(screen.getByText("Swap")).toBeInTheDocument();
     expect(screen.getByText("Staking")).toBeInTheDocument();
-    expect(screen.getByText("Leaderboard")).toBeInTheDocument();
+    expect(screen.getByText("Rank")).toBeInTheDocument();
     expect(screen.getByText("Activity")).toBeInTheDocument();
   });
 
