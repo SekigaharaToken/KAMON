@@ -17,14 +17,14 @@ export const FarcasterProvider = ({ children }) => {
     useProfile();
   const { signOut } = useSignIn({});
   const [error, setError] = useState(null);
-  const [miniAppFid, setMiniAppFid] = useState(null);
+  const [miniAppUser, setMiniAppUser] = useState(null);
 
-  // Resolve FID from MiniApp SDK context (Farcaster frames / mini-apps)
+  // Resolve user profile from MiniApp SDK context (Farcaster frames / mini-apps)
   useEffect(() => {
     import("@farcaster/miniapp-sdk").then(({ sdk: miniSdk }) => {
       if (miniSdk.context && typeof miniSdk.context.then === "function") {
         miniSdk.context.then((ctx) => {
-          if (ctx?.user?.fid) setMiniAppFid(ctx.user.fid);
+          if (ctx?.user?.fid) setMiniAppUser(ctx.user);
         }).catch(() => {});
       }
     }).catch(() => {});
@@ -68,18 +68,20 @@ export const FarcasterProvider = ({ children }) => {
 
   // Use auth-kit profile when live, fall back to stored profile
   const baseProfile = (isAuthKitAuthenticated && authKitProfile) || storedProfile;
+  const miniAppFid = miniAppUser?.fid;
   const isAuthenticated = isAuthKitAuthenticated || storedProfile !== null || !!miniAppFid;
 
-  // Merge MiniApp FID into profile — create a minimal profile if none exists
-  // (MiniApp users auto-connect wallet without SIWF, so baseProfile is null)
+  // Merge MiniApp user into profile — use full MiniApp user data (displayName,
+  // username, pfpUrl) when no SIWF profile exists, so the Header can display
+  // the avatar and username without requiring a separate sign-in.
   const profile = useMemo(() => {
     if (baseProfile) {
       if (baseProfile.fid || !miniAppFid) return baseProfile;
       return { ...baseProfile, fid: miniAppFid };
     }
-    if (miniAppFid) return { fid: miniAppFid };
+    if (miniAppUser) return miniAppUser;
     return null;
-  }, [baseProfile, miniAppFid]);
+  }, [baseProfile, miniAppUser, miniAppFid]);
 
   /**
    * Generate an alphanumeric nonce for SIWF.

@@ -8,7 +8,7 @@
  */
 
 import { useTranslation } from "react-i18next";
-import { useAccount } from "wagmi";
+import { useAccount, useWalletClient } from "wagmi";
 import { useTransactionStepper } from "@/hooks/useTransactionStepper.js";
 import { mintHouseNFT } from "@/hooks/useHouseNFT.js";
 import { attestHouse } from "@/hooks/useHouseMembership.js";
@@ -28,6 +28,7 @@ import {
 export function JoinStepper({ house, open, onOpenChange, onComplete }) {
   const { t } = useTranslation();
   const { address } = useAccount();
+  const { data: walletClient } = useWalletClient();
   const { profile } = useFarcaster();
   const fid = profile?.fid;
   const fidRequired = !isLocalDev && !fid;
@@ -44,7 +45,7 @@ export function JoinStepper({ house, open, onOpenChange, onComplete }) {
 
     // Step 1: Mint NFT
     try {
-      await mintHouseNFT(house.address, address);
+      await mintHouseNFT(house.address, address, walletClient);
     } catch (err) {
       stepper.fail(err?.shortMessage || err?.message || t("errors.txFailed"));
       return;
@@ -114,7 +115,7 @@ export function JoinStepper({ house, open, onOpenChange, onComplete }) {
               )}
               <Button
                 onClick={handleBegin}
-                disabled={fidRequired}
+                disabled={fidRequired || !walletClient}
                 style={house ? { backgroundColor: house.colors.primary } : undefined}
               >
                 {t("stepper.begin")}
