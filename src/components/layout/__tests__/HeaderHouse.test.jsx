@@ -38,6 +38,15 @@ vi.mock("@/hooks/useHouse.js", () => ({
   useHouse: (...args) => mockUseHouse(...args),
 }));
 
+// Mock useMembershipStatus
+const mockUseMembershipStatus = vi.fn(() => ({
+  hasNFT: false, hasAttestation: false, isComplete: false,
+  needsNFT: false, needsAttestation: false, isLoading: false,
+}));
+vi.mock("@/hooks/useMembershipStatus.js", () => ({
+  useMembershipStatus: (...args) => mockUseMembershipStatus(...args),
+}));
+
 const { Header } = await import("../Header.jsx");
 
 describe("Header house info in avatar menu", () => {
@@ -45,8 +54,12 @@ describe("Header house info in avatar menu", () => {
     vi.clearAllMocks();
   });
 
-  it("shows house symbol and name when house is selected", async () => {
+  it("shows house symbol and name when house is selected and membership verified", async () => {
     const user = userEvent.setup();
+    mockUseMembershipStatus.mockReturnValue({
+      hasNFT: true, hasAttestation: true, isComplete: true,
+      needsNFT: false, needsAttestation: false, isLoading: false,
+    });
     mockUseHouse.mockReturnValue({
       selectedHouse: "mizu",
       houseConfig: {
