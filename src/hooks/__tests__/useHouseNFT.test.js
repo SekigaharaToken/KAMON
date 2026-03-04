@@ -37,22 +37,15 @@ vi.mock("@/lib/mintclub.js", () => {
   };
 });
 
-// Mock viem for ensureWalletClient
-vi.mock("viem", async (importOriginal) => {
-  const actual = await importOriginal();
-  return {
-    ...actual,
-    createWalletClient: vi.fn(() => ({ account: "0xmock" })),
-    custom: vi.fn(() => ({})),
-  };
-});
+// Mock @wagmi/core for ensureWalletClient
+vi.mock("@wagmi/core", () => ({
+  getWalletClient: vi.fn(() => Promise.resolve({ account: "0xmock" })),
+}));
 
-// Mock window.ethereum for ensureWalletClient
-globalThis.window = {
-  ethereum: {
-    request: vi.fn().mockResolvedValue(["0xmockAccount"]),
-  },
-};
+// Mock wagmi config to avoid loading @farcaster/miniapp-wagmi-connector
+vi.mock("@/config/wagmi.js", () => ({
+  wagmiConfig: {},
+}));
 
 // Import after mock setup
 const { __mockNft } = await import("@/lib/mintclub.js");
