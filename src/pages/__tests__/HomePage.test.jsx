@@ -38,13 +38,22 @@ vi.mock("@/hooks/useHouse.js", () => ({
 }));
 
 // Mock useHouseMembership
-const mockRetryAttest = vi.fn(() => Promise.resolve());
-const mockGetAttestedHouse = vi.fn(() => Promise.resolve(0));
 const mockGetIsMultiHouseHolder = vi.fn(() => Promise.resolve(false));
 vi.mock("@/hooks/useHouseMembership.js", () => ({
-  retryAttest: (...args) => mockRetryAttest(...args),
-  getAttestedHouse: (...args) => mockGetAttestedHouse(...args),
   getIsMultiHouseHolder: (...args) => mockGetIsMultiHouseHolder(...args),
+}));
+
+// Mock useMembershipStatus
+const mockMembershipStatus = {
+  hasNFT: true,
+  hasAttestation: true,
+  isComplete: true,
+  needsNFT: false,
+  needsAttestation: false,
+  isLoading: false,
+};
+vi.mock("@/hooks/useMembershipStatus.js", () => ({
+  useMembershipStatus: () => mockMembershipStatus,
 }));
 
 // Mock sonner
@@ -67,6 +76,10 @@ vi.mock("@/components/house/JoinStepper.jsx", () => ({
 
 vi.mock("@/components/house/AbdicateStepper.jsx", () => ({
   AbdicateStepper: ({ open }) => open ? <div data-testid="abdicate-stepper">abdicate stepper</div> : null,
+}));
+
+vi.mock("@/components/house/RepairStepper.jsx", () => ({
+  RepairStepper: ({ open }) => open ? <div data-testid="repair-stepper">repair stepper</div> : null,
 }));
 
 // Mock chains for SDK guard
@@ -128,6 +141,15 @@ describe("HomePage", () => {
     mockGetHouseSupply.mockResolvedValue(42n);
     mockGetBuyPrice.mockResolvedValue(50000000000000000n);
     mockGetIsMultiHouseHolder.mockResolvedValue(false);
+    // Reset membership status to complete
+    Object.assign(mockMembershipStatus, {
+      hasNFT: true,
+      hasAttestation: true,
+      isComplete: true,
+      needsNFT: false,
+      needsAttestation: false,
+      isLoading: false,
+    });
   });
 
   it("renders carousel when no house selected", () => {
@@ -335,5 +357,64 @@ describe("HomePage", () => {
     await user.click(screen.getByText("Switch House"));
 
     expect(screen.getByTestId("abdicate-stepper")).toBeInTheDocument();
+  });
+
+  it("opens RepairStepper when membership is incomplete (needs attestation)", async () => {
+    Object.assign(mockMembershipStatus, {
+      hasNFT: true,
+      hasAttestation: false,
+      isComplete: false,
+      needsNFT: false,
+      needsAttestation: true,
+      isLoading: false,
+    });
+
+    mockUseHouse.mockReturnValue({
+      selectedHouse: "honoo",
+      houseConfig: {
+        id: "honoo",
+        symbol: "炎",
+        nameKey: "house.honoo",
+        descriptionKey: "house.description.honoo",
+        address: "0x1234",
+        numericId: 1,
+        colors: { primary: "#c92a22" },
+      },
+      selectHouse: mockSelectHouse,
+    });
+
+    render(
+      <FreshWrapper>
+        <HomePage />
+      </FreshWrapper>,
+    );
+
+    await vi.waitFor(() => {
+      expect(screen.getByTestId("repair-stepper")).toBeInTheDocument();
+    });
+  });
+
+  it("does not open RepairStepper when membership is complete", () => {
+    mockUseHouse.mockReturnValue({
+      selectedHouse: "honoo",
+      houseConfig: {
+        id: "honoo",
+        symbol: "炎",
+        nameKey: "house.honoo",
+        descriptionKey: "house.description.honoo",
+        address: "0x1234",
+        numericId: 1,
+        colors: { primary: "#c92a22" },
+      },
+      selectHouse: mockSelectHouse,
+    });
+
+    render(
+      <TestWrapper>
+        <HomePage />
+      </TestWrapper>,
+    );
+
+    expect(screen.queryByTestId("repair-stepper")).not.toBeInTheDocument();
   });
 });

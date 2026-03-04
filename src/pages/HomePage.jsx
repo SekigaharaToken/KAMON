@@ -14,7 +14,8 @@ import { formatUnits } from "viem";
 import { toast } from "sonner";
 import { useHouse } from "@/hooks/useHouse.js";
 import { useFarcaster } from "@/hooks/useFarcaster.js";
-import { retryAttest, getAttestedHouse, getIsMultiHouseHolder } from "@/hooks/useHouseMembership.js";
+import { useMembershipStatus } from "@/hooks/useMembershipStatus.js";
+import { getIsMultiHouseHolder } from "@/hooks/useHouseMembership.js";
 import { getBuyPrice, getHouseSupply } from "@/hooks/useHouseNFT.js";
 import { isLocalDev } from "@/config/chains.js";
 import { HOUSES, HOUSE_LIST } from "@/config/houses.js";
@@ -22,6 +23,7 @@ import { useMintClubReady } from "@/lib/mintclub.js";
 import { HouseCarousel } from "@/components/house/HouseCarousel.jsx";
 import { JoinStepper } from "@/components/house/JoinStepper.jsx";
 import { AbdicateStepper } from "@/components/house/AbdicateStepper.jsx";
+import { RepairStepper } from "@/components/house/RepairStepper.jsx";
 import { BackSekiLink } from "@/components/layout/BackSekiLink.jsx";
 import { Button } from "@/components/ui/button.jsx";
 import { Alert, AlertDescription } from "@/components/ui/alert.jsx";
@@ -135,8 +137,7 @@ function PostSelection() {
   const { address } = useAccount();
   const [abdicateOpen, setAbdicateOpen] = useState(false);
   const [switchMode, setSwitchMode] = useState(false);
-  const [attesting, setAttesting] = useState(false);
-  const [needsAttest, setNeedsAttest] = useState(false);
+  const [repairDismissed, setRepairDismissed] = useState(false);
 
   // Check if user holds NFTs in multiple houses
   const { data: isMultiHouseHolder } = useQuery({
@@ -146,30 +147,13 @@ function PostSelection() {
     staleTime: 30_000,
   });
 
-  // Check if user needs attestation (has house but no on-chain record)
-  useState(() => {
-    if (isLocalDev || !houseConfig || !address) return;
-    getAttestedHouse(address).then((attested) => {
-      if (attested === 0) setNeedsAttest(true);
-    });
-  });
+  // Check membership integrity (NFT + attestation)
+  const membership = useMembershipStatus();
 
-  async function handleRetryAttest() {
-    if (!houseConfig?.numericId || !address) return;
-    setAttesting(true);
-    try {
-      toast.loading(t("house.attesting"), { id: "attest" });
-      await retryAttest(houseConfig.numericId, address);
-      toast.dismiss("attest");
-      toast.success(t("house.joinSuccess"));
-      setNeedsAttest(false);
-    } catch {
-      toast.dismiss("attest");
-      toast.error(t("house.attestFailed"));
-    } finally {
-      setAttesting(false);
-    }
-  }
+  // Show repair dialog when membership is incomplete and user hasn't dismissed
+  const showRepair = !membership.isLoading && !membership.isComplete &&
+    (membership.needsNFT || membership.needsAttestation);
+  const repairOpen = showRepair && !repairDismissed && !abdicateOpen;
 
   function handleSwitchHouse() {
     setSwitchMode(true);
@@ -208,29 +192,12 @@ function PostSelection() {
           </Alert>
         </motion.div>
       )}
-      {needsAttest && (
-        <motion.div
-          {...fadeInUp}
-          transition={{ ...fadeInUp.transition, ...staggerDelay(isMultiHouseHolder ? 4 : 3) }}
-        >
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRetryAttest}
-            disabled={attesting}
-          >
-            {attesting ? t("house.attesting") : t("house.retryAttest")}
-          </Button>
-        </motion.div>
-      )}
       <motion.div
         className="flex items-center gap-3"
         {...fadeInUp}
         transition={{
           ...fadeInUp.transition,
-          ...staggerDelay(
-            (isMultiHouseHolder ? 1 : 0) + (needsAttest ? 1 : 0) + 3,
-          ),
+          ...staggerDelay((isMultiHouseHolder ? 1 : 0) + 3),
         }}
       >
         <Button variant="destructive" size="sm" onClick={() => setAbdicateOpen(true)}>
@@ -258,6 +225,15 @@ function PostSelection() {
           setSwitchMode(false);
         }}
       />
+      {showRepair && (
+        <RepairStepper
+          houseConfig={houseConfig}
+          needsNFT={membership.needsNFT}
+          needsAttestation={membership.needsAttestation}
+          open={repairOpen}
+          onOpenChange={(open) => { if (!open) setRepairDismissed(true); }}
+        />
+      )}
     </div>
   );
 }
