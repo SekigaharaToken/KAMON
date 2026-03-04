@@ -32,15 +32,18 @@ const mockStake = {
   claim: vi.fn(),
 };
 
+const mockWithWalletClient = vi.fn();
+const mockMintclub = {
+  network: vi.fn(() => ({
+    stake: mockStake,
+  })),
+  withWalletClient: mockWithWalletClient,
+};
+
 vi.mock("@/lib/mintclub.js", () => ({
-  mintclub: null,
-  getMintClub: vi.fn(() =>
-    Promise.resolve({
-      network: vi.fn(() => ({
-        stake: mockStake,
-      })),
-    }),
-  ),
+  mintclub: mockMintclub,
+  ensureInitialized: vi.fn(),
+  getMintClub: vi.fn(() => Promise.resolve(mockMintclub)),
   useMintClubReady: vi.fn(() => true),
 }));
 
@@ -54,6 +57,7 @@ const {
 
 const TEST_POOL_ADDRESS = "0xabcdef1234567890abcdef1234567890abcdef12";
 const TEST_WALLET = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
+const mockWalletClient = { account: "0xmock", chain: { id: 8453 } };
 
 describe("useStaking — getPoolState", () => {
   beforeEach(() => {
@@ -115,23 +119,28 @@ describe("useStaking — stakeTokens", () => {
     vi.clearAllMocks();
   });
 
-  it("stakes amount into pool", async () => {
+  it("stakes amount into pool and injects walletClient", async () => {
     mockStake.stake.mockResolvedValue({ hash: "0xstake" });
 
-    const result = await stakeTokens(TEST_POOL_ADDRESS, 1000n);
+    const result = await stakeTokens(TEST_POOL_ADDRESS, 1000n, mockWalletClient);
     expect(result).toEqual({ hash: "0xstake" });
+    expect(mockWithWalletClient).toHaveBeenCalledWith(mockWalletClient);
     expect(mockStake.stake).toHaveBeenCalledWith({ poolId: 206, amount: 1000n });
   });
 
   it("throws on zero amount", async () => {
-    await expect(stakeTokens(TEST_POOL_ADDRESS, 0n)).rejects.toThrow();
+    await expect(stakeTokens(TEST_POOL_ADDRESS, 0n, mockWalletClient)).rejects.toThrow();
+  });
+
+  it("throws on missing walletClient", async () => {
+    await expect(stakeTokens(TEST_POOL_ADDRESS, 1000n, undefined)).rejects.toThrow("Wallet client is required");
   });
 
   it("throws when SDK returns undefined (user rejected)", async () => {
     // Mint Club SDK swallows errors and returns undefined
     mockStake.stake.mockResolvedValue(undefined);
 
-    await expect(stakeTokens(TEST_POOL_ADDRESS, 1000n)).rejects.toThrow();
+    await expect(stakeTokens(TEST_POOL_ADDRESS, 1000n, mockWalletClient)).rejects.toThrow();
   });
 });
 
@@ -140,18 +149,23 @@ describe("useStaking — unstakeTokens", () => {
     vi.clearAllMocks();
   });
 
-  it("unstakes amount from pool", async () => {
+  it("unstakes amount from pool and injects walletClient", async () => {
     mockStake.unstake.mockResolvedValue({ hash: "0xunstake" });
 
-    const result = await unstakeTokens(TEST_POOL_ADDRESS, 500n);
+    const result = await unstakeTokens(TEST_POOL_ADDRESS, 500n, mockWalletClient);
     expect(result).toEqual({ hash: "0xunstake" });
+    expect(mockWithWalletClient).toHaveBeenCalledWith(mockWalletClient);
     expect(mockStake.unstake).toHaveBeenCalledWith({ poolId: 206, amount: 500n });
+  });
+
+  it("throws on missing walletClient", async () => {
+    await expect(unstakeTokens(TEST_POOL_ADDRESS, 500n, undefined)).rejects.toThrow("Wallet client is required");
   });
 
   it("throws when SDK returns undefined (user rejected)", async () => {
     mockStake.unstake.mockResolvedValue(undefined);
 
-    await expect(unstakeTokens(TEST_POOL_ADDRESS, 500n)).rejects.toThrow();
+    await expect(unstakeTokens(TEST_POOL_ADDRESS, 500n, mockWalletClient)).rejects.toThrow();
   });
 });
 
@@ -160,17 +174,22 @@ describe("useStaking — claimRewards", () => {
     vi.clearAllMocks();
   });
 
-  it("claims pending rewards", async () => {
+  it("claims pending rewards and injects walletClient", async () => {
     mockStake.claim.mockResolvedValue({ hash: "0xclaim" });
 
-    const result = await claimRewards(TEST_POOL_ADDRESS);
+    const result = await claimRewards(TEST_POOL_ADDRESS, mockWalletClient);
     expect(result).toEqual({ hash: "0xclaim" });
+    expect(mockWithWalletClient).toHaveBeenCalledWith(mockWalletClient);
     expect(mockStake.claim).toHaveBeenCalledWith({ poolId: 206 });
+  });
+
+  it("throws on missing walletClient", async () => {
+    await expect(claimRewards(TEST_POOL_ADDRESS, undefined)).rejects.toThrow("Wallet client is required");
   });
 
   it("throws when SDK returns undefined (user rejected)", async () => {
     mockStake.claim.mockResolvedValue(undefined);
 
-    await expect(claimRewards(TEST_POOL_ADDRESS)).rejects.toThrow();
+    await expect(claimRewards(TEST_POOL_ADDRESS, mockWalletClient)).rejects.toThrow();
   });
 });
