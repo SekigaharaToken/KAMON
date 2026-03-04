@@ -207,7 +207,9 @@
     "skip": "건너뛰기",
     "successJoin": "{{houseName}}에 오신 것을 환영합니다!",
     "successAbdicate": "가문을 떠났습니다.",
-    "fidRequired": "가문에 가입하려면 Farcaster로 로그인하세요"
+    "fidRequired": "가문에 가입하려면 Farcaster로 로그인하세요",
+    "repairTitle": "멤버십 완료",
+    "repairDesc": "하우스 멤버십이 불완전합니다. 누락된 단계를 완료하세요."
   },
   "footer": {
     "builtOn": "Base에서 구축",

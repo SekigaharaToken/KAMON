@@ -207,7 +207,9 @@
     "skip": "スキップ",
     "successJoin": "{{houseName}}へようこそ！",
     "successAbdicate": "家を離れました。",
-    "fidRequired": "家に加入するにはFarcasterでサインインしてください"
+    "fidRequired": "家に加入するにはFarcasterでサインインしてください",
+    "repairTitle": "メンバーシップを完了",
+    "repairDesc": "ハウスメンバーシップが不完全です。不足しているステップを完了してください。"
   },
   "footer": {
     "builtOn": "Base上に構築",

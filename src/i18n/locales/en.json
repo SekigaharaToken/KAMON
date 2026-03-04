@@ -210,7 +210,9 @@
     "skip": "Skip",
     "successJoin": "Welcome to {{houseName}}!",
     "successAbdicate": "You have left the house.",
-    "fidRequired": "Sign in with Farcaster to join a house"
+    "fidRequired": "Sign in with Farcaster to join a house",
+    "repairTitle": "Complete Membership",
+    "repairDesc": "Your house membership is incomplete. Complete the missing step."
   },
   "footer": {
     "builtOn": "Built on Base",
