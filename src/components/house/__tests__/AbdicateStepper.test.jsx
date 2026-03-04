@@ -4,8 +4,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { TestWrapper } from "@/test/wrapper.jsx";
 
 // Mock wagmi
+const mockWalletClient = { account: "0xabc123", chain: { id: 8453 } };
 vi.mock("wagmi", () => ({
   useAccount: () => ({ address: "0xabc123", isConnected: true }),
+  useWalletClient: () => ({ data: mockWalletClient }),
 }));
 
 // Mock useHouseNFT
@@ -67,7 +69,7 @@ describe("AbdicateStepper", () => {
     await user.click(screen.getByText("Confirm"));
 
     await waitFor(() => {
-      expect(mockBurnHouseNFT).toHaveBeenCalledWith("0x1234", "0xabc123");
+      expect(mockBurnHouseNFT).toHaveBeenCalledWith("0x1234", "0xabc123", mockWalletClient);
     });
   });
 

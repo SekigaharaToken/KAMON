@@ -7,13 +7,12 @@
  * Provides: getBuyPrice, getSellPrice, mintHouseNFT, burnHouseNFT, getHouseBalance, getHouseSupply.
  */
 
-import { isLocalDev, activeChain } from "@/config/chains.js";
+import { isLocalDev } from "@/config/chains.js";
 import { MINT_CLUB_NETWORK } from "@/config/contracts.js";
 
 // Lazy imports — only load the module needed for the current chain
 let sdkModule = null;
 let localModule = null;
-let walletClientInjected = false;
 
 async function getSdk() {
   if (!sdkModule) {
@@ -27,26 +26,6 @@ async function getLocal() {
     localModule = await import("@/lib/localBond.js");
   }
   return localModule;
-}
-
-/**
- * Ensure the SDK has a wallet client for write operations.
- * Must be called before buy()/sell() — the SDK won't prompt a wallet
- * popup if it doesn't have one pre-configured.
- */
-async function ensureWalletClient() {
-  if (walletClientInjected || !window.ethereum) return;
-  const { createWalletClient, custom } = await import("viem");
-  const { mintclub } = await getSdk();
-  const [address] = await window.ethereum.request({ method: "eth_accounts" });
-  if (!address) return;
-  const walletClient = createWalletClient({
-    account: address,
-    chain: activeChain,
-    transport: custom(window.ethereum),
-  });
-  mintclub.withWalletClient(walletClient);
-  walletClientInjected = true;
 }
 
 function getNft(houseAddress) {
@@ -82,7 +61,7 @@ export async function getBuyPrice(houseAddress) {
   return reserveAmount;
 }
 
-export async function mintHouseNFT(houseAddress, recipient) {
+export async function mintHouseNFT(houseAddress, recipient, walletClient) {
   if (!houseAddress) throw new Error("House address is required");
 
   if (isLocalDev) {
@@ -90,7 +69,9 @@ export async function mintHouseNFT(houseAddress, recipient) {
     return local.localMintHouseNFT(houseAddress, recipient);
   }
 
-  await ensureWalletClient();
+  if (!walletClient) throw new Error("Wallet client is required");
+  const { mintclub } = await getSdk();
+  mintclub.withWalletClient(walletClient);
   const nft = await getNft(houseAddress);
   return nft.buy({
     amount: 1,
@@ -99,7 +80,7 @@ export async function mintHouseNFT(houseAddress, recipient) {
   });
 }
 
-export async function burnHouseNFT(houseAddress, recipient) {
+export async function burnHouseNFT(houseAddress, recipient, walletClient) {
   if (!houseAddress) throw new Error("House address is required");
 
   if (isLocalDev) {
@@ -107,7 +88,9 @@ export async function burnHouseNFT(houseAddress, recipient) {
     return local.localBurnHouseNFT(houseAddress, recipient);
   }
 
-  await ensureWalletClient();
+  if (!walletClient) throw new Error("Wallet client is required");
+  const { mintclub } = await getSdk();
+  mintclub.withWalletClient(walletClient);
   const nft = await getNft(houseAddress);
   return nft.sell({
     amount: 1,

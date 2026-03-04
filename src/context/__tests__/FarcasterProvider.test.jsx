@@ -30,6 +30,8 @@ function ProfileDisplay() {
     <div>
       <span data-testid="authenticated">{String(isAuthenticated)}</span>
       <span data-testid="fid">{profile?.fid ?? "none"}</span>
+      <span data-testid="username">{profile?.username ?? "none"}</span>
+      <span data-testid="pfpUrl">{profile?.pfpUrl ?? "none"}</span>
     </div>
   );
 }
@@ -75,6 +77,27 @@ describe("FarcasterProvider — MiniApp FID resolution", () => {
     });
 
     expect(screen.getByTestId("fid").textContent).toBe("12345");
+  });
+
+  it("surfaces full MiniApp user profile (username, pfpUrl)", async () => {
+    mockCtxValue.current = {
+      user: { fid: 12345, username: "alice", displayName: "Alice", pfpUrl: "https://example.com/alice.png" },
+    };
+
+    await act(async () => {
+      render(
+        <FarcasterProvider>
+          <ProfileDisplay />
+        </FarcasterProvider>,
+      );
+    });
+
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 20));
+    });
+
+    expect(screen.getByTestId("username").textContent).toBe("alice");
+    expect(screen.getByTestId("pfpUrl").textContent).toBe("https://example.com/alice.png");
   });
 
   it("marks user as authenticated when MiniApp FID is available", async () => {

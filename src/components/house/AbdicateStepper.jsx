@@ -11,7 +11,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { formatUnits } from "viem";
-import { useAccount } from "wagmi";
+import { useAccount, useWalletClient } from "wagmi";
 import { useTransactionStepper } from "@/hooks/useTransactionStepper.js";
 import { burnHouseNFT, getHouseBalance, getSellPrice } from "@/hooks/useHouseNFT.js";
 import { revokeHouse } from "@/hooks/useHouseMembership.js";
@@ -29,6 +29,7 @@ import {
 export function AbdicateStepper({ houseConfig, open, onOpenChange, onComplete }) {
   const { t } = useTranslation();
   const { address } = useAccount();
+  const { data: walletClient } = useWalletClient();
   const [refund, setRefund] = useState(null);
 
   const houseName = houseConfig ? t(houseConfig.nameKey) : "";
@@ -66,7 +67,7 @@ export function AbdicateStepper({ houseConfig, open, onOpenChange, onComplete })
 
     // Step 1: Burn NFT
     try {
-      await burnHouseNFT(houseConfig.address, address);
+      await burnHouseNFT(houseConfig.address, address, walletClient);
     } catch (err) {
       stepper.fail(err?.shortMessage || err?.message || t("errors.txFailed"));
       return;
