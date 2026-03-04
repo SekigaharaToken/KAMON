@@ -90,6 +90,11 @@ describe("useHouseNFT — mintHouseNFT", () => {
   it("throws on missing walletClient", async () => {
     await expect(mintHouseNFT(TEST_HOUSE_ADDRESS, TEST_WALLET, undefined)).rejects.toThrow("Wallet client is required");
   });
+
+  it("throws when buy returns null (user rejected)", async () => {
+    mockNft.buy.mockResolvedValue(null);
+    await expect(mintHouseNFT(TEST_HOUSE_ADDRESS, TEST_WALLET, mockWalletClient)).rejects.toThrow("Transaction was not completed");
+  });
 });
 
 describe("useHouseNFT — burnHouseNFT", () => {
@@ -110,6 +115,11 @@ describe("useHouseNFT — burnHouseNFT", () => {
 
   it("throws on missing walletClient", async () => {
     await expect(burnHouseNFT(TEST_HOUSE_ADDRESS, TEST_WALLET, null)).rejects.toThrow("Wallet client is required");
+  });
+
+  it("throws when sell returns null (user rejected)", async () => {
+    mockNft.sell.mockResolvedValue(null);
+    await expect(burnHouseNFT(TEST_HOUSE_ADDRESS, TEST_WALLET, mockWalletClient)).rejects.toThrow("Transaction was not completed");
   });
 });
 
