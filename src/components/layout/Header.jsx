@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useLocation } from "react-router-dom";
-import { Sun, Moon, Globe, LogOut, Activity, MessageSquare } from "lucide-react";
+import { Sun, Moon, Globe, LogOut, Activity } from "lucide-react";
 import { useAccount, useDisconnect } from "wagmi";
 import { createPublicClient, http, formatUnits } from "viem";
 import { Button } from "@/components/ui/button.jsx";
@@ -194,17 +194,11 @@ export const Header = () => {
                     {houseConfig.symbol} {t(houseConfig.nameKey)}
                   </DropdownMenuItem>
                 )}
-                {/* Activity & Chat (mobile) */}
+                {/* Activity (mobile — also in bottom nav but kept for quick access) */}
                 <DropdownMenuItem asChild className="md:hidden">
                   <Link to="/activity">
                     <Activity className="mr-2 size-4" />
                     {t("nav.activity")}
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild className="md:hidden">
-                  <Link to="/chat">
-                    <MessageSquare className="mr-2 size-4" />
-                    {t("nav.chat")}
                   </Link>
                 </DropdownMenuItem>
                 {SWAP_TOKENS.map((token) => (
