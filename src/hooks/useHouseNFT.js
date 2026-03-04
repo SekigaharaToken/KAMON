@@ -7,7 +7,7 @@
  * Provides: getBuyPrice, getSellPrice, mintHouseNFT, burnHouseNFT, getHouseBalance, getHouseSupply.
  */
 
-import { isLocalDev } from "@/config/chains.js";
+import { isLocalDev, activeChain } from "@/config/chains.js";
 import { MINT_CLUB_NETWORK } from "@/config/contracts.js";
 
 // Lazy imports — only load the module needed for the current chain
@@ -33,17 +33,18 @@ async function getLocal() {
  * Ensure the SDK has a wallet client for write operations.
  * Must be called before buy()/sell() — the SDK won't prompt a wallet
  * popup if it doesn't have one pre-configured.
- *
- * Uses wagmi's getWalletClient so it works with any connector
- * (browser extension, WalletConnect, or Farcaster MiniApp).
  */
 async function ensureWalletClient() {
-  if (walletClientInjected) return;
-  const { getWalletClient } = await import("@wagmi/core");
-  const { wagmiConfig } = await import("@/config/wagmi.js");
-  const walletClient = await getWalletClient(wagmiConfig);
-  if (!walletClient) return;
+  if (walletClientInjected || !window.ethereum) return;
+  const { createWalletClient, custom } = await import("viem");
   const { mintclub } = await getSdk();
+  const [address] = await window.ethereum.request({ method: "eth_accounts" });
+  if (!address) return;
+  const walletClient = createWalletClient({
+    account: address,
+    chain: activeChain,
+    transport: custom(window.ethereum),
+  });
   mintclub.withWalletClient(walletClient);
   walletClientInjected = true;
 }
