@@ -7,7 +7,7 @@
  * In local dev (isLocalDev): skips attestation calls, returns mock values.
  */
 
-import { createPublicClient, createWalletClient, http, custom, encodeAbiParameters } from "viem";
+import { createPublicClient, http, encodeAbiParameters } from "viem";
 import { isLocalDev, activeChain } from "@/config/chains.js";
 import {
   EAS_ADDRESS,
@@ -23,14 +23,6 @@ function getPublicClient() {
   return createPublicClient({
     chain: activeChain,
     transport: http(),
-  });
-}
-
-function getWalletClient() {
-  if (!window.ethereum) throw new Error("No wallet connected");
-  return createWalletClient({
-    chain: activeChain,
-    transport: custom(window.ethereum),
   });
 }
 
@@ -110,14 +102,13 @@ export async function getMemberAttestationUID(walletAddress) {
  * @param {number} houseId — 1-5 (honoo, mizu, mori, tsuchi, kaze)
  * @param {string} walletAddress — recipient wallet
  * @param {number} fid — Farcaster user ID
+ * @param {object} walletClient — wagmi walletClient (from useWalletClient)
  * @returns {Promise<string>} attestation UID (tx hash on success)
  */
-export async function attestHouse(houseId, walletAddress, fid) {
+export async function attestHouse(houseId, walletAddress, fid, walletClient) {
   if (isLocalDev) return ZERO_BYTES32;
   if (!HOUSE_SCHEMA_UID || !HOUSE_RESOLVER_ADDRESS) return ZERO_BYTES32;
-
-  const walletClient = getWalletClient();
-  const [account] = await walletClient.getAddresses();
+  if (!walletClient) throw new Error("Wallet client is required");
 
   const hash = await walletClient.writeContract({
     address: EAS_ADDRESS,
@@ -136,7 +127,7 @@ export async function attestHouse(houseId, walletAddress, fid) {
         },
       },
     ],
-    account,
+    account: walletClient.account,
   });
 
   // Wait for receipt to confirm
@@ -150,9 +141,10 @@ export async function attestHouse(houseId, walletAddress, fid) {
  * Revoke house membership via EAS.
  *
  * @param {string} walletAddress — the wallet whose membership to revoke
+ * @param {object} walletClient — wagmi walletClient (from useWalletClient)
  * @returns {Promise<string>} tx hash
  */
-export async function revokeHouse(walletAddress) {
+export async function revokeHouse(walletAddress, walletClient) {
   if (isLocalDev) return ZERO_BYTES32;
   if (!HOUSE_SCHEMA_UID || !HOUSE_RESOLVER_ADDRESS) return ZERO_BYTES32;
 
@@ -161,8 +153,7 @@ export async function revokeHouse(walletAddress) {
     throw new Error("No attestation to revoke");
   }
 
-  const walletClient = getWalletClient();
-  const [account] = await walletClient.getAddresses();
+  if (!walletClient) throw new Error("Wallet client is required");
 
   const hash = await walletClient.writeContract({
     address: EAS_ADDRESS,
@@ -177,7 +168,7 @@ export async function revokeHouse(walletAddress) {
         },
       },
     ],
-    account,
+    account: walletClient.account,
   });
 
   const publicClient = getPublicClient();

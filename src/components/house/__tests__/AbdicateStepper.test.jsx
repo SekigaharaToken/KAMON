@@ -84,7 +84,7 @@ describe("AbdicateStepper", () => {
     await user.click(screen.getByText("Confirm"));
 
     await waitFor(() => {
-      expect(mockRevokeHouse).toHaveBeenCalledWith("0xabc123");
+      expect(mockRevokeHouse).toHaveBeenCalledWith("0xabc123", mockWalletClient);
     });
   });
 

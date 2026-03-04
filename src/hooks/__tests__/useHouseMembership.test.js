@@ -36,8 +36,11 @@ vi.mock("viem", () => ({
   }),
 }));
 
-// Provide window.ethereum for wallet client creation
-globalThis.window = { ethereum: {} };
+// Mock walletClient (wagmi-style) for write operations
+const mockWalletClient = {
+  writeContract: mockWriteContract,
+  account: { address: "0xAlice" },
+};
 
 describe("useHouseMembership", () => {
   let mod;
@@ -107,14 +110,14 @@ describe("useHouseMembership", () => {
   });
 
   describe("attestHouse", () => {
-    it("calls EAS.attest with encoded houseId and fid", async () => {
-      await mod.attestHouse(1, "0xAlice", 12345);
+    it("calls EAS.attest with encoded houseId and fid using provided walletClient", async () => {
+      await mod.attestHouse(1, "0xAlice", 12345, mockWalletClient);
 
       expect(mockWriteContract).toHaveBeenCalledWith(
         expect.objectContaining({
           address: "0x4200000000000000000000000000000000000021",
           functionName: "attest",
-          account: "0xAlice",
+          account: { address: "0xAlice" },
         }),
       );
 
@@ -135,19 +138,25 @@ describe("useHouseMembership", () => {
     });
 
     it("waits for transaction receipt", async () => {
-      await mod.attestHouse(1, "0xAlice", 12345);
+      await mod.attestHouse(1, "0xAlice", 12345, mockWalletClient);
       expect(mockWaitForTransactionReceipt).toHaveBeenCalledWith({
         hash: "0xtxhash",
       });
     });
+
+    it("throws if walletClient is not provided", async () => {
+      await expect(mod.attestHouse(1, "0xAlice", 12345)).rejects.toThrow(
+        "Wallet client is required",
+      );
+    });
   });
 
   describe("revokeHouse", () => {
-    it("fetches attestation UID then calls EAS.revoke", async () => {
+    it("fetches attestation UID then calls EAS.revoke using provided walletClient", async () => {
       const uid = "0xdeadbeef" + "0".repeat(56);
       mockReadContract.mockResolvedValue(uid);
 
-      await mod.revokeHouse("0xAlice");
+      await mod.revokeHouse("0xAlice", mockWalletClient);
 
       // Should read attestation UID first
       expect(mockReadContract).toHaveBeenCalledWith(
@@ -157,10 +166,11 @@ describe("useHouseMembership", () => {
         }),
       );
 
-      // Then call revoke
+      // Then call revoke using the provided walletClient
       expect(mockWriteContract).toHaveBeenCalledWith(
         expect.objectContaining({
           functionName: "revoke",
+          account: { address: "0xAlice" },
         }),
       );
 
@@ -173,8 +183,17 @@ describe("useHouseMembership", () => {
         "0x0000000000000000000000000000000000000000000000000000000000000000",
       );
 
-      await expect(mod.revokeHouse("0xAlice")).rejects.toThrow(
+      await expect(mod.revokeHouse("0xAlice", mockWalletClient)).rejects.toThrow(
         "No attestation to revoke",
+      );
+    });
+
+    it("throws if walletClient is not provided", async () => {
+      const uid = "0xdeadbeef" + "0".repeat(56);
+      mockReadContract.mockResolvedValue(uid);
+
+      await expect(mod.revokeHouse("0xAlice")).rejects.toThrow(
+        "Wallet client is required",
       );
     });
   });
