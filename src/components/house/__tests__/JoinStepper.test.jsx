@@ -156,6 +156,58 @@ describe("JoinStepper", () => {
     expect(screen.getByText("Sign in with Farcaster to join a house")).toBeInTheDocument();
   });
 
+  it("retry after attest failure only retries attest, not mint", async () => {
+    mockAttestHouse.mockRejectedValueOnce(new Error("attest failed"));
+    const user = userEvent.setup();
+    render(
+      <TestWrapper>
+        <JoinStepper house={house} open={true} onOpenChange={vi.fn()} onComplete={vi.fn()} />
+      </TestWrapper>,
+    );
+
+    await user.click(screen.getByText("Begin"));
+
+    await waitFor(() => {
+      expect(screen.getByText("Retry")).toBeInTheDocument();
+    });
+
+    // Clear mocks to track retry calls
+    mockMintHouseNFT.mockClear();
+    mockAttestHouse.mockClear();
+
+    await user.click(screen.getByText("Retry"));
+
+    await waitFor(() => {
+      expect(mockAttestHouse).toHaveBeenCalledWith(1, "0xabc123", 12345, mockWalletClient);
+    });
+    // Mint should NOT be called again
+    expect(mockMintHouseNFT).not.toHaveBeenCalled();
+  });
+
+  it("retry after mint failure retries mint", async () => {
+    mockMintHouseNFT.mockRejectedValueOnce(new Error("mint failed"));
+    const user = userEvent.setup();
+    render(
+      <TestWrapper>
+        <JoinStepper house={house} open={true} onOpenChange={vi.fn()} onComplete={vi.fn()} />
+      </TestWrapper>,
+    );
+
+    await user.click(screen.getByText("Begin"));
+
+    await waitFor(() => {
+      expect(screen.getByText("Retry")).toBeInTheDocument();
+    });
+
+    mockMintHouseNFT.mockClear();
+
+    await user.click(screen.getByText("Retry"));
+
+    await waitFor(() => {
+      expect(mockMintHouseNFT).toHaveBeenCalledWith("0x1234", "0xabc123", mockWalletClient);
+    });
+  });
+
   it("Done calls onComplete with house id", async () => {
     const user = userEvent.setup();
     const onComplete = vi.fn();

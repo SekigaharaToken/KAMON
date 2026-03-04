@@ -54,11 +54,21 @@ export function useTransactionStepper(initialSteps) {
     });
   }, []);
 
+  const retry = useCallback(() => {
+    setSteps((prev) => {
+      const idx = prev.findIndex((s) => s.status === "error");
+      if (idx === -1) return prev;
+      return prev.map((s, i) =>
+        i === idx ? { ...s, status: "active", errorMessage: null } : s,
+      );
+    });
+  }, []);
+
   const reset = useCallback(() => {
     setSteps((prev) =>
       prev.map((s) => ({ ...s, status: "pending", errorMessage: null })),
     );
   }, []);
 
-  return { steps, start, advance, fail, reset, isComplete, isActive, activeStep };
+  return { steps, start, advance, fail, retry, reset, isComplete, isActive, activeStep };
 }

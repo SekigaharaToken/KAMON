@@ -50,6 +50,28 @@ export function AbdicateStepper({ houseConfig, open, onOpenChange, onComplete })
       .catch(() => setRefund("?"));
   }, [open, houseConfig?.address]);
 
+  async function runBurn() {
+    try {
+      await burnHouseNFT(houseConfig.address, address, walletClient);
+    } catch (err) {
+      stepper.fail(err?.shortMessage || err?.message || t("errors.txFailed"));
+      return false;
+    }
+    stepper.advance();
+    return true;
+  }
+
+  async function runRevoke() {
+    try {
+      await revokeHouse(address, walletClient);
+    } catch (err) {
+      stepper.fail(err?.shortMessage || err?.message || t("house.revokeFailed"));
+      return false;
+    }
+    stepper.advance();
+    return true;
+  }
+
   async function handleConfirm() {
     // Pre-flight: check NFT balance
     try {
@@ -64,31 +86,19 @@ export function AbdicateStepper({ houseConfig, open, onOpenChange, onComplete })
     }
 
     stepper.start();
-
-    // Step 1: Burn NFT
-    try {
-      await burnHouseNFT(houseConfig.address, address, walletClient);
-    } catch (err) {
-      stepper.fail(err?.shortMessage || err?.message || t("errors.txFailed"));
-      return;
-    }
-
-    stepper.advance();
-
-    // Step 2: Revoke attestation (non-fatal)
-    try {
-      await revokeHouse(address, walletClient);
-    } catch (err) {
-      stepper.fail(err?.shortMessage || err?.message || t("house.revokeFailed"));
-      return;
-    }
-
-    stepper.advance();
+    if (!(await runBurn())) return;
+    await runRevoke();
   }
 
-  function handleRetry() {
-    stepper.reset();
-    handleConfirm();
+  async function handleRetry() {
+    const failedStep = stepper.steps.findIndex((s) => s.status === "error");
+    stepper.retry();
+    if (failedStep === 0) {
+      if (!(await runBurn())) return;
+      await runRevoke();
+    } else {
+      await runRevoke();
+    }
   }
 
   function handleSkip() {
