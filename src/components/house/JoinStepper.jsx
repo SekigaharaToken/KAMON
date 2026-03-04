@@ -55,7 +55,7 @@ export function JoinStepper({ house, open, onOpenChange, onComplete }) {
 
     // Step 2: Attest membership (non-fatal)
     try {
-      await attestHouse(house.numericId, address, fid);
+      await attestHouse(house.numericId, address, fid, walletClient);
     } catch (err) {
       stepper.fail(err?.shortMessage || err?.message || t("house.attestFailed"));
       return;

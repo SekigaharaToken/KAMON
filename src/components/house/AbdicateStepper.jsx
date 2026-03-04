@@ -77,7 +77,7 @@ export function AbdicateStepper({ houseConfig, open, onOpenChange, onComplete })
 
     // Step 2: Revoke attestation (non-fatal)
     try {
-      await revokeHouse(address);
+      await revokeHouse(address, walletClient);
     } catch (err) {
       stepper.fail(err?.shortMessage || err?.message || t("house.revokeFailed"));
       return;

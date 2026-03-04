@@ -90,7 +90,7 @@ describe("JoinStepper", () => {
     await user.click(screen.getByText("Begin"));
 
     await waitFor(() => {
-      expect(mockAttestHouse).toHaveBeenCalledWith(1, "0xabc123", 12345);
+      expect(mockAttestHouse).toHaveBeenCalledWith(1, "0xabc123", 12345, mockWalletClient);
     });
   });
 
