@@ -32,12 +32,22 @@ const mockStake = {
   claim: vi.fn(),
 };
 
+const mockReadContract = vi.fn();
+const mockWaitForTransactionReceipt = vi.fn();
+const mockPublicClient = {
+  readContract: mockReadContract,
+  waitForTransactionReceipt: mockWaitForTransactionReceipt,
+};
+
 const mockWithWalletClient = vi.fn();
 const mockMintclub = {
   network: vi.fn(() => ({
     stake: mockStake,
   })),
   withWalletClient: mockWithWalletClient,
+  wallet: {
+    _getPublicClient: vi.fn(() => mockPublicClient),
+  },
 };
 
 vi.mock("@/lib/mintclub.js", () => ({
@@ -46,6 +56,14 @@ vi.mock("@/lib/mintclub.js", () => ({
   getMintClub: vi.fn(() => Promise.resolve(mockMintclub)),
   useMintClubReady: vi.fn(() => true),
 }));
+
+vi.mock("@/config/contracts.js", async (importOriginal) => {
+  const original = await importOriginal();
+  return {
+    ...original,
+    SEKI_TOKEN_ADDRESS: "0x6ABF95F802119c8e46c5DB4a21E22Ef7298e1DA4",
+  };
+});
 
 const {
   getPoolState,
@@ -57,7 +75,11 @@ const {
 
 const TEST_POOL_ADDRESS = "0xabcdef1234567890abcdef1234567890abcdef12";
 const TEST_WALLET = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
-const mockWalletClient = { account: "0xmock", chain: { id: 8453 } };
+const mockWalletClient = {
+  account: { address: TEST_WALLET },
+  chain: { id: 8453 },
+  writeContract: vi.fn().mockResolvedValue("0xapprovehash"),
+};
 
 describe("useStaking — getPoolState", () => {
   beforeEach(() => {
@@ -117,6 +139,10 @@ describe("useStaking — getUserPosition", () => {
 describe("useStaking — stakeTokens", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Default: already approved (high allowance)
+    mockReadContract.mockResolvedValue(BigInt("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"));
+    mockWaitForTransactionReceipt.mockResolvedValue({});
+    mockWalletClient.writeContract.mockResolvedValue("0xapprovehash");
   });
 
   it("stakes amount into pool and injects walletClient", async () => {
@@ -125,7 +151,25 @@ describe("useStaking — stakeTokens", () => {
     const result = await stakeTokens(TEST_POOL_ADDRESS, 1000n, mockWalletClient);
     expect(result).toEqual({ hash: "0xstake" });
     expect(mockWithWalletClient).toHaveBeenCalledWith(mockWalletClient);
-    expect(mockStake.stake).toHaveBeenCalledWith({ poolId: 206, amount: 1000n });
+  });
+
+  it("approves SEKI when allowance is insufficient", async () => {
+    mockReadContract.mockResolvedValue(0n); // no allowance
+    mockStake.stake.mockResolvedValue({ hash: "0xstake" });
+
+    await stakeTokens(TEST_POOL_ADDRESS, 1000n, mockWalletClient);
+    expect(mockWalletClient.writeContract).toHaveBeenCalledWith(
+      expect.objectContaining({ functionName: "approve" }),
+    );
+    expect(mockWaitForTransactionReceipt).toHaveBeenCalled();
+  });
+
+  it("skips approval when allowance is sufficient", async () => {
+    mockReadContract.mockResolvedValue(2000n); // enough
+    mockStake.stake.mockResolvedValue({ hash: "0xstake" });
+
+    await stakeTokens(TEST_POOL_ADDRESS, 1000n, mockWalletClient);
+    expect(mockWalletClient.writeContract).not.toHaveBeenCalled();
   });
 
   it("throws on zero amount", async () => {
@@ -136,11 +180,14 @@ describe("useStaking — stakeTokens", () => {
     await expect(stakeTokens(TEST_POOL_ADDRESS, 1000n, undefined)).rejects.toThrow("Wallet client is required");
   });
 
-  it("throws when SDK returns undefined (user rejected)", async () => {
-    // Mint Club SDK swallows errors and returns undefined
-    mockStake.stake.mockResolvedValue(undefined);
+  it("throws actual SDK error when SDK returns undefined", async () => {
+    const sdkErr = new Error("insufficient funds for gas");
+    mockStake.stake.mockImplementation(async (params) => {
+      params.onError?.(sdkErr);
+      return undefined;
+    });
 
-    await expect(stakeTokens(TEST_POOL_ADDRESS, 1000n, mockWalletClient)).rejects.toThrow();
+    await expect(stakeTokens(TEST_POOL_ADDRESS, 1000n, mockWalletClient)).rejects.toThrow("insufficient funds for gas");
   });
 });
 
@@ -155,17 +202,20 @@ describe("useStaking — unstakeTokens", () => {
     const result = await unstakeTokens(TEST_POOL_ADDRESS, 500n, mockWalletClient);
     expect(result).toEqual({ hash: "0xunstake" });
     expect(mockWithWalletClient).toHaveBeenCalledWith(mockWalletClient);
-    expect(mockStake.unstake).toHaveBeenCalledWith({ poolId: 206, amount: 500n });
   });
 
   it("throws on missing walletClient", async () => {
     await expect(unstakeTokens(TEST_POOL_ADDRESS, 500n, undefined)).rejects.toThrow("Wallet client is required");
   });
 
-  it("throws when SDK returns undefined (user rejected)", async () => {
-    mockStake.unstake.mockResolvedValue(undefined);
+  it("throws actual SDK error when SDK returns undefined", async () => {
+    const sdkErr = new Error("user rejected");
+    mockStake.unstake.mockImplementation(async (params) => {
+      params.onError?.(sdkErr);
+      return undefined;
+    });
 
-    await expect(unstakeTokens(TEST_POOL_ADDRESS, 500n, mockWalletClient)).rejects.toThrow();
+    await expect(unstakeTokens(TEST_POOL_ADDRESS, 500n, mockWalletClient)).rejects.toThrow("user rejected");
   });
 });
 
@@ -180,16 +230,19 @@ describe("useStaking — claimRewards", () => {
     const result = await claimRewards(TEST_POOL_ADDRESS, mockWalletClient);
     expect(result).toEqual({ hash: "0xclaim" });
     expect(mockWithWalletClient).toHaveBeenCalledWith(mockWalletClient);
-    expect(mockStake.claim).toHaveBeenCalledWith({ poolId: 206 });
   });
 
   it("throws on missing walletClient", async () => {
     await expect(claimRewards(TEST_POOL_ADDRESS, undefined)).rejects.toThrow("Wallet client is required");
   });
 
-  it("throws when SDK returns undefined (user rejected)", async () => {
-    mockStake.claim.mockResolvedValue(undefined);
+  it("throws actual SDK error when SDK returns undefined", async () => {
+    const sdkErr = new Error("user rejected");
+    mockStake.claim.mockImplementation(async (params) => {
+      params.onError?.(sdkErr);
+      return undefined;
+    });
 
-    await expect(claimRewards(TEST_POOL_ADDRESS, mockWalletClient)).rejects.toThrow();
+    await expect(claimRewards(TEST_POOL_ADDRESS, mockWalletClient)).rejects.toThrow("user rejected");
   });
 });

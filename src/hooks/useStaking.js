@@ -9,9 +9,13 @@
  *   getUserPosition → { staked, pendingRewards, stakedSince }
  */
 
+import { erc20Abi, maxUint256 } from "viem";
 import { mintclub, ensureInitialized, getMintClub } from "@/lib/mintclub.js";
-import { MINT_CLUB_NETWORK } from "@/config/contracts.js";
+import { MINT_CLUB_NETWORK, SEKI_TOKEN_ADDRESS } from "@/config/contracts.js";
 import { STAKING_POOL_ID } from "@/config/season.js";
+
+/** Mint Club Stake contract address on Base */
+const STAKE_CONTRACT_ADDRESS = "0x9Ab05EcA10d087f23a1B22A44A714cdbBA76E802";
 
 async function getStakeHelper() {
   const mc = await getMintClub();
@@ -58,6 +62,34 @@ export async function getUserPosition(_unused, walletAddress) {
 }
 
 /**
+ * Ensure the staking contract has ERC-20 approval to transfer $SEKI.
+ * Stake.stake() does NOT auto-approve (unlike Token.buy()).
+ */
+async function ensureStakingApproval(walletClient, amount) {
+  const publicClient = mintclub.wallet._getPublicClient(walletClient.chain.id);
+  const owner = walletClient.account.address;
+
+  const allowance = await publicClient.readContract({
+    address: SEKI_TOKEN_ADDRESS,
+    abi: erc20Abi,
+    functionName: "allowance",
+    args: [owner, STAKE_CONTRACT_ADDRESS],
+  });
+
+  if (allowance >= amount) return;
+
+  const hash = await walletClient.writeContract({
+    address: SEKI_TOKEN_ADDRESS,
+    abi: erc20Abi,
+    functionName: "approve",
+    args: [STAKE_CONTRACT_ADDRESS, maxUint256],
+    chain: walletClient.chain,
+    account: walletClient.account,
+  });
+  await publicClient.waitForTransactionReceipt({ hash });
+}
+
+/**
  * Stake tokens into the pool.
  * @param {string} _unused — kept for call-site compat (was poolAddress)
  * @param {bigint} amount — amount to stake (must be > 0)
@@ -69,10 +101,18 @@ export async function stakeTokens(_unused, amount, walletClient) {
   if (!walletClient) throw new Error("Wallet client is required");
   ensureInitialized();
   mintclub.withWalletClient(walletClient);
+
+  // Stake.stake() doesn't auto-approve — handle ERC-20 approval first
+  await ensureStakingApproval(walletClient, amount);
+
   const stake = mintclub.network(MINT_CLUB_NETWORK).stake;
-  const receipt = await stake.stake({ poolId: STAKING_POOL_ID, amount });
-  // Mint Club SDK swallows errors and returns undefined — re-throw
-  if (!receipt) throw new Error("Transaction was not completed");
+  let sdkError = null;
+  const receipt = await stake.stake({
+    poolId: STAKING_POOL_ID,
+    amount,
+    onError: (e) => { sdkError = e; },
+  });
+  if (!receipt) throw sdkError || new Error("Transaction was not completed");
   return receipt;
 }
 
@@ -88,8 +128,13 @@ export async function unstakeTokens(_unused, amount, walletClient) {
   ensureInitialized();
   mintclub.withWalletClient(walletClient);
   const stake = mintclub.network(MINT_CLUB_NETWORK).stake;
-  const receipt = await stake.unstake({ poolId: STAKING_POOL_ID, amount });
-  if (!receipt) throw new Error("Transaction was not completed");
+  let sdkError = null;
+  const receipt = await stake.unstake({
+    poolId: STAKING_POOL_ID,
+    amount,
+    onError: (e) => { sdkError = e; },
+  });
+  if (!receipt) throw sdkError || new Error("Transaction was not completed");
   return receipt;
 }
 
@@ -104,7 +149,11 @@ export async function claimRewards(_unused, walletClient) {
   ensureInitialized();
   mintclub.withWalletClient(walletClient);
   const stake = mintclub.network(MINT_CLUB_NETWORK).stake;
-  const receipt = await stake.claim({ poolId: STAKING_POOL_ID });
-  if (!receipt) throw new Error("Transaction was not completed");
+  let sdkError = null;
+  const receipt = await stake.claim({
+    poolId: STAKING_POOL_ID,
+    onError: (e) => { sdkError = e; },
+  });
+  if (!receipt) throw sdkError || new Error("Transaction was not completed");
   return receipt;
 }
