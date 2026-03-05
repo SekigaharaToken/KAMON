@@ -14,6 +14,7 @@
 import { HOUSE_LIST } from "@/config/houses.js";
 import { STAKING_POOL_ADDRESS } from "@/config/contracts.js";
 import { getHouseHolders } from "@/lib/getHouseHolders.js";
+import { getHouseSupply } from "@/hooks/useHouseNFT.js";
 import { getCurrentStreak } from "@/hooks/useEASStreaks.js";
 import { getUserPosition, getPoolState } from "@/hooks/useStaking.js";
 import {
@@ -35,7 +36,7 @@ import {
  * @param {bigint} totalStaked — total staked in pool (for staking normalization)
  * @param {number|null} maxOnChatMessages — channel max for normalization (null if unavailable)
  * @param {bigint} seasonStartBlock — season start block for OnChat window
- * @returns {Promise<{ walletScores: number[], memberCount: number, totalStaked: bigint }>}
+ * @returns {Promise<{ walletScores: number[], totalStaked: bigint }>}
  */
 async function scoreHouseHolders(house, totalStaked, maxOnChatMessages, seasonStartBlock) {
   let holders = [];
@@ -43,11 +44,11 @@ async function scoreHouseHolders(house, totalStaked, maxOnChatMessages, seasonSt
     holders = await getHouseHolders(house.address);
   } catch (err) {
     console.warn(`[Leaderboard] Failed to get holders for ${house.id}:`, err.message);
-    return { walletScores: [], memberCount: 0, totalStaked: 0n };
+    return { walletScores: [], totalStaked: 0n };
   }
 
   if (holders.length === 0) {
-    return { walletScores: [], memberCount: 0, totalStaked };
+    return { walletScores: [], totalStaked };
   }
 
   // Fetch all wallet data in parallel
@@ -90,7 +91,7 @@ async function scoreHouseHolders(house, totalStaked, maxOnChatMessages, seasonSt
     });
   });
 
-  return { walletScores, memberCount: holders.length, totalStaked };
+  return { walletScores, totalStaked };
 }
 
 /**
@@ -120,20 +121,31 @@ export async function computeLeaderboard(seasonStartBlock = 0n) {
     ? maxOnChatResult.value
     : null;
 
-  // Score all Houses in parallel
-  const houseResults = await Promise.allSettled(
-    HOUSE_LIST.map((house) =>
-      scoreHouseHolders(house, totalStaked, maxOnChatMessages, seasonStartBlock)
-    )
-  );
+  // Score all Houses and fetch NFT supply (member count) in parallel
+  const [houseResults, supplyResults] = await Promise.all([
+    Promise.allSettled(
+      HOUSE_LIST.map((house) =>
+        scoreHouseHolders(house, totalStaked, maxOnChatMessages, seasonStartBlock)
+      )
+    ),
+    Promise.allSettled(
+      HOUSE_LIST.map((house) => getHouseSupply(house.address))
+    ),
+  ]);
 
   // Build houseScores for rankHouses()
   const houseScores = HOUSE_LIST.map((house, i) => {
-    const result = houseResults[i];
-    if (result.status === "rejected") {
-      return { id: house.id, score: 0, memberCount: 0, totalStaked: 0 };
+    const scoreResult = houseResults[i];
+    const supplyResult = supplyResults[i];
+
+    const memberCount = supplyResult.status === "fulfilled"
+      ? Number(supplyResult.value ?? 0n)
+      : 0;
+
+    if (scoreResult.status === "rejected") {
+      return { id: house.id, score: 0, memberCount, totalStaked: 0 };
     }
-    const { walletScores, memberCount, totalStaked: houseTotalStaked } = result.value;
+    const { walletScores, totalStaked: houseTotalStaked } = scoreResult.value;
     return {
       id: house.id,
       score: computeHouseScore(walletScores),
