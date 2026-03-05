@@ -74,7 +74,7 @@ export function HowItWorks() {
           <div className="flex flex-col items-center gap-4 px-4 py-6 text-center">
             <Icon className="size-12 text-primary" />
             <h3 className="text-lg font-semibold">{t(current.titleKey)}</h3>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground text-sm whitespace-pre-line">
               {t(current.descKey)}
             </p>
           </div>
@@ -84,9 +84,9 @@ export function HowItWorks() {
             {PAGES.map((_, i) => (
               <div
                 key={i}
-                className={`size-2 rounded-full ${
-                  i === page ? "bg-primary" : "bg-muted"
-                }`}
+                className={`h-2 rounded-full ${
+                  i === page ? "w-6 bg-primary" : "w-2 bg-muted"
+                } transition-all`}
               />
             ))}
           </div>

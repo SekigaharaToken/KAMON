@@ -40,6 +40,18 @@ describe("HowItWorks", () => {
     expect(bar.className).toContain("bottom-16");
   });
 
+  it("active pagination dot is elongated (w-6) while others are w-2", async () => {
+    const user = userEvent.setup();
+    renderComponent();
+
+    await user.click(screen.getByText("New here? Learn how KAMON works →"));
+
+    const dots = document.querySelectorAll("[data-slot='sheet-content'] .rounded-full");
+    expect(dots[0].className).toContain("w-6");
+    expect(dots[1].className).toContain("w-2");
+    expect(dots[2].className).toContain("w-2");
+  });
+
   it("clicking X button dismisses bar permanently", async () => {
     const user = userEvent.setup();
     renderComponent();
