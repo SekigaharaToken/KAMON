@@ -7,7 +7,7 @@ export function MiniAppLink({ href, children, ...props }) {
   function handleClick(e) {
     if (isInMiniApp) {
       e.preventDefault();
-      sdk.actions.openUrl(href);
+      sdk.actions.openMiniApp({ url: href });
     }
   }
 
