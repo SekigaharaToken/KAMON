@@ -8,6 +8,7 @@ import { PageWrapper } from "@/components/layout/PageWrapper.jsx";
 import { NetworkGuardBanner } from "@/components/layout/NetworkGuardBanner.jsx";
 import { ErrorBoundary } from "@/components/layout/ErrorBoundary.jsx";
 import { LoginModal } from "@/components/auth/LoginModal.jsx";
+import { HowItWorks } from "@/components/onboarding/HowItWorks.jsx";
 import { Skeleton } from "@/components/ui/skeleton.jsx";
 import HomePage from "@/pages/HomePage.jsx";
 
@@ -49,6 +50,7 @@ function App() {
           { to: "/chat", icon: MessageCircle, labelKey: "nav.chat" },
         ]}
       />
+      <HowItWorks />
       <LoginModal />
     </div>
   );

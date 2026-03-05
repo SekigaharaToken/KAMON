@@ -212,6 +212,19 @@
     "repairTitle": "メンバーシップを完了",
     "repairDesc": "ハウスメンバーシップが不完全です。不足しているステップを完了してください。"
   },
+  "howItWorks": {
+    "barText": "初めてですか？KAMONの仕組みを学ぶ →",
+    "title": "使い方",
+    "page1Title": "家を選べ",
+    "page1Desc": "5つの属性の家から1つを選び、ハウスNFTを購入して加入。",
+    "page2Title": "ステーク＆競争",
+    "page2Desc": "$SEKIをステーキングして、家のリーダーボードポイントを獲得。",
+    "page3Title": "シーズン報酬",
+    "page3Desc": "12週間のシーズン — トップの家がエアドロップを獲得。",
+    "next": "次へ",
+    "back": "戻る",
+    "done": "完了"
+  },
   "footer": {
     "builtOn": "Base上に構築",
     "poweredBy": "Sekigahara提供"
