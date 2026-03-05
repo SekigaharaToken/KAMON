@@ -13,12 +13,15 @@ vi.mock("@/lib/getLogsPaginated.js", () => ({
   getLogsPaginated: (...args) => mockGetLogsPaginated(...args),
 }));
 
+const mockGetBlockNumber = vi.fn().mockResolvedValue(30_000_000n);
+
 vi.mock("viem", async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,
     createPublicClient: vi.fn(() => ({
       readContract: mockReadContract,
+      getBlockNumber: mockGetBlockNumber,
     })),
   };
 });

@@ -116,41 +116,4 @@ describe("MyActivity", () => {
     expect(screen.getByText("8")).toBeInTheDocument();
   });
 
-  it("renders Kamon when houseConfig and walletAddress provided", () => {
-    const mockHouse = {
-      id: "honoo",
-      element: "fire",
-      symbol: "炎",
-      nameKey: "house.honoo",
-      cssClass: "house-honoo",
-      colors: { primary: "#c92a22", secondary: "#55011f", accent: "#dccf8e" },
-    };
-    const { container } = render(
-      <MyActivity
-        {...baseProps}
-        houseConfig={mockHouse}
-        walletAddress="0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
-      />,
-      { wrapper: TestWrapper },
-    );
-    // KamonRenderer renders an SVG
-    expect(container.querySelector("svg")).toBeInTheDocument();
-  });
-
-  it("omits Kamon when houseConfig is missing", () => {
-    const { container } = render(
-      <MyActivity {...baseProps} walletAddress="0xabc" />,
-      { wrapper: TestWrapper },
-    );
-    expect(container.querySelector("svg")).not.toBeInTheDocument();
-  });
-
-  it("omits Kamon when walletAddress is missing", () => {
-    const mockHouse = { id: "honoo" };
-    const { container } = render(
-      <MyActivity {...baseProps} houseConfig={mockHouse} />,
-      { wrapper: TestWrapper },
-    );
-    expect(container.querySelector("svg")).not.toBeInTheDocument();
-  });
 });

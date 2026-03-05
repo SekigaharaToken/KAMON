@@ -6,7 +6,6 @@ import { motion } from "motion/react";
 import { useQuery } from "@tanstack/react-query";
 import { formatUnits } from "viem";
 import { formatTokenAmount } from "@/lib/formatTokenAmount.js";
-import { useHouse } from "@/hooks/useHouse.js";
 import { useWalletAddress } from "@/hooks/useWalletAddress.js";
 import {
   getOnChatMessageCount,
@@ -31,7 +30,6 @@ const fmt = (v) => formatTokenAmount(v != null ? formatUnits(v, 18) : "0");
 
 
 export default function ActivityPage() {
-  const { houseConfig } = useHouse();
   const { address } = useWalletAddress();
 
   const sdkEnabled = useMintClubReady();
@@ -112,8 +110,6 @@ export default function ActivityPage() {
     <div className="max-w-lg mx-auto space-y-6">
       <motion.div {...fadeInUp}>
         <MyActivity
-          houseConfig={houseConfig}
-          walletAddress={address}
           streak={streak}
           staking={staking}
           onChat={onChat}
