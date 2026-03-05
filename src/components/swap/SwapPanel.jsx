@@ -24,15 +24,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { getCached, setCached } from "@/lib/immutableCache.js";
 
-const ONE_TOKEN = parseUnits("1", 18);
-
 function toPrice(value) {
   return parseFloat(formatUnits(value, 18));
 }
 
 const priceFormat = { minimumFractionDigits: 8, maximumFractionDigits: 8 };
 
-function getAlertMessage({ mode, supplyIsZero, supplyIsMax, buyExceedsSupply, exceedsBalance, userBalance, sellAtLoss, t }) {
+function getAlertMessage({ mode, supplyIsZero, supplyIsMax, buyExceedsSupply, exceedsBalance, userBalance, t }) {
   const title = t("swap.swapWarningTitle");
   if (mode === "sell" && supplyIsZero) return { title, desc: t("swap.noSupply") };
   if (mode === "buy" && supplyIsMax) return { title, desc: t("swap.maxSupply") };
@@ -41,12 +39,11 @@ function getAlertMessage({ mode, supplyIsZero, supplyIsMax, buyExceedsSupply, ex
     const balance = parseFloat(formatUnits(userBalance, 18)).toFixed(2);
     return { title, desc: t("swap.exceedsBalance", { balance }) };
   }
-  if (sellAtLoss) return { title, desc: t("swap.sellWarning") };
   return null;
 }
 
-function SwapAlert({ mode, supplyIsZero, supplyIsMax, buyExceedsSupply, exceedsBalance, userBalance, sellAtLoss, parsedAmount, estimation, estimationLoading, tokenConfig, hasStaggered, onStaggerComplete, t }) {
-  const alert = getAlertMessage({ mode, supplyIsZero, supplyIsMax, buyExceedsSupply, exceedsBalance, userBalance, sellAtLoss, t });
+function SwapAlert({ mode, supplyIsZero, supplyIsMax, buyExceedsSupply, exceedsBalance, userBalance, parsedAmount, estimation, estimationLoading, tokenConfig, hasStaggered, onStaggerComplete, t }) {
+  const alert = getAlertMessage({ mode, supplyIsZero, supplyIsMax, buyExceedsSupply, exceedsBalance, userBalance, t });
   const showAlert = alert && (parsedAmount || supplyIsZero || supplyIsMax);
 
   return (
@@ -159,20 +156,6 @@ export function SwapPanel({ tokenConfig }) {
     retry: false,
   });
 
-  // Current buy price for 1 token (shared cache with PriceDisplay)
-  const { data: priceData } = useQuery({
-    queryKey: ["tokenPrice", tokenConfig.address],
-    queryFn: async () => {
-      const mc = await getMintClub();
-      const token = mc.network(tokenConfig.network).token(tokenConfig.address);
-      const [reserveAmount, royalty] = await token.getBuyEstimation(ONE_TOKEN);
-      return { buyPrice: reserveAmount, royalty };
-    },
-    enabled: sdkReady && !!tokenConfig.address,
-    staleTime: 10_000,
-    retry: false,
-  });
-
   // Token supply — maxSupply is immutable (cached), currentSupply is mutable
   const cacheKey = `tokenDetail:${tokenConfig.address}`;
   const cached = getCached(cacheKey);
@@ -240,13 +223,7 @@ export function SwapPanel({ tokenConfig }) {
     && (currentSupply + parsedAmount > maxSupply);
   const exceedsBalance = mode === "sell" && parsedAmount && userBalance != null && parsedAmount > userBalance;
 
-  // Detect if per-token sell refund is below the current buy price
-  const buyPrice = priceData?.buyPrice;
-  const sellAtLoss = mode === "sell"
-    && estimation
-    && parsedAmount
-    && buyPrice != null
-    && (estimation.cost * ONE_TOKEN / parsedAmount) < buyPrice;
+  // Bonding curves always have sell < buy; no warning needed (matches Dojo)
 
   async function handleSubmit() {
     if (!amount || !address || !walletClient) return;
@@ -318,7 +295,6 @@ export function SwapPanel({ tokenConfig }) {
           buyExceedsSupply={buyExceedsSupply}
           exceedsBalance={exceedsBalance}
           userBalance={userBalance}
-          sellAtLoss={sellAtLoss}
           parsedAmount={parsedAmount}
           estimation={estimation}
           estimationLoading={estimationLoading}
@@ -338,8 +314,7 @@ export function SwapPanel({ tokenConfig }) {
             || (mode === "buy" && supplyIsMax)
             || buyExceedsSupply
             || exceedsBalance
-            || sellAtLoss
-          }
+}
         >
           {mode === "buy" ? t(tokenConfig.buyKey) : t(tokenConfig.sellKey)}
         </Button>
