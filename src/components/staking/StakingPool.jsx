@@ -24,9 +24,10 @@ export function StakingPool({
   onUnstake,
   onClaim,
   isLoading = false,
+  initialTab = "stake",
 }) {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState("stake");
+  const [activeTab, setActiveTab] = useState(initialTab);
 
   return (
     <div className="space-y-6">

@@ -29,15 +29,6 @@ import { fadeInUp } from "@/lib/motion.js";
 const EAS_STALE_TIME = 30_000;
 const fmt = (v) => formatTokenAmount(v != null ? formatUnits(v, 18) : "0");
 
-/** Format pending rewards with extra precision for small streaming amounts */
-function fmtPending(v) {
-  if (v == null) return "0";
-  const str = formatUnits(v, 18);
-  const num = parseFloat(str);
-  if (!Number.isFinite(num) || num === 0) return "0";
-  if (num < 0.0001) return num.toFixed(8).replace(/0+$/, "").replace(/\.$/, "");
-  return formatTokenAmount(str);
-}
 
 export default function ActivityPage() {
   const { houseConfig } = useHouse();
@@ -113,7 +104,7 @@ export default function ActivityPage() {
     userPos != null
       ? {
           staked: fmt(userPos.staked),
-          pendingRewards: fmtPending(userPos.pendingRewards),
+          pendingRewards: fmt(userPos.pendingRewards),
         }
       : {};
 
