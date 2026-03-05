@@ -131,29 +131,43 @@ describe("useLeaderboard — hook", () => {
     expect(cached.rankings).toEqual(MOCK_RANKINGS);
   });
 
-  it("returns cached data without calling computeLeaderboard when cache is valid", async () => {
-    // Pre-populate cache
+  it("seeds initial data from localStorage cache without fetching", async () => {
+    // Pre-populate cache with recent timestamp
     setLeaderboardCache({ rankings: MOCK_RANKINGS });
 
     const { result } = renderHook(() => useLeaderboard(), {
       wrapper: makeWrapper(),
     });
 
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
-
-    // Should use cache, not call computeLeaderboard
-    expect(computeLeaderboard).not.toHaveBeenCalled();
+    // initialData should be available immediately (no loading state)
     expect(result.current.rankings).toEqual(MOCK_RANKINGS);
+
+    // Fresh cache means TanStack Query won't refetch during staleTime
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(computeLeaderboard).not.toHaveBeenCalled();
   });
 
-  it("calls computeLeaderboard when cache is expired", async () => {
-    // Set expired cache
+  it("refetches when cache is expired (older than TTL)", async () => {
+    // Set expired cache — initialDataUpdatedAt tells TQ the real age
     const expired = {
       rankings: MOCK_RANKINGS,
       lastUpdated: Date.now() - LEADERBOARD_CACHE_TTL - 1000,
     };
     localStorage.setItem(LEADERBOARD_CACHE_KEY, JSON.stringify(expired));
 
+    const freshRankings = [{ house: { id: "mori" }, score: 99, memberCount: 5, totalStaked: 200, lastUpdated: Date.now() }];
+    computeLeaderboard.mockResolvedValue(freshRankings);
+
+    const { result } = renderHook(() => useLeaderboard(), {
+      wrapper: makeWrapper(),
+    });
+
+    // initialData shows stale cache immediately; background refetch replaces it
+    await waitFor(() => expect(computeLeaderboard).toHaveBeenCalledOnce());
+    await waitFor(() => expect(result.current.rankings).toEqual(freshRankings));
+  });
+
+  it("persists fresh results to localStorage after fetch", async () => {
     computeLeaderboard.mockResolvedValue(MOCK_RANKINGS);
 
     const { result } = renderHook(() => useLeaderboard(), {
@@ -162,7 +176,10 @@ describe("useLeaderboard — hook", () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(computeLeaderboard).toHaveBeenCalledOnce();
+    // localStorage should be updated with fresh results
+    const cached = getLeaderboardCache();
+    expect(cached.rankings).toEqual(MOCK_RANKINGS);
+    expect(cached.lastUpdated).toBeGreaterThan(0);
   });
 
   it("returns isError and empty rankings when computeLeaderboard throws", async () => {

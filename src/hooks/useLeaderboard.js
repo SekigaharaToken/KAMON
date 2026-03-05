@@ -46,23 +46,21 @@ export function isLeaderboardCacheValid() {
 }
 
 /**
- * Fetch leaderboard rankings.
- * Returns cached data if valid; otherwise calls computeLeaderboard and caches result.
+ * Fetch leaderboard rankings and persist to localStorage.
+ * TanStack Query manages staleness/refetch timing; this always computes fresh.
  * @returns {Promise<Array>} ranked House array
  */
 async function fetchLeaderboard() {
-  if (isLeaderboardCacheValid()) {
-    const cached = getLeaderboardCache();
-    if (cached?.rankings) return cached.rankings;
-  }
-
   const rankings = await computeLeaderboard();
   setLeaderboardCache({ rankings });
   return rankings;
 }
 
 /**
- * React hook — leaderboard rankings with 15-min staleTime.
+ * React hook — leaderboard rankings.
+ *
+ * - On app open: renders instantly from localStorage cache, refetches if stale (>15 min).
+ * - Background: auto-refetches every 15 min via refetchInterval.
  *
  * @returns {{ rankings: Array, isLoading: boolean, isError: boolean, lastUpdated: number|null }}
  */
@@ -71,13 +69,16 @@ export function useLeaderboard() {
     queryKey: ["leaderboard"],
     queryFn: fetchLeaderboard,
     staleTime: LEADERBOARD_CACHE_TTL,
+    refetchInterval: LEADERBOARD_CACHE_TTL,
     // Seed from localStorage so the UI renders instantly with cached data
     initialData: () => {
-      if (isLeaderboardCacheValid()) {
-        const cached = getLeaderboardCache();
-        return cached?.rankings ?? undefined;
-      }
-      return undefined;
+      const cached = getLeaderboardCache();
+      return cached?.rankings ?? undefined;
+    },
+    // Tell TanStack Query the real age of cached data so it refetches if stale
+    initialDataUpdatedAt: () => {
+      const cached = getLeaderboardCache();
+      return cached?.lastUpdated ?? 0;
     },
   });
 
