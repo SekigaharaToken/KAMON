@@ -26,14 +26,24 @@ const MESSAGE_SENT_EVENT = parseAbiItem(
   "event MessageSent(bytes32 indexed slugHash, address indexed sender, uint256 indexed messageIndex, string content)"
 );
 
+// 12 weeks of ~2s blocks on Base ≈ 3.6M blocks — cap scan window to avoid genesis scan
+const MAX_SEASON_BLOCKS = 3_628_800n;
+
 /**
  * Count messages sent by a wallet in the sekigahara channel since a given block.
  * @param {string} walletAddress
- * @param {bigint} fromBlock — season start block
+ * @param {bigint} fromBlock — season start block (0n triggers auto-estimation)
  * @returns {Promise<number|null>} message count, or null on error
  */
 export async function getOnChatMessageCount(walletAddress, fromBlock) {
   try {
+    // If no start block configured, estimate from latest to avoid scanning from genesis
+    let effectiveFromBlock = fromBlock;
+    if (!fromBlock || fromBlock === 0n) {
+      const latest = await client.getBlockNumber();
+      effectiveFromBlock = latest > MAX_SEASON_BLOCKS ? latest - MAX_SEASON_BLOCKS : 0n;
+    }
+
     const logs = await getLogsPaginated({
       address: ONCHAT_ADDRESS,
       event: MESSAGE_SENT_EVENT,
@@ -41,7 +51,7 @@ export async function getOnChatMessageCount(walletAddress, fromBlock) {
         slugHash: CHANNEL_SLUG_HASH,
         sender: walletAddress,
       },
-      fromBlock,
+      fromBlock: effectiveFromBlock,
       toBlock: "latest",
     });
     return logs.length;

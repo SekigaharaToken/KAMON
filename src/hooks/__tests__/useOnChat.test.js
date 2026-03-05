@@ -8,11 +8,15 @@ vi.mock("@/lib/getLogsPaginated.js", () => ({
 
 // Mock viem's createPublicClient for contract reads
 const mockReadContract = vi.fn();
+const mockGetBlockNumber = vi.fn().mockResolvedValue(30_000_000n);
 vi.mock("viem", async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,
-    createPublicClient: () => ({ readContract: mockReadContract }),
+    createPublicClient: () => ({
+      readContract: mockReadContract,
+      getBlockNumber: mockGetBlockNumber,
+    }),
   };
 });
 

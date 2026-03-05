@@ -7,7 +7,6 @@ import i18n from "@/i18n";
 import { LoginModalProvider } from "@/context/LoginModalContext.jsx";
 
 const mockUseWalletAddress = vi.fn();
-const mockUseHouse = vi.fn();
 const mockGetOnChatMessageCount = vi.fn();
 const mockGetOnChatTotalMessages = vi.fn();
 const mockGetCurrentStreak = vi.fn();
@@ -18,10 +17,6 @@ const mockGetUserPosition = vi.fn();
 
 vi.mock("@/hooks/useWalletAddress.js", () => ({
   useWalletAddress: (...args) => mockUseWalletAddress(...args),
-}));
-
-vi.mock("@/hooks/useHouse.js", () => ({
-  useHouse: (...args) => mockUseHouse(...args),
 }));
 
 vi.mock("@/hooks/useOnChat.js", () => ({
@@ -62,11 +57,10 @@ vi.mock("@/config/contracts.js", () => ({
 
 // Mock MyActivity to a stub that exposes props via data attributes
 vi.mock("@/components/activity/MyActivity.jsx", () => ({
-  MyActivity: ({ onChat, walletAddress, streak, staking }) => (
+  MyActivity: ({ onChat, streak, staking }) => (
     <div
       data-testid="my-activity"
       data-onchat={onChat ? JSON.stringify(onChat) : "null"}
-      data-wallet={walletAddress ?? "null"}
       data-streak={streak ? JSON.stringify(streak) : "null"}
       data-staking={staking ? JSON.stringify(staking) : "null"}
     >
@@ -106,30 +100,16 @@ describe("ActivityPage", () => {
 
   it("passes onChat=null when wallet is disconnected", () => {
     mockUseWalletAddress.mockReturnValue({ address: null });
-    mockUseHouse.mockReturnValue({ houseConfig: null });
 
     render(<ActivityPage />, { wrapper: FreshWrapper });
 
     const activity = screen.getByTestId("my-activity");
     expect(activity.dataset.onchat).toBe("null");
-    expect(activity.dataset.wallet).toBe("null");
-  });
-
-  it("passes wallet address when connected", () => {
-    mockUseWalletAddress.mockReturnValue({ address: "0xABC" });
-    mockUseHouse.mockReturnValue({ houseConfig: { id: "honoo" } });
-    mockGetOnChatMessageCount.mockResolvedValue(10);
-    mockGetOnChatTotalMessages.mockResolvedValue(100);
-
-    render(<ActivityPage />, { wrapper: FreshWrapper });
-
-    const activity = screen.getByTestId("my-activity");
-    expect(activity.dataset.wallet).toBe("0xABC");
   });
 
   it("populates onChat when queries resolve", async () => {
     mockUseWalletAddress.mockReturnValue({ address: "0xABC" });
-    mockUseHouse.mockReturnValue({ houseConfig: { id: "honoo" } });
+
     mockGetOnChatMessageCount.mockResolvedValue(25);
     mockGetOnChatTotalMessages.mockResolvedValue(100);
 
@@ -146,7 +126,7 @@ describe("ActivityPage", () => {
 
   it("gracefully degrades to onChat=null on query failure", async () => {
     mockUseWalletAddress.mockReturnValue({ address: "0xDEF" });
-    mockUseHouse.mockReturnValue({ houseConfig: { id: "honoo" } });
+
     mockGetOnChatMessageCount.mockRejectedValue(new Error("RPC fail"));
     mockGetOnChatTotalMessages.mockResolvedValue(100);
 
@@ -161,7 +141,7 @@ describe("ActivityPage", () => {
 
   it("passes streak data to MyActivity when queries resolve", async () => {
     mockUseWalletAddress.mockReturnValue({ address: "0xABC" });
-    mockUseHouse.mockReturnValue({ houseConfig: { id: "honoo" } });
+
     mockGetOnChatMessageCount.mockResolvedValue(10);
     mockGetOnChatTotalMessages.mockResolvedValue(100);
     mockGetCurrentStreak.mockResolvedValue(7n);
@@ -183,7 +163,7 @@ describe("ActivityPage", () => {
 
   it("passes streak=empty object when wallet is disconnected", () => {
     mockUseWalletAddress.mockReturnValue({ address: null });
-    mockUseHouse.mockReturnValue({ houseConfig: null });
+
 
     render(<ActivityPage />, { wrapper: FreshWrapper });
 
@@ -195,7 +175,7 @@ describe("ActivityPage", () => {
 
   it("passes staking data to MyActivity when query resolves", async () => {
     mockUseWalletAddress.mockReturnValue({ address: "0xABC" });
-    mockUseHouse.mockReturnValue({ houseConfig: { id: "honoo" } });
+
     mockGetOnChatMessageCount.mockResolvedValue(10);
     mockGetOnChatTotalMessages.mockResolvedValue(100);
     // 5 SEKI staked (5 * 10^18), 1 DOJO pending
@@ -217,7 +197,7 @@ describe("ActivityPage", () => {
 
   it("passes staking=empty object when getUserPosition returns null", async () => {
     mockUseWalletAddress.mockReturnValue({ address: "0xABC" });
-    mockUseHouse.mockReturnValue({ houseConfig: { id: "honoo" } });
+
     mockGetOnChatMessageCount.mockResolvedValue(10);
     mockGetOnChatTotalMessages.mockResolvedValue(100);
     mockGetUserPosition.mockResolvedValue(null);
@@ -233,7 +213,7 @@ describe("ActivityPage", () => {
 
   it("gracefully degrades streak to empty object on query failure", async () => {
     mockUseWalletAddress.mockReturnValue({ address: "0xABC" });
-    mockUseHouse.mockReturnValue({ houseConfig: { id: "honoo" } });
+
     mockGetOnChatMessageCount.mockResolvedValue(10);
     mockGetOnChatTotalMessages.mockResolvedValue(100);
     mockGetCurrentStreak.mockRejectedValue(new Error("EAS fail"));
