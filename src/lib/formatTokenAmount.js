@@ -2,15 +2,17 @@
  * Format a token amount for display.
  *
  * Rules:
- *   - Max 4 decimal places
- *   - Decimals decrease as integer part grows:
- *       < 10     → 4 decimals
- *       10–99    → 3 decimals
- *       100–999  → 2 decimals
- *       1k–9999  → 1 decimal
- *       ≥ 10k    → 0 decimals
+ *   - Max 6 decimal places, decreasing as integer part grows:
+ *       < 10       → 6 decimals
+ *       10–99      → 5 decimals
+ *       100–999    → 4 decimals
+ *       1k–9999    → 3 decimals
+ *       10k–99999  → 2 decimals
+ *       100k–999k  → 1 decimal
+ *       ≥ 1M       → 0 decimals
  *   - Trailing zeros are stripped
  *   - Dash placeholders pass through unchanged
+ *   - Max token supply is 100M so integer part never exceeds 9 digits
  *
  * @param {string|number|null|undefined} value — raw amount (typically from formatUnits)
  * @returns {string} formatted display string
@@ -26,7 +28,7 @@ export function formatTokenAmount(value) {
   const magnitude = Math.floor(Math.log10(Math.abs(num)));
   const intDigits = Math.max(0, magnitude); // 0 for values < 10
 
-  const maxDecimals = Math.max(0, 4 - intDigits);
+  const maxDecimals = Math.max(0, 6 - intDigits);
 
   // Truncate (floor toward zero) instead of rounding
   const factor = 10 ** maxDecimals;

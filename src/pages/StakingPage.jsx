@@ -6,6 +6,7 @@
  */
 
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { formatUnits, parseUnits, erc20Abi } from "viem";
@@ -45,8 +46,13 @@ function formatCountdown(ms) {
 
 const fmt = (v) => formatTokenAmount(v != null ? formatUnits(v, 18) : "0");
 
+const VALID_TABS = ["stake", "claim", "unstake"];
+
 export default function StakingPage() {
   const { t } = useTranslation();
+  const [searchParams] = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const initialTab = VALID_TABS.includes(tabParam) ? tabParam : "stake";
   const { address, canTransact } = useWalletAddress();
   const [isPending, setIsPending] = useState(false);
   const { data: walletClient } = useWalletClient();
@@ -104,19 +110,9 @@ export default function StakingPage() {
       : "—",
   };
 
-  // Format pending rewards with more precision — streaming $DOJO can be very small
-  const pendingRaw = userPos?.pendingRewards;
-  const pendingStr = pendingRaw != null ? formatUnits(pendingRaw, 18) : "0";
-  const pendingNum = parseFloat(pendingStr);
-  const pendingFormatted = !Number.isFinite(pendingNum) || pendingNum === 0
-    ? "0"
-    : pendingNum < 0.0001
-      ? pendingNum.toFixed(8).replace(/0+$/, "").replace(/\.$/, "")
-      : fmt(pendingRaw);
-
   const userPosition = {
     staked: fmt(userPos?.staked),
-    pendingRewards: pendingFormatted,
+    pendingRewards: fmt(userPos?.pendingRewards),
   };
 
   const balance = fmt(sekiBalance);
@@ -192,6 +188,7 @@ export default function StakingPage() {
           onUnstake={handleUnstake}
           onClaim={handleClaim}
           isLoading={poolLoading || posLoading || isPending}
+          initialTab={initialTab}
         />
       </motion.div>
       <motion.div {...fadeInUp} transition={{ ...fadeInUp.transition, delay: 0.2 }}>

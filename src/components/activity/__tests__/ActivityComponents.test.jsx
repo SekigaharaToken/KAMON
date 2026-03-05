@@ -53,7 +53,7 @@ describe("StakingMeter", () => {
       wrapper: TestWrapper,
     });
     const link = screen.getByRole("link", { name: /Claim Rewards/i });
-    expect(link).toHaveAttribute("href", "/staking");
+    expect(link).toHaveAttribute("href", "/staking?tab=claim");
   });
 
   it("hides Claim Rewards button when pendingRewards is 0", () => {

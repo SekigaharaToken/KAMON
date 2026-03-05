@@ -35,7 +35,7 @@ export function MyActivity({
           <KamonRenderer
             houseId={houseConfig.id}
             walletAddress={walletAddress}
-            size={120}
+            size={80}
           />
         </motion.div>
       )}

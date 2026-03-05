@@ -34,7 +34,7 @@ export function StakingMeter({ staked = "0", pendingRewards = "0" }) {
         </div>
         {hasClaimable && (
           <Button variant="outline" size="sm" className="w-full" asChild>
-            <Link to="/staking">{t("staking.claim")}</Link>
+            <Link to="/staking?tab=claim">{t("staking.claim")}</Link>
           </Button>
         )}
       </CardContent>
