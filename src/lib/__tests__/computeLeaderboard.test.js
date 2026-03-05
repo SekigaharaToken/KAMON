@@ -10,6 +10,10 @@ vi.mock("@/lib/getHouseHolders.js", () => ({
   getHouseHolders: vi.fn(),
 }));
 
+vi.mock("@/hooks/useHouseNFT.js", () => ({
+  getHouseSupply: vi.fn(),
+}));
+
 vi.mock("@/hooks/useEASStreaks.js", () => ({
   getCurrentStreak: vi.fn(),
 }));
@@ -48,6 +52,7 @@ vi.mock("@/config/contracts.js", () => ({
 }));
 
 import { getHouseHolders } from "@/lib/getHouseHolders.js";
+import { getHouseSupply } from "@/hooks/useHouseNFT.js";
 import { getCurrentStreak } from "@/hooks/useEASStreaks.js";
 import { getUserPosition, getPoolState } from "@/hooks/useStaking.js";
 import { getOnChatMessageCount, getOnChatTotalMessages } from "@/hooks/useOnChat.js";
@@ -60,6 +65,7 @@ describe("computeLeaderboard", () => {
 
   it("returns ranked array with all 5 house fields present", async () => {
     getHouseHolders.mockResolvedValue(["0xaaa"]);
+    getHouseSupply.mockResolvedValue(1n);
     getCurrentStreak.mockResolvedValue(15n);
     getPoolState.mockResolvedValue({ totalStaked: 1000n });
     getUserPosition.mockResolvedValue({ staked: 100n });
@@ -85,6 +91,9 @@ describe("computeLeaderboard", () => {
     getHouseHolders
       .mockResolvedValueOnce(["0xaaa", "0xbbb"]) // honoo
       .mockResolvedValueOnce([]); // mizu
+    getHouseSupply
+      .mockResolvedValueOnce(2n) // honoo
+      .mockResolvedValueOnce(0n); // mizu
 
     getCurrentStreak
       .mockResolvedValueOnce(30n) // 0xaaa
@@ -112,6 +121,9 @@ describe("computeLeaderboard", () => {
     getHouseHolders
       .mockResolvedValueOnce(["0xaaa"]) // honoo
       .mockResolvedValueOnce([]); // mizu
+    getHouseSupply
+      .mockResolvedValueOnce(1n)
+      .mockResolvedValueOnce(0n);
 
     getCurrentStreak.mockResolvedValue(30n); // 100% dojo
     getPoolState.mockResolvedValue({ totalStaked: 100n });
@@ -131,6 +143,7 @@ describe("computeLeaderboard", () => {
 
   it("returns zero score for houses with no holders", async () => {
     getHouseHolders.mockResolvedValue([]);
+    getHouseSupply.mockResolvedValue(0n);
     getPoolState.mockResolvedValue({ totalStaked: 0n });
     getOnChatTotalMessages.mockResolvedValue(null);
 
@@ -144,6 +157,7 @@ describe("computeLeaderboard", () => {
 
   it("includes lastUpdated timestamp in each entry", async () => {
     getHouseHolders.mockResolvedValue([]);
+    getHouseSupply.mockResolvedValue(0n);
     getPoolState.mockResolvedValue({ totalStaked: 0n });
     getOnChatTotalMessages.mockResolvedValue(null);
 
@@ -161,22 +175,48 @@ describe("computeLeaderboard", () => {
     getHouseHolders
       .mockRejectedValueOnce(new Error("RPC failure")) // honoo errors
       .mockResolvedValueOnce([]); // mizu ok
+    getHouseSupply
+      .mockResolvedValueOnce(5n) // honoo supply still works
+      .mockResolvedValueOnce(0n); // mizu
 
     getPoolState.mockResolvedValue({ totalStaked: 0n });
     getOnChatTotalMessages.mockResolvedValue(null);
 
     const result = await computeLeaderboard();
 
-    // Should not throw, should return 0 for the errored house
+    // Should not throw, should return 0 score but correct memberCount from supply
     expect(result).toHaveLength(2);
     const honoo = result.find((e) => e.house.id === "honoo");
     expect(honoo.score).toBe(0);
+    expect(honoo.memberCount).toBe(5); // from getHouseSupply, not holders
+  });
+
+  it("uses getHouseSupply for memberCount, not holders.length", async () => {
+    // honoo: 1 holder enumerated, but supply shows 10 minted
+    getHouseHolders.mockResolvedValueOnce(["0xaaa"]).mockResolvedValueOnce([]);
+    getHouseSupply.mockResolvedValueOnce(10n).mockResolvedValueOnce(3n);
+    getCurrentStreak.mockResolvedValue(15n);
+    getPoolState.mockResolvedValue({ totalStaked: 100n });
+    getUserPosition.mockResolvedValue({ staked: 50n });
+    getOnChatMessageCount.mockResolvedValue(5);
+    getOnChatTotalMessages.mockResolvedValue(100);
+
+    const result = await computeLeaderboard();
+    const honoo = result.find((e) => e.house.id === "honoo");
+    const mizu = result.find((e) => e.house.id === "mizu");
+
+    // memberCount comes from getHouseSupply (10), not holders.length (1)
+    expect(honoo.memberCount).toBe(10);
+    expect(mizu.memberCount).toBe(3);
   });
 
   it("handles getUserPosition returning null by using 0 staking score", async () => {
     getHouseHolders
       .mockResolvedValueOnce(["0xaaa"]) // honoo
       .mockResolvedValueOnce([]); // mizu
+    getHouseSupply
+      .mockResolvedValueOnce(1n)
+      .mockResolvedValueOnce(0n);
 
     getCurrentStreak.mockResolvedValue(30n); // 100% dojo
     getPoolState.mockResolvedValue({ totalStaked: 100n });
