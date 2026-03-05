@@ -52,6 +52,7 @@ vi.mock("@/lib/mintclub.js", () => ({
 
 vi.mock("@/config/season.js", () => ({
   ONCHAT_CACHE_TTL: 30000,
+  SEASON_START_BLOCK: 0n,
 }));
 
 vi.mock("@/config/contracts.js", () => ({

@@ -40,12 +40,36 @@ describe("StreakMeter", () => {
 });
 
 describe("StakingMeter", () => {
-  it("renders staked amount", () => {
+  it("renders staked amount and pending rewards", () => {
     render(<StakingMeter staked="5000" pendingRewards="120" />, {
       wrapper: TestWrapper,
     });
     expect(screen.getByText("5000")).toBeInTheDocument();
-    expect(screen.getByText(/120/)).toBeInTheDocument();
+    expect(screen.getByText("120")).toBeInTheDocument();
+  });
+
+  it("shows Claim Rewards button when pendingRewards > 0", () => {
+    render(<StakingMeter staked="1000" pendingRewards="50.5" />, {
+      wrapper: TestWrapper,
+    });
+    const link = screen.getByRole("link", { name: /Claim Rewards/i });
+    expect(link).toHaveAttribute("href", "/staking");
+  });
+
+  it("hides Claim Rewards button when pendingRewards is 0", () => {
+    render(<StakingMeter staked="1000" pendingRewards="0" />, {
+      wrapper: TestWrapper,
+    });
+    expect(screen.queryByRole("link", { name: /Claim Rewards/i })).not.toBeInTheDocument();
+  });
+
+  it("renders numbers with mono font", () => {
+    const { container } = render(
+      <StakingMeter staked="5000" pendingRewards="120" />,
+      { wrapper: TestWrapper },
+    );
+    const monos = container.querySelectorAll(".font-mono");
+    expect(monos.length).toBeGreaterThanOrEqual(2);
   });
 });
 
