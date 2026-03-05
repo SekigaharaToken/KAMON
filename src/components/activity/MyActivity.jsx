@@ -31,11 +31,11 @@ export function MyActivity({
       <h2 className="font-serif text-xl font-bold">{t("activity.title")}</h2>
 
       {houseConfig && walletAddress && (
-        <motion.div className="flex justify-center" {...fadeInUp}>
+        <motion.div className="flex items-center justify-center overflow-hidden" {...fadeInUp}>
           <KamonRenderer
             houseId={houseConfig.id}
             walletAddress={walletAddress}
-            size={160}
+            size={120}
           />
         </motion.div>
       )}

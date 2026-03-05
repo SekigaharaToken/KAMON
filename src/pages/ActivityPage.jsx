@@ -5,6 +5,7 @@
 import { motion } from "motion/react";
 import { useQuery } from "@tanstack/react-query";
 import { formatUnits } from "viem";
+import { formatTokenAmount } from "@/lib/formatTokenAmount.js";
 import { useHouse } from "@/hooks/useHouse.js";
 import { useWalletAddress } from "@/hooks/useWalletAddress.js";
 import {
@@ -21,12 +22,22 @@ import {
 import { getUserPosition } from "@/hooks/useStaking.js";
 import { useMintClubReady } from "@/lib/mintclub.js";
 import { STAKING_POOL_ADDRESS } from "@/config/contracts.js";
-import { ONCHAT_CACHE_TTL } from "@/config/season.js";
+import { ONCHAT_CACHE_TTL, SEASON_START_BLOCK } from "@/config/season.js";
 import { MyActivity } from "@/components/activity/MyActivity.jsx";
 import { fadeInUp } from "@/lib/motion.js";
 
 const EAS_STALE_TIME = 30_000;
-const fmt = (v) => (v != null ? formatUnits(v, 18) : "0");
+const fmt = (v) => formatTokenAmount(v != null ? formatUnits(v, 18) : "0");
+
+/** Format pending rewards with extra precision for small streaming amounts */
+function fmtPending(v) {
+  if (v == null) return "0";
+  const str = formatUnits(v, 18);
+  const num = parseFloat(str);
+  if (!Number.isFinite(num) || num === 0) return "0";
+  if (num < 0.0001) return num.toFixed(8).replace(/0+$/, "").replace(/\.$/, "");
+  return formatTokenAmount(str);
+}
 
 export default function ActivityPage() {
   const { houseConfig } = useHouse();
@@ -37,7 +48,7 @@ export default function ActivityPage() {
   // OnChat queries
   const { data: messageCount } = useQuery({
     queryKey: ["onchat", "messages", address],
-    queryFn: () => getOnChatMessageCount(address, 0n),
+    queryFn: () => getOnChatMessageCount(address, SEASON_START_BLOCK),
     staleTime: ONCHAT_CACHE_TTL,
     enabled: !!address,
   });
@@ -102,7 +113,7 @@ export default function ActivityPage() {
     userPos != null
       ? {
           staked: fmt(userPos.staked),
-          pendingRewards: fmt(userPos.pendingRewards),
+          pendingRewards: fmtPending(userPos.pendingRewards),
         }
       : {};
 
