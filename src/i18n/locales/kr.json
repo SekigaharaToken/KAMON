@@ -212,6 +212,19 @@
     "repairTitle": "멤버십 완료",
     "repairDesc": "하우스 멤버십이 불완전합니다. 누락된 단계를 완료하세요."
   },
+  "howItWorks": {
+    "barText": "처음이신가요? KAMON 작동 방식 알아보기 →",
+    "title": "작동 방식",
+    "page1Title": "가문을 선택하라",
+    "page1Desc": "5개의 속성 가문 중 하나를 선택하고 하우스 NFT를 구매하여 가입.",
+    "page2Title": "스테이크 & 경쟁",
+    "page2Desc": "$SEKI를 스테이킹하여 가문의 리더보드 포인트를 획득.",
+    "page3Title": "시즌 보상",
+    "page3Desc": "12주 시즌 — 최고의 가문이 에어드롭을 획득.",
+    "next": "다음",
+    "back": "이전",
+    "done": "완료"
+  },
   "footer": {
     "builtOn": "Base에서 구축",
     "poweredBy": "Sekigahara 제공"
