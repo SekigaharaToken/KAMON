@@ -31,8 +31,6 @@ import {
 import { getTimeRemaining } from "@/hooks/useSeason.js";
 import { Card, CardContent } from "@/components/ui/card";
 import { StakingPool } from "@/components/staking/StakingPool.jsx";
-import { StakingBadge } from "@/components/staking/StakingBadge.jsx";
-import { getBadgeProgress } from "@/lib/stakingBadge.js";
 import { fadeInUp } from "@/lib/motion.js";
 
 function formatCountdown(ms) {
@@ -117,14 +115,6 @@ export default function StakingPage() {
 
   const balance = fmt(sekiBalance);
 
-  // Compute badge progress from user's stake timestamp.
-  // userPos.stakedSince is preferred; fall back to pool startTime when the
-  // user has a non-zero stake (i.e. they have been staking since pool start).
-  const stakeTimestamp =
-    userPos?.stakedSince ??
-    (userPos?.staked && userPos.staked > 0n ? poolState?.startTime : null);
-  const badgeProgress = getBadgeProgress(stakeTimestamp);
-
   function showTxError(err) {
     const { key, params } = parseContractError(err);
     toast.error(t(key, params));
@@ -189,14 +179,6 @@ export default function StakingPage() {
           onClaim={handleClaim}
           isLoading={poolLoading || posLoading || isPending}
           initialTab={initialTab}
-        />
-      </motion.div>
-      <motion.div {...fadeInUp} transition={{ ...fadeInUp.transition, delay: 0.2 }}>
-        <StakingBadge
-          weeks={badgeProgress.weeks}
-          threshold={badgeProgress.threshold}
-          earned={badgeProgress.earned}
-          progress={badgeProgress.progress}
         />
       </motion.div>
     </div>
