@@ -113,7 +113,8 @@ describe("useStaking — getUserPosition", () => {
 
   it("returns user position with staked amount and pending rewards", async () => {
     mockStake.getUserPoolStake.mockResolvedValue({ stakedAmount: 5000n });
-    mockStake.getClaimableReward.mockResolvedValue(150n);
+    // SDK returns a 4-element tuple: [rewardClaimable, fee, claimedTotal, feeTotal]
+    mockStake.getClaimableReward.mockResolvedValue([150n, 10n, 0n, 0n]);
 
     const position = await getUserPosition(TEST_POOL_ADDRESS, TEST_WALLET);
     expect(position).toEqual({

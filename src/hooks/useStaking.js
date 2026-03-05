@@ -57,7 +57,7 @@ export async function getUserPosition(_unused, walletAddress) {
 
   return {
     staked: userStake.stakedAmount,
-    pendingRewards: claimable,
+    pendingRewards: claimable[0],
   };
 }
 
