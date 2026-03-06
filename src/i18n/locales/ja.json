@@ -115,6 +115,8 @@
     "stakeSize": "ステーキング量",
     "onChatMessages": "今シーズンのメッセージ",
     "contribution": "スコアへの貢献",
+    "onChatUnavailable": "利用不可",
+    "onChatFallback": "OnChatデータは現在利用できません。スコアリングはDOJO＋ステーキングのフォールバックを使用します。",
     "comingSoon": "アクティビティダッシュボードは近日公開。"
   },
   "season": {

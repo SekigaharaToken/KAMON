@@ -82,20 +82,37 @@ describe("OnChatCount", () => {
     expect(screen.getByText(/15%/)).toBeInTheDocument();
   });
 
-  it("shows Unavailable badge when messageCount is null", () => {
-    render(<OnChatCount messageCount={null} />, {
+  it("shows Skeleton placeholders when isLoading and no data", () => {
+    const { container } = render(
+      <OnChatCount messageCount={null} isLoading={true} />,
+      { wrapper: TestWrapper },
+    );
+    const skeletons = container.querySelectorAll("[data-slot='skeleton']");
+    expect(skeletons.length).toBe(2);
+    expect(screen.queryByText("Unavailable")).not.toBeInTheDocument();
+  });
+
+  it("shows Unavailable badge when isLoading=false and no data", () => {
+    render(<OnChatCount messageCount={null} isLoading={false} />, {
       wrapper: TestWrapper,
     });
     expect(screen.getByText("Unavailable")).toBeInTheDocument();
   });
 
-  it("shows fallback text when messageCount is null", () => {
-    render(<OnChatCount messageCount={null} />, {
+  it("shows fallback text when messageCount is null and not loading", () => {
+    render(<OnChatCount messageCount={null} isLoading={false} />, {
       wrapper: TestWrapper,
     });
     expect(
       screen.getByText(/OnChat data is currently unavailable/),
     ).toBeInTheDocument();
+  });
+
+  it("shows data even when isLoading is true (data already resolved)", () => {
+    render(<OnChatCount messageCount={42} percentage={15} isLoading={true} />, {
+      wrapper: TestWrapper,
+    });
+    expect(screen.getByText("42")).toBeInTheDocument();
   });
 });
 

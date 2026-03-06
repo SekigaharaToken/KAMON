@@ -18,6 +18,7 @@ export function MyActivity({
   streak = {},
   staking = {},
   onChat = null,
+  onChatLoading = false,
 }) {
   const { t } = useTranslation();
 
@@ -44,6 +45,7 @@ export function MyActivity({
         <OnChatCount
           messageCount={onChat?.messageCount ?? null}
           percentage={onChat?.percentage ?? null}
+          isLoading={onChatLoading}
         />
       </motion.div>
     </div>

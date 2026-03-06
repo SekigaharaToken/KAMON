@@ -115,6 +115,8 @@
     "stakeSize": "Stake Size",
     "onChatMessages": "Messages This Season",
     "contribution": "Contribution to Score",
+    "onChatUnavailable": "Unavailable",
+    "onChatFallback": "OnChat data is currently unavailable. Scoring uses DOJO + Staking fallback.",
     "comingSoon": "Activity dashboard coming soon."
   },
   "season": {
