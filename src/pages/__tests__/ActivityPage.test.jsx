@@ -57,12 +57,13 @@ vi.mock("@/config/contracts.js", () => ({
 
 // Mock MyActivity to a stub that exposes props via data attributes
 vi.mock("@/components/activity/MyActivity.jsx", () => ({
-  MyActivity: ({ onChat, streak, staking }) => (
+  MyActivity: ({ onChat, streak, staking, onChatLoading }) => (
     <div
       data-testid="my-activity"
       data-onchat={onChat ? JSON.stringify(onChat) : "null"}
       data-streak={streak ? JSON.stringify(streak) : "null"}
       data-staking={staking ? JSON.stringify(staking) : "null"}
+      data-onchat-loading={String(!!onChatLoading)}
     >
       MyActivity
     </div>
@@ -209,6 +210,15 @@ describe("ActivityPage", () => {
       const staking = JSON.parse(activity.dataset.staking);
       expect(staking).toEqual({});
     });
+  });
+
+  it("passes onChatLoading=false when wallet is disconnected", () => {
+    mockUseWalletAddress.mockReturnValue({ address: null });
+
+    render(<ActivityPage />, { wrapper: FreshWrapper });
+
+    const activity = screen.getByTestId("my-activity");
+    expect(activity.dataset.onchatLoading).toBe("false");
   });
 
   it("gracefully degrades streak to empty object on query failure", async () => {

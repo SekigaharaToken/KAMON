@@ -35,14 +35,14 @@ export default function ActivityPage() {
   const sdkEnabled = useMintClubReady();
 
   // OnChat queries
-  const { data: messageCount } = useQuery({
+  const { data: messageCount, isLoading: messageCountLoading } = useQuery({
     queryKey: ["onchat", "messages", address],
     queryFn: () => getOnChatMessageCount(address, SEASON_START_BLOCK),
     staleTime: ONCHAT_CACHE_TTL,
     enabled: !!address,
   });
 
-  const { data: totalMessages } = useQuery({
+  const { data: totalMessages, isLoading: totalMessagesLoading } = useQuery({
     queryKey: ["onchat", "total"],
     queryFn: () => getOnChatTotalMessages(),
     staleTime: ONCHAT_CACHE_TTL,
@@ -79,6 +79,7 @@ export default function ActivityPage() {
   });
 
   // Derive onChat
+  const onChatLoading = !!address && (messageCountLoading || totalMessagesLoading);
   const onChatPct = normalizeOnChatMessages(messageCount, totalMessages);
   const onChat =
     messageCount != null ? { messageCount, percentage: onChatPct } : null;
@@ -113,6 +114,7 @@ export default function ActivityPage() {
           streak={streak}
           staking={staking}
           onChat={onChat}
+          onChatLoading={onChatLoading}
         />
       </motion.div>
     </div>
