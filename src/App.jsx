@@ -11,6 +11,7 @@ import { LoginModal } from "@/components/auth/LoginModal.jsx";
 import { HowItWorks } from "@/components/onboarding/HowItWorks.jsx";
 import { Skeleton } from "@/components/ui/skeleton.jsx";
 import HomePage from "@/pages/HomePage.jsx";
+import { useHouseAutoDetect } from "@/hooks/useHouseAutoDetect.js";
 
 const SwapPage = lazy(() => import("@/pages/SwapPage.jsx"));
 const StakingPage = lazy(() => import("@/pages/StakingPage.jsx"));
@@ -20,6 +21,8 @@ const AdminPage = lazy(() => import("@/pages/AdminPage.jsx"));
 const ChatPage = lazy(() => import("@/pages/ChatPage.jsx"));
 
 function App() {
+  useHouseAutoDetect();
+
   return (
     <div className="flex min-h-svh flex-col">
       <NetworkGuardBanner />
