@@ -33,7 +33,7 @@ describe("getLogsPaginated", () => {
     vi.clearAllMocks();
   });
 
-  it("makes a single getLogs call when range < 2000 blocks", async () => {
+  it("makes a single getLogs call when range < 10000 blocks", async () => {
     mockGetLogs.mockResolvedValueOnce([{ log: 1 }, { log: 2 }]);
 
     const result = await getLogsPaginated({
@@ -55,7 +55,7 @@ describe("getLogsPaginated", () => {
   });
 
   it("paginates into correct chunks for multi-page ranges", async () => {
-    // Range: 0 to 4999 = 5000 blocks = 3 pages (0-1999, 2000-3999, 4000-4999)
+    // Range: 0 to 24999 = 25000 blocks = 3 pages (0-9999, 10000-19999, 20000-24999)
     mockGetLogs
       .mockResolvedValueOnce([{ log: "a" }])
       .mockResolvedValueOnce([{ log: "b" }])
@@ -65,21 +65,21 @@ describe("getLogsPaginated", () => {
       address: "0xabc",
       event: mockEvent,
       fromBlock: 0n,
-      toBlock: 4999n,
+      toBlock: 24999n,
     });
 
     expect(mockGetLogs).toHaveBeenCalledTimes(3);
     expect(mockGetLogs).toHaveBeenNthCalledWith(1, expect.objectContaining({
       fromBlock: 0n,
-      toBlock: 1999n,
+      toBlock: 9999n,
     }));
     expect(mockGetLogs).toHaveBeenNthCalledWith(2, expect.objectContaining({
-      fromBlock: 2000n,
-      toBlock: 3999n,
+      fromBlock: 10000n,
+      toBlock: 19999n,
     }));
     expect(mockGetLogs).toHaveBeenNthCalledWith(3, expect.objectContaining({
-      fromBlock: 4000n,
-      toBlock: 4999n,
+      fromBlock: 20000n,
+      toBlock: 24999n,
     }));
     expect(result).toEqual([{ log: "a" }, { log: "b" }, { log: "c" }]);
   });
@@ -110,7 +110,7 @@ describe("getLogsPaginated", () => {
       address: "0x123",
       event: mockEvent,
       fromBlock: 0n,
-      toBlock: 2500n,
+      toBlock: 15000n,
     });
 
     expect(result).toHaveLength(3);
