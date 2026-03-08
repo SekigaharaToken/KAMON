@@ -35,6 +35,9 @@ const BALANCE_OF_ABI = [
 /** Mint Club ERC-1155 token ID is always 0 */
 const TOKEN_ID = 0n;
 
+/** 12 weeks of ~2s blocks on Base — caps the scan window for a season */
+const MAX_SEASON_BLOCKS = 3_628_800n;
+
 /**
  * Enumerate current holders of a House ERC-1155 token.
  *
@@ -45,9 +48,10 @@ const TOKEN_ID = 0n;
  *
  * @param {string} tokenAddress — ERC-1155 contract address
  * @param {object} [publicClient] — optional viem public client (for testing)
+ * @param {bigint} [fromBlock=0n] — start block for event scan (0n auto-estimates)
  * @returns {Promise<string[]>} array of holder addresses
  */
-export async function getHouseHolders(tokenAddress, publicClient) {
+export async function getHouseHolders(tokenAddress, publicClient, fromBlock = 0n) {
   if (!tokenAddress) return [];
 
   const client = publicClient ?? createPublicClient({
@@ -55,12 +59,19 @@ export async function getHouseHolders(tokenAddress, publicClient) {
     transport: http(),
   });
 
+  // Auto-estimate a reasonable start block if none provided
+  let effectiveFromBlock = fromBlock;
+  if (!fromBlock || fromBlock === 0n) {
+    const latest = await client.getBlockNumber();
+    effectiveFromBlock = latest > MAX_SEASON_BLOCKS ? latest - MAX_SEASON_BLOCKS : 0n;
+  }
+
   // 1. Fetch all mint logs (from == zero address)
   const logs = await getLogsPaginated({
     address: tokenAddress,
     event: TRANSFER_SINGLE_EVENT,
     args: { from: ZERO_ADDRESS },
-    fromBlock: 0n,
+    fromBlock: effectiveFromBlock,
     toBlock: "latest",
   });
 

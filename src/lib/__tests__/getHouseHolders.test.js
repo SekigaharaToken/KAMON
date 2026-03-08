@@ -32,7 +32,10 @@ describe("getHouseHolders", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockClient = { readContract: vi.fn() };
+    mockClient = {
+      readContract: vi.fn(),
+      getBlockNumber: vi.fn().mockResolvedValue(25_000_000n),
+    };
   });
 
   it("returns empty array when tokenAddress is falsy", async () => {
@@ -100,6 +103,29 @@ describe("getHouseHolders", () => {
     const holders = await getHouseHolders("0xtoken", mockClient);
     expect(holders).toHaveLength(1);
     expect(holders).toContain("0xbbb");
+  });
+
+  it("auto-estimates fromBlock when not provided", async () => {
+    getLogsPaginated.mockResolvedValue([]);
+
+    await getHouseHolders("0xtoken", mockClient);
+
+    // Should auto-estimate: 25_000_000 - 3_628_800 = 21_371_200
+    expect(getLogsPaginated).toHaveBeenCalledWith(
+      expect.objectContaining({ fromBlock: 21_371_200n })
+    );
+  });
+
+  it("uses explicit fromBlock when provided", async () => {
+    getLogsPaginated.mockResolvedValue([]);
+
+    await getHouseHolders("0xtoken", mockClient, 10_000_000n);
+
+    expect(getLogsPaginated).toHaveBeenCalledWith(
+      expect.objectContaining({ fromBlock: 10_000_000n })
+    );
+    // Should not call getBlockNumber when explicit fromBlock given
+    expect(mockClient.getBlockNumber).not.toHaveBeenCalled();
   });
 
   it("ignores zero address in transfer logs", async () => {

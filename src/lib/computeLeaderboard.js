@@ -41,7 +41,7 @@ import {
 async function scoreHouseHolders(house, totalStaked, maxOnChatMessages, seasonStartBlock) {
   let holders = [];
   try {
-    holders = await getHouseHolders(house.address);
+    holders = await getHouseHolders(house.address, undefined, seasonStartBlock);
   } catch (err) {
     console.warn(`[Leaderboard] Failed to get holders for ${house.id}:`, err.message);
     return { walletScores: [], totalStaked: 0n };

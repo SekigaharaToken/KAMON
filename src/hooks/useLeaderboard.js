@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from "@tanstack/react-query";
-import { LEADERBOARD_CACHE_KEY, LEADERBOARD_CACHE_TTL } from "@/config/season.js";
+import { LEADERBOARD_CACHE_KEY, LEADERBOARD_CACHE_TTL, SEASON_START_BLOCK } from "@/config/season.js";
 import { computeLeaderboard } from "@/lib/computeLeaderboard.js";
 
 /**
@@ -51,7 +51,7 @@ export function isLeaderboardCacheValid() {
  * @returns {Promise<Array>} ranked House array
  */
 async function fetchLeaderboard() {
-  const rankings = await computeLeaderboard();
+  const rankings = await computeLeaderboard(SEASON_START_BLOCK);
   setLeaderboardCache({ rankings });
   return rankings;
 }
