@@ -6,9 +6,8 @@ const client = createPublicClient({
   transport: http(),
 });
 
-// Base mainnet public RPC limits eth_getLogs to ~3k blocks per request.
-// Use 2k to be safe on both mainnet and Sepolia.
-const MAX_BLOCK_RANGE = 2_000n;
+// Base mainnet public RPCs handle 10k block ranges without issue.
+const MAX_BLOCK_RANGE = 10_000n;
 
 /**
  * Fetches event logs in paginated chunks to stay within RPC block range limits.
